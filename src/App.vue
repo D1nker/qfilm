@@ -1,3 +1,21 @@
+<template>
+  <TooltipProvider :delay-duration="400">
+    <div class="layout" :class="{ collapsed: !open }">
+      <AppHeader class="area-header" />
+      <ImageViewport class="area-main" />
+      <InspectorPanel v-show="open" class="area-inspector" />
+    </div>
+
+    <div class="toasts">
+      <p v-if="error" class="toast error" role="alert">{{ error }}</p>
+      <p v-if="notice" class="toast" role="status">{{ notice }}</p>
+    </div>
+
+    <ExportDialog />
+    <ShortcutsDialog />
+  </TooltipProvider>
+</template>
+
 <script setup lang="ts">
 import { onMounted } from "vue";
 import { TooltipProvider } from "reka-ui";
@@ -22,24 +40,6 @@ useShortcuts();
 
 onMounted(() => void Promise.all([init(), initFrames()]));
 </script>
-
-<template>
-  <TooltipProvider :delay-duration="400">
-    <div class="layout" :class="{ collapsed: !open }">
-      <AppHeader class="area-header" />
-      <ImageViewport class="area-main" />
-      <InspectorPanel v-show="open" class="area-inspector" />
-    </div>
-
-    <div class="toasts">
-      <p v-if="error" class="toast error" role="alert">{{ error }}</p>
-      <p v-if="notice" class="toast" role="status">{{ notice }}</p>
-    </div>
-
-    <ExportDialog />
-    <ShortcutsDialog />
-  </TooltipProvider>
-</template>
 
 <style scoped>
 .layout {

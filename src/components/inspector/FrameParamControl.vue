@@ -1,29 +1,3 @@
-<script setup lang="ts">
-import { computed } from "vue";
-
-import type { ParamDef, ParamValue } from "@/lib/api";
-import { decimalsOf } from "@/lib/frameParams";
-import UiColorInput from "@/components/ui/UiColorInput.vue";
-import UiField from "@/components/ui/UiField.vue";
-import UiInput from "@/components/ui/UiInput.vue";
-import UiListItem from "@/components/ui/UiListItem.vue";
-import UiSelect from "@/components/ui/UiSelect.vue";
-import UiSlider from "@/components/ui/UiSlider.vue";
-import UiSwitch from "@/components/ui/UiSwitch.vue";
-
-const props = defineProps<{ def: ParamDef; value: ParamValue }>();
-const emit = defineEmits<{ change: [value: ParamValue] }>();
-
-const text = computed(() => String(props.value));
-const number = computed(() => Number(props.value));
-const flag = computed(() => props.value === true);
-const menu = computed(() =>
-  props.def.type === "choice"
-    ? props.def.options.map((option) => ({ value: option.id, label: option.label }))
-    : [],
-);
-</script>
-
 <template>
   <UiSlider
     v-if="def.type === 'number'"
@@ -67,3 +41,29 @@ const menu = computed(() =>
     <UiSelect :model-value="text" :options="menu" @update:model-value="emit('change', $event)" />
   </UiField>
 </template>
+
+<script setup lang="ts">
+import { computed } from "vue";
+
+import type { ParamDef, ParamValue } from "@/lib/api";
+import { decimalsOf } from "@/lib/frameParams";
+import UiColorInput from "@/components/ui/UiColorInput.vue";
+import UiField from "@/components/ui/UiField.vue";
+import UiInput from "@/components/ui/UiInput.vue";
+import UiListItem from "@/components/ui/UiListItem.vue";
+import UiSelect from "@/components/ui/UiSelect.vue";
+import UiSlider from "@/components/ui/UiSlider.vue";
+import UiSwitch from "@/components/ui/UiSwitch.vue";
+
+const props = defineProps<{ def: ParamDef; value: ParamValue }>();
+const emit = defineEmits<{ change: [value: ParamValue] }>();
+
+const text = computed(() => String(props.value));
+const number = computed(() => Number(props.value));
+const flag = computed(() => props.value === true);
+const menu = computed(() =>
+  props.def.type === "choice"
+    ? props.def.options.map((option) => ({ value: option.id, label: option.label }))
+    : [],
+);
+</script>

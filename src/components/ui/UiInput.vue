@@ -1,10 +1,10 @@
-<script setup lang="ts">
-const model = defineModel<string>({ required: true });
-</script>
-
 <template>
   <input v-model="model" type="text" class="input" />
 </template>
+
+<script setup lang="ts">
+const model = defineModel<string>({ required: true });
+</script>
 
 <style scoped>
 .input {

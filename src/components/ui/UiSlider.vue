@@ -1,3 +1,29 @@
+<template>
+  <div class="slider" :class="{ disabled }">
+    <div class="row">
+      <span>{{ label }}</span>
+      <span class="value">{{ display }}</span>
+    </div>
+
+    <SliderRoot
+      class="root"
+      :model-value="[model]"
+      :min="min"
+      :max="max"
+      :step="step"
+      :disabled="disabled"
+      @update:model-value="onSlide"
+      @value-commit="emit('change')"
+      @dblclick="reset"
+    >
+      <SliderTrack class="track">
+        <span class="fill" :style="fillStyle" />
+      </SliderTrack>
+      <SliderThumb class="thumb" :aria-label="label" />
+    </SliderRoot>
+  </div>
+</template>
+
 <script setup lang="ts">
 import { computed } from "vue";
 import { SliderRoot, SliderThumb, SliderTrack } from "reka-ui";
@@ -49,32 +75,6 @@ function reset() {
   emit("change");
 }
 </script>
-
-<template>
-  <div class="slider" :class="{ disabled }">
-    <div class="row">
-      <span>{{ label }}</span>
-      <span class="value">{{ display }}</span>
-    </div>
-
-    <SliderRoot
-      class="root"
-      :model-value="[model]"
-      :min="min"
-      :max="max"
-      :step="step"
-      :disabled="disabled"
-      @update:model-value="onSlide"
-      @value-commit="emit('change')"
-      @dblclick="reset"
-    >
-      <SliderTrack class="track">
-        <span class="fill" :style="fillStyle" />
-      </SliderTrack>
-      <SliderThumb class="thumb" :aria-label="label" />
-    </SliderRoot>
-  </div>
-</template>
 
 <style scoped>
 .slider {

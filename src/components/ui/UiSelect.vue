@@ -1,22 +1,3 @@
-<script setup lang="ts" generic="T extends string">
-import {
-  SelectContent,
-  SelectItem,
-  SelectItemIndicator,
-  SelectItemText,
-  SelectPortal,
-  SelectRoot,
-  SelectTrigger,
-  SelectValue,
-  SelectViewport,
-} from "reka-ui";
-import { Check, ChevronDown } from "lucide-vue-next";
-
-defineProps<{ options: { value: T; label: string }[]; placeholder?: string }>();
-
-const model = defineModel<T>({ required: true });
-</script>
-
 <template>
   <SelectRoot v-model="model">
     <SelectTrigger class="trigger">
@@ -43,6 +24,25 @@ const model = defineModel<T>({ required: true });
     </SelectPortal>
   </SelectRoot>
 </template>
+
+<script setup lang="ts" generic="T extends string">
+import {
+  SelectContent,
+  SelectItem,
+  SelectItemIndicator,
+  SelectItemText,
+  SelectPortal,
+  SelectRoot,
+  SelectTrigger,
+  SelectValue,
+  SelectViewport,
+} from "reka-ui";
+import { Check, ChevronDown } from "lucide-vue-next";
+
+defineProps<{ options: { value: T; label: string }[]; placeholder?: string }>();
+
+const model = defineModel<T>({ required: true });
+</script>
 
 <style scoped>
 .trigger {

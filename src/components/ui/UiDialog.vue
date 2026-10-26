@@ -1,30 +1,3 @@
-<script setup lang="ts">
-import {
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogOverlay,
-  DialogPortal,
-  DialogRoot,
-  DialogTitle,
-} from "reka-ui";
-import { X } from "lucide-vue-next";
-
-withDefaults(
-  defineProps<{
-    title: string;
-    /** Lue par les lecteurs d'écran, jamais affichée. */
-    description: string;
-    size?: "md" | "lg";
-  }>(),
-  { size: "lg" },
-);
-
-const emit = defineEmits<{ escapeKeyDown: [event: KeyboardEvent] }>();
-
-const open = defineModel<boolean>("open", { required: true });
-</script>
-
 <template>
   <DialogRoot v-model:open="open">
     <DialogPortal>
@@ -53,6 +26,33 @@ const open = defineModel<boolean>("open", { required: true });
     </DialogPortal>
   </DialogRoot>
 </template>
+
+<script setup lang="ts">
+import {
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogOverlay,
+  DialogPortal,
+  DialogRoot,
+  DialogTitle,
+} from "reka-ui";
+import { X } from "lucide-vue-next";
+
+withDefaults(
+  defineProps<{
+    title: string;
+    /** Lue par les lecteurs d'écran, jamais affichée. */
+    description: string;
+    size?: "md" | "lg";
+  }>(),
+  { size: "lg" },
+);
+
+const emit = defineEmits<{ escapeKeyDown: [event: KeyboardEvent] }>();
+
+const open = defineModel<boolean>("open", { required: true });
+</script>
 
 <style scoped>
 .overlay {

@@ -1,11 +1,3 @@
-<script setup lang="ts" generic="T extends string">
-import { TabsContent, TabsList, TabsRoot, TabsTrigger } from "reka-ui";
-
-defineProps<{ tabs: { value: T; label: string }[] }>();
-
-const model = defineModel<T>({ required: true });
-</script>
-
 <template>
   <TabsRoot v-model="model" class="tabs">
     <TabsList class="list">
@@ -19,6 +11,14 @@ const model = defineModel<T>({ required: true });
     </TabsContent>
   </TabsRoot>
 </template>
+
+<script setup lang="ts" generic="T extends string">
+import { TabsContent, TabsList, TabsRoot, TabsTrigger } from "reka-ui";
+
+defineProps<{ tabs: { value: T; label: string }[] }>();
+
+const model = defineModel<T>({ required: true });
+</script>
 
 <style scoped>
 .tabs {

@@ -1,3 +1,9 @@
+<template>
+  <SwitchRoot class="switch" :model-value="model" @update:model-value="toggle">
+    <SwitchThumb class="thumb" />
+  </SwitchRoot>
+</template>
+
 <script setup lang="ts">
 import { SwitchRoot, SwitchThumb } from "reka-ui";
 
@@ -10,12 +16,6 @@ function toggle(value: boolean) {
   emit("change");
 }
 </script>
-
-<template>
-  <SwitchRoot class="switch" :model-value="model" @update:model-value="toggle">
-    <SwitchThumb class="thumb" />
-  </SwitchRoot>
-</template>
 
 <style scoped>
 .switch {

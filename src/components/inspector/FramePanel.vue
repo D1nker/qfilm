@@ -1,42 +1,3 @@
-<script setup lang="ts">
-import { computed } from "vue";
-
-import type { ParamDef, ParamValue } from "@/lib/api";
-import { FONTS } from "@/lib/fonts";
-import { sectionsOf } from "@/lib/frameParams";
-import { useFrame } from "@/composables/useFrame";
-import { useFrameThumbnails } from "@/composables/useFrameThumbnails";
-import UiButton from "@/components/ui/UiButton.vue";
-import UiCollapsible from "@/components/ui/UiCollapsible.vue";
-import UiColorInput from "@/components/ui/UiColorInput.vue";
-import UiField from "@/components/ui/UiField.vue";
-import UiInput from "@/components/ui/UiInput.vue";
-import UiSelect from "@/components/ui/UiSelect.vue";
-import UiSlider from "@/components/ui/UiSlider.vue";
-import FrameLibrary from "@/components/inspector/FrameLibrary.vue";
-import FrameParamControl from "@/components/inspector/FrameParamControl.vue";
-import ThumbnailButton from "@/components/inspector/ThumbnailButton.vue";
-
-const {
-  frames,
-  frame,
-  caption,
-  current,
-  isPristine,
-  applyFrame,
-  setParam,
-  resetFrame,
-  recenterCaption,
-} = useFrame();
-const { thumbnails } = useFrameThumbnails();
-
-const sections = computed(() => (current.value ? sectionsOf(current.value, frame.params) : []));
-
-function valueOf(def: ParamDef): ParamValue {
-  return frame.params[def.id] ?? def.default;
-}
-</script>
-
 <template>
   <div>
     <div class="head">
@@ -108,6 +69,45 @@ function valueOf(def: ParamDef): ParamValue {
     </UiCollapsible>
   </div>
 </template>
+
+<script setup lang="ts">
+import { computed } from "vue";
+
+import type { ParamDef, ParamValue } from "@/lib/api";
+import { FONTS } from "@/lib/fonts";
+import { sectionsOf } from "@/lib/frameParams";
+import { useFrame } from "@/composables/useFrame";
+import { useFrameThumbnails } from "@/composables/useFrameThumbnails";
+import UiButton from "@/components/ui/UiButton.vue";
+import UiCollapsible from "@/components/ui/UiCollapsible.vue";
+import UiColorInput from "@/components/ui/UiColorInput.vue";
+import UiField from "@/components/ui/UiField.vue";
+import UiInput from "@/components/ui/UiInput.vue";
+import UiSelect from "@/components/ui/UiSelect.vue";
+import UiSlider from "@/components/ui/UiSlider.vue";
+import FrameLibrary from "@/components/inspector/FrameLibrary.vue";
+import FrameParamControl from "@/components/inspector/FrameParamControl.vue";
+import ThumbnailButton from "@/components/inspector/ThumbnailButton.vue";
+
+const {
+  frames,
+  frame,
+  caption,
+  current,
+  isPristine,
+  applyFrame,
+  setParam,
+  resetFrame,
+  recenterCaption,
+} = useFrame();
+const { thumbnails } = useFrameThumbnails();
+
+const sections = computed(() => (current.value ? sectionsOf(current.value, frame.params) : []));
+
+function valueOf(def: ParamDef): ParamValue {
+  return frame.params[def.id] ?? def.default;
+}
+</script>
 
 <style scoped>
 .head {

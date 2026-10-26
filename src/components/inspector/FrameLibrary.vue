@@ -1,16 +1,3 @@
-<script setup lang="ts">
-import { computed } from "vue";
-import { FolderOpen, RefreshCw, Trash2 } from "lucide-vue-next";
-
-import { useFrame } from "@/composables/useFrame";
-import UiButton from "@/components/ui/UiButton.vue";
-import UiTooltip from "@/components/ui/UiTooltip.vue";
-
-const { frames, issues, remove, importArchive, importFolder, reload, showFolder } = useFrame();
-
-const mine = computed(() => frames.value.filter((info) => !info.builtin));
-</script>
-
 <template>
   <div class="library">
     <p class="intro">
@@ -61,6 +48,19 @@ const mine = computed(() => frames.value.filter((info) => !info.builtin));
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+import { computed } from "vue";
+import { FolderOpen, RefreshCw, Trash2 } from "lucide-vue-next";
+
+import { useFrame } from "@/composables/useFrame";
+import UiButton from "@/components/ui/UiButton.vue";
+import UiTooltip from "@/components/ui/UiTooltip.vue";
+
+const { frames, issues, remove, importArchive, importFolder, reload, showFolder } = useFrame();
+
+const mine = computed(() => frames.value.filter((info) => !info.builtin));
+</script>
 
 <style scoped>
 .library {

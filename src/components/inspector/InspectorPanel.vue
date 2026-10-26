@@ -1,3 +1,13 @@
+<template>
+  <aside>
+    <UiTabs v-model="tab" :tabs="TABS">
+      <template #looks><LooksPanel /></template>
+      <template #adjust><AdjustPanel /></template>
+      <template #frame><FramePanel /></template>
+    </UiTabs>
+  </aside>
+</template>
+
 <script setup lang="ts">
 import { useInspector, type InspectorTab } from "@/composables/useInspector";
 import UiTabs from "@/components/ui/UiTabs.vue";
@@ -13,16 +23,6 @@ const TABS: { value: InspectorTab; label: string }[] = [
 
 const { tab } = useInspector();
 </script>
-
-<template>
-  <aside>
-    <UiTabs v-model="tab" :tabs="TABS">
-      <template #looks><LooksPanel /></template>
-      <template #adjust><AdjustPanel /></template>
-      <template #frame><FramePanel /></template>
-    </UiTabs>
-  </aside>
-</template>
 
 <style scoped>
 aside {

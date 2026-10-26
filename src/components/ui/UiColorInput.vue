@@ -1,10 +1,10 @@
-<script setup lang="ts">
-const model = defineModel<string>({ required: true });
-</script>
-
 <template>
   <input v-model="model" type="color" class="swatch" />
 </template>
+
+<script setup lang="ts">
+const model = defineModel<string>({ required: true });
+</script>
 
 <style scoped>
 .swatch {

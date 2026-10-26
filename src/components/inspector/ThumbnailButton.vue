@@ -1,3 +1,13 @@
+<template>
+  <button type="button" class="thumb" :class="{ active }">
+    <span class="frame">
+      <img v-if="src" :src="src" :alt="name" :class="fit" draggable="false" />
+      <span v-else class="skeleton" />
+    </span>
+    <span class="name">{{ name }}</span>
+  </button>
+</template>
+
 <script setup lang="ts">
 withDefaults(
   defineProps<{
@@ -9,16 +19,6 @@ withDefaults(
   { src: undefined, fit: "cover" },
 );
 </script>
-
-<template>
-  <button type="button" class="thumb" :class="{ active }">
-    <span class="frame">
-      <img v-if="src" :src="src" :alt="name" :class="fit" draggable="false" />
-      <span v-else class="skeleton" />
-    </span>
-    <span class="name">{{ name }}</span>
-  </button>
-</template>
 
 <style scoped>
 .thumb {

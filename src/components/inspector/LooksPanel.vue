@@ -1,23 +1,3 @@
-<script setup lang="ts">
-import type { Preset } from "@/lib/api";
-import { useEditor } from "@/composables/useEditor";
-import { useFrame } from "@/composables/useFrame";
-import { useLook } from "@/composables/useLook";
-import UiCollapsible from "@/components/ui/UiCollapsible.vue";
-import UiSlider from "@/components/ui/UiSlider.vue";
-import UiTooltip from "@/components/ui/UiTooltip.vue";
-import ThumbnailButton from "@/components/inspector/ThumbnailButton.vue";
-
-const { groupedPresets, thumbnails } = useEditor();
-const { activePreset, amount, applyPreset } = useLook();
-const { labelFromLook } = useFrame();
-
-function select(preset: Preset) {
-  applyPreset(preset);
-  labelFromLook(preset.id, preset.name);
-}
-</script>
-
 <template>
   <div>
     <UiSlider
@@ -45,6 +25,26 @@ function select(preset: Preset) {
     </UiCollapsible>
   </div>
 </template>
+
+<script setup lang="ts">
+import type { Preset } from "@/lib/api";
+import { useEditor } from "@/composables/useEditor";
+import { useFrame } from "@/composables/useFrame";
+import { useLook } from "@/composables/useLook";
+import UiCollapsible from "@/components/ui/UiCollapsible.vue";
+import UiSlider from "@/components/ui/UiSlider.vue";
+import UiTooltip from "@/components/ui/UiTooltip.vue";
+import ThumbnailButton from "@/components/inspector/ThumbnailButton.vue";
+
+const { groupedPresets, thumbnails } = useEditor();
+const { activePreset, amount, applyPreset } = useLook();
+const { labelFromLook } = useFrame();
+
+function select(preset: Preset) {
+  applyPreset(preset);
+  labelFromLook(preset.id, preset.name);
+}
+</script>
 
 <style scoped>
 .amount {

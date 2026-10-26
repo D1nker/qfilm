@@ -1,19 +1,3 @@
-<script setup lang="ts">
-import { Eye, Minus, Plus, Redo2, Undo2 } from "lucide-vue-next";
-
-import { useEditor } from "@/composables/useEditor";
-import { useHistory } from "@/composables/useHistory";
-import UiButton from "@/components/ui/UiButton.vue";
-import UiTooltip from "@/components/ui/UiTooltip.vue";
-
-defineProps<{ zoomPercent: number; atFit: boolean }>();
-
-const emit = defineEmits<{ zoomIn: []; zoomOut: []; toggleZoom: [] }>();
-
-const { comparing } = useEditor();
-const { canUndo, canRedo, undo, redo } = useHistory();
-</script>
-
 <template>
   <!-- Pas de focus au clic : Espace doit rester « déplacer », pas « activer le bouton ». -->
   <div class="toolbar" role="toolbar" aria-label="Outils de la photo" @mousedown.prevent>
@@ -76,6 +60,22 @@ const { canUndo, canRedo, undo, redo } = useHistory();
     </UiTooltip>
   </div>
 </template>
+
+<script setup lang="ts">
+import { Eye, Minus, Plus, Redo2, Undo2 } from "lucide-vue-next";
+
+import { useEditor } from "@/composables/useEditor";
+import { useHistory } from "@/composables/useHistory";
+import UiButton from "@/components/ui/UiButton.vue";
+import UiTooltip from "@/components/ui/UiTooltip.vue";
+
+defineProps<{ zoomPercent: number; atFit: boolean }>();
+
+const emit = defineEmits<{ zoomIn: []; zoomOut: []; toggleZoom: [] }>();
+
+const { comparing } = useEditor();
+const { canUndo, canRedo, undo, redo } = useHistory();
+</script>
 
 <style scoped>
 .toolbar {

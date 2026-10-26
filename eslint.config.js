@@ -43,7 +43,7 @@ export default defineConfigWithVueTs(
   {
     name: "app/vue",
     rules: {
-      "vue/block-order": ["error", { order: ["script", "template", "style"] }],
+      "vue/block-order": ["error", { order: ["template", "script", "style"] }],
       "vue/block-lang": ["error", { script: { lang: "ts" } }],
       "vue/component-api-style": ["error", ["script-setup"]],
       "vue/define-macros-order": ["error", { order: ["defineProps", "defineEmits"] }],

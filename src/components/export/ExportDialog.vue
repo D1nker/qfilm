@@ -1,15 +1,3 @@
-<script setup lang="ts">
-import { FORMAT_OPTIONS, SIZE_OPTIONS } from "@/lib/exportOptions";
-import { useExport } from "@/composables/useExport";
-import UiButton from "@/components/ui/UiButton.vue";
-import UiDialog from "@/components/ui/UiDialog.vue";
-import UiField from "@/components/ui/UiField.vue";
-import UiSelect from "@/components/ui/UiSelect.vue";
-import UiSlider from "@/components/ui/UiSlider.vue";
-
-const { exportOpen, exporting, format, quality, size, saveExport } = useExport();
-</script>
-
 <template>
   <UiDialog
     v-model:open="exportOpen"
@@ -43,3 +31,15 @@ const { exportOpen, exporting, format, quality, size, saveExport } = useExport()
     </template>
   </UiDialog>
 </template>
+
+<script setup lang="ts">
+import { FORMAT_OPTIONS, SIZE_OPTIONS } from "@/lib/exportOptions";
+import { useExport } from "@/composables/useExport";
+import UiButton from "@/components/ui/UiButton.vue";
+import UiDialog from "@/components/ui/UiDialog.vue";
+import UiField from "@/components/ui/UiField.vue";
+import UiSelect from "@/components/ui/UiSelect.vue";
+import UiSlider from "@/components/ui/UiSlider.vue";
+
+const { exportOpen, exporting, format, quality, size, saveExport } = useExport();
+</script>

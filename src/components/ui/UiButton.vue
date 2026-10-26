@@ -1,3 +1,13 @@
+<template>
+  <button
+    type="button"
+    class="btn"
+    :class="[`btn--${variant}`, `btn--${size}`, { 'btn--icon': icon }]"
+  >
+    <slot />
+  </button>
+</template>
+
 <script setup lang="ts">
 withDefaults(
   defineProps<{
@@ -8,16 +18,6 @@ withDefaults(
   { variant: "secondary", size: "md", icon: false },
 );
 </script>
-
-<template>
-  <button
-    type="button"
-    class="btn"
-    :class="[`btn--${variant}`, `btn--${size}`, { 'btn--icon': icon }]"
-  >
-    <slot />
-  </button>
-</template>
 
 <style scoped>
 .btn {

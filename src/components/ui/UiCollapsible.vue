@@ -1,10 +1,3 @@
-<script setup lang="ts">
-import { CollapsibleContent, CollapsibleRoot, CollapsibleTrigger } from "reka-ui";
-import { ChevronDown } from "lucide-vue-next";
-
-withDefaults(defineProps<{ title: string; defaultOpen?: boolean }>(), { defaultOpen: true });
-</script>
-
 <template>
   <CollapsibleRoot class="group" :default-open="defaultOpen">
     <CollapsibleTrigger class="head">
@@ -16,6 +9,13 @@ withDefaults(defineProps<{ title: string; defaultOpen?: boolean }>(), { defaultO
     </CollapsibleContent>
   </CollapsibleRoot>
 </template>
+
+<script setup lang="ts">
+import { CollapsibleContent, CollapsibleRoot, CollapsibleTrigger } from "reka-ui";
+import { ChevronDown } from "lucide-vue-next";
+
+withDefaults(defineProps<{ title: string; defaultOpen?: boolean }>(), { defaultOpen: true });
+</script>
 
 <style scoped>
 .group + .group {

@@ -1,11 +1,3 @@
-<script setup lang="ts">
-import { TooltipContent, TooltipPortal, TooltipRoot, TooltipTrigger } from "reka-ui";
-
-withDefaults(defineProps<{ text: string; side?: "top" | "right" | "bottom" | "left" }>(), {
-  side: "bottom",
-});
-</script>
-
 <template>
   <TooltipRoot>
     <TooltipTrigger as-child>
@@ -18,6 +10,14 @@ withDefaults(defineProps<{ text: string; side?: "top" | "right" | "bottom" | "le
     </TooltipPortal>
   </TooltipRoot>
 </template>
+
+<script setup lang="ts">
+import { TooltipContent, TooltipPortal, TooltipRoot, TooltipTrigger } from "reka-ui";
+
+withDefaults(defineProps<{ text: string; side?: "top" | "right" | "bottom" | "left" }>(), {
+  side: "bottom",
+});
+</script>
 
 <!-- Le contenu est téléporté dans <body> : les styles scoped ne l'atteignent pas. -->
 <style>

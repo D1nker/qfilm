@@ -1,12 +1,12 @@
-<script setup lang="ts">
-defineProps<{ active: boolean }>();
-</script>
-
 <template>
   <button type="button" class="item" :class="{ active }">
     <slot />
   </button>
 </template>
+
+<script setup lang="ts">
+defineProps<{ active: boolean }>();
+</script>
 
 <style scoped>
 .item {

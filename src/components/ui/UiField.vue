@@ -1,16 +1,16 @@
-<script setup lang="ts">
-withDefaults(defineProps<{ label: string; stacked?: boolean; as?: "label" | "div" }>(), {
-  stacked: false,
-  as: "label",
-});
-</script>
-
 <template>
   <component :is="as" class="field" :class="{ stacked }">
     <span class="label">{{ label }}</span>
     <slot />
   </component>
 </template>
+
+<script setup lang="ts">
+withDefaults(defineProps<{ label: string; stacked?: boolean; as?: "label" | "div" }>(), {
+  stacked: false,
+  as: "label",
+});
+</script>
 
 <style scoped>
 .field {
