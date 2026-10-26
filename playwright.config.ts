@@ -9,10 +9,14 @@ export default defineConfig({
   use: {
     baseURL: "http://localhost:5173",
     colorScheme: "dark",
-    viewport: { width: 1400, height: 900 },
     trace: "retain-on-failure",
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    {
+      name: "chromium",
+      use: { ...devices["Desktop Chrome"], viewport: { width: 1400, height: 900 } },
+    },
+  ],
   webServer: {
     command: "npm run dev",
     url: "http://localhost:5173",

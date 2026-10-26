@@ -43,13 +43,21 @@ test.describe("floating toolbar", () => {
       .toBeLessThan(1);
   });
 
-  test("the header no longer carries those controls", async ({ openApp }) => {
+  test("the header keeps open and export on the right, and the app menu on the left", async ({
+    openApp,
+  }) => {
     const header = openApp.page.locator("header");
 
-    await expect(header.getByRole("button", { name: "Annuler" })).toHaveCount(0);
-    await expect(header.getByRole("button", { name: /Comparer/ })).toHaveCount(0);
     await expect(header.getByRole("button", { name: "Ouvrir…" })).toBeVisible();
     await expect(header.getByRole("button", { name: "Exporter…" })).toBeVisible();
+    await expect(header.getByRole("button", { name: "Menu" })).toContainText("qFilm");
+    await expect(header.getByRole("button", { name: "Annuler" })).toHaveCount(0);
+    await expect(header.getByRole("button", { name: /Comparer/ })).toHaveCount(0);
+    await expect(header.getByRole("button", { name: /panneau/ })).toHaveCount(0);
+
+    const menu = await bounds(openApp, 'header button[aria-label="Menu"]');
+    const open = await bounds(openApp, "header .actions button");
+    expect(menu.right).toBeLessThan(open.left);
   });
 
   test("holding Compare shows the original and releasing brings the edit back", async ({
@@ -85,7 +93,89 @@ test.describe("floating toolbar", () => {
   }
 });
 
+test.describe("panel handle", () => {
+  const handle = (app: App) => app.page.getByRole("button", { name: /le panneau/ });
+
+  test("is there even before a photo is open", async ({ app }) => {
+    await expect(handle(app)).toBeVisible();
+  });
+
+  test("folds and unfolds the panel", async ({ openApp }) => {
+    const panel = openApp.page.locator("aside");
+    await expect(handle(openApp)).toHaveAttribute("aria-expanded", "true");
+
+    await handle(openApp).click();
+    await expect(panel).toBeHidden();
+    await expect(handle(openApp)).toHaveAttribute("aria-expanded", "false");
+
+    await handle(openApp).click();
+    await expect(panel).toBeVisible();
+  });
+
+  test("sits on the canvas edge next to the panel, and follows it when it folds", async ({
+    openApp,
+  }) => {
+    await expect
+      .poll(async () => {
+        const stage = await bounds(openApp, "main");
+        const box = await bounds(openApp, "main .handle");
+        return Math.abs(box.right - stage.right);
+      })
+      .toBeLessThan(1);
+
+    await openApp.page.keyboard.press("f");
+    await expect(openApp.page.locator("aside")).toBeHidden();
+    await expect
+      .poll(async () => {
+        const box = await bounds(openApp, "main .handle");
+        return Math.abs(box.right - (await openApp.page.evaluate(() => innerWidth)));
+      })
+      .toBeLessThan(1);
+    await expect(handle(openApp)).toBeVisible();
+  });
+
+  test("says what it does", async ({ openApp }) => {
+    await handle(openApp).hover();
+    await expect(openApp.page.getByRole("tooltip")).toHaveText("Masquer le panneau (F)");
+
+    await handle(openApp).click();
+    await handle(openApp).hover();
+    await expect(openApp.page.getByRole("tooltip")).toHaveText("Afficher le panneau (F)");
+  });
+
+  test("does not start a pan when pressed", async ({ openApp }) => {
+    await openApp.page.getByRole("button", { name: "Zoomer", exact: true }).click();
+    const before = await openApp.page.locator(".scroller").evaluate((el) => el.scrollTop);
+
+    await handle(openApp).hover();
+    await openApp.page.mouse.down();
+    await openApp.page.mouse.move(600, 300, { steps: 4 });
+    await openApp.page.mouse.up();
+
+    expect(await openApp.page.locator(".scroller").evaluate((el) => el.scrollTop)).toBe(before);
+  });
+});
+
 test.describe("menu", () => {
+  test("shows a tooltip on hover and opens on click", async ({ app }) => {
+    const trigger = app.page.getByRole("button", { name: "Menu" });
+
+    await trigger.hover();
+    await expect(app.page.getByRole("tooltip")).toHaveText("Menu");
+
+    await trigger.click();
+    await expect(app.page.getByRole("menu")).toBeVisible();
+    await expect(app.page.getByRole("menuitem", { name: "Raccourcis clavier" })).toBeVisible();
+  });
+
+  test("opens aligned with the wordmark, not off to the right", async ({ app }) => {
+    await app.page.getByRole("button", { name: "Menu" }).click();
+
+    const menu = await bounds(app, '[role="menu"]');
+    const trigger = await bounds(app, 'header button[aria-label="Menu"]');
+    expect(Math.abs(menu.left - trigger.left)).toBeLessThan(12);
+  });
+
   test("opens the shortcuts cheat-sheet", async ({ app }) => {
     await app.page.getByRole("button", { name: "Menu" }).click();
     await app.page.getByRole("menuitem", { name: "Raccourcis clavier" }).click();

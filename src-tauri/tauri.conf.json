@@ -13,6 +13,9 @@
     "windows": [
       {
         "title": "Qfilm",
+        "titleBarStyle": "Overlay",
+        "hiddenTitle": true,
+        "trafficLightPosition": { "x": 18, "y": 27 },
         "width": 1400,
         "height": 900,
         "minWidth": 1000,

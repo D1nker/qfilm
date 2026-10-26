@@ -1,3 +1,92 @@
+<template>
+  <main ref="stage">
+    <button v-if="!image" type="button" class="dropzone" @click="browse">
+      <ImagePlus :size="28" class="icon" />
+      <span class="big">Dépose une photo ici</span>
+      <span class="hint">JPEG, PNG ou TIFF 16 bits — ou clique pour parcourir</span>
+    </button>
+
+    <div
+      v-else
+      ref="scroller"
+      class="scroller"
+      :class="{ pannable, panning, 'space-down': spaceDown }"
+      @wheel="onWheel"
+      @gesturestart="onGestureStart"
+      @gesturechange="onGestureChange"
+      @pointerdown="onPointerDown"
+      @pointermove="onPointerMove"
+      @pointerup="onPointerUp"
+      @pointercancel="onPointerUp"
+      @dblclick="onDoubleClick"
+    >
+      <div class="content">
+        <img
+          ref="previewImage"
+          :src="displayed"
+          :alt="image.fileName"
+          :style="imageStyle"
+          draggable="false"
+          @load="onImageLoad"
+        />
+
+        <template v-if="!comparing">
+          <canvas ref="captionCanvas" class="caption-layer" :style="captionCanvasStyle" />
+
+          <template v-if="editable">
+            <button
+              v-for="zone in view.zones"
+              :key="zone.field"
+              type="button"
+              class="zone"
+              :class="{ active: editing === zone.field }"
+              :style="zoneStyle(zone)"
+              :aria-label="`Modifier : ${fieldLabel(zone.field)}`"
+              @click="editZone(zone)"
+            />
+
+            <button
+              type="button"
+              class="zone movable"
+              :class="{ active: editing === 'caption' }"
+              :style="captionZoneStyle"
+              aria-label="Modifier la légende (glisser pour la déplacer)"
+              @pointerdown="startCaptionDrag"
+              @pointermove="onCaptionDrag"
+              @pointerup="endCaptionDrag"
+            />
+          </template>
+
+          <div v-if="editorStyle" class="zone-editor" :style="editorStyle">
+            <input
+              ref="zoneInput"
+              v-model="editingValue"
+              type="text"
+              :placeholder="fieldLabel(editing)"
+              @keydown.enter="editing = null"
+              @keydown.esc="editing = null"
+              @blur="editing = null"
+            />
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <PanelHandle />
+
+    <CanvasToolbar
+      v-if="image"
+      :zoom-percent="zoomPercent"
+      :at-fit="atFit"
+      @zoom-in="zoomIn"
+      @zoom-out="zoomOut"
+      @toggle-zoom="toggleActual()"
+    />
+
+    <div v-if="loading" class="overlay">Décodage…</div>
+  </main>
+</template>
+
 <script setup lang="ts">
 import { computed, nextTick, ref } from "vue";
 import { ImagePlus } from "lucide-vue-next";
@@ -10,6 +99,7 @@ import { useInspector } from "@/composables/useInspector";
 import { useRender } from "@/composables/useRender";
 import { useViewportNavigation } from "@/composables/useViewportNavigation";
 import CanvasToolbar from "@/components/CanvasToolbar.vue";
+import PanelHandle from "@/components/PanelHandle.vue";
 
 const { image, loading, comparing, browse } = useEditor();
 const { frame, caption, current, setParam } = useFrame();
@@ -114,93 +204,6 @@ function editCaption() {
   void focusEditor();
 }
 </script>
-
-<template>
-  <main ref="stage">
-    <button v-if="!image" type="button" class="dropzone" @click="browse">
-      <ImagePlus :size="28" class="icon" />
-      <span class="big">Dépose une photo ici</span>
-      <span class="hint">JPEG, PNG ou TIFF 16 bits — ou clique pour parcourir</span>
-    </button>
-
-    <div
-      v-else
-      ref="scroller"
-      class="scroller"
-      :class="{ pannable, panning, 'space-down': spaceDown }"
-      @wheel="onWheel"
-      @gesturestart="onGestureStart"
-      @gesturechange="onGestureChange"
-      @pointerdown="onPointerDown"
-      @pointermove="onPointerMove"
-      @pointerup="onPointerUp"
-      @pointercancel="onPointerUp"
-      @dblclick="onDoubleClick"
-    >
-      <div class="content">
-        <img
-          ref="previewImage"
-          :src="displayed"
-          :alt="image.fileName"
-          :style="imageStyle"
-          draggable="false"
-          @load="onImageLoad"
-        />
-
-        <template v-if="!comparing">
-          <canvas ref="captionCanvas" class="caption-layer" :style="captionCanvasStyle" />
-
-          <template v-if="editable">
-            <button
-              v-for="zone in view.zones"
-              :key="zone.field"
-              type="button"
-              class="zone"
-              :class="{ active: editing === zone.field }"
-              :style="zoneStyle(zone)"
-              :aria-label="`Modifier : ${fieldLabel(zone.field)}`"
-              @click="editZone(zone)"
-            />
-
-            <button
-              type="button"
-              class="zone movable"
-              :class="{ active: editing === 'caption' }"
-              :style="captionZoneStyle"
-              aria-label="Modifier la légende (glisser pour la déplacer)"
-              @pointerdown="startCaptionDrag"
-              @pointermove="onCaptionDrag"
-              @pointerup="endCaptionDrag"
-            />
-          </template>
-
-          <div v-if="editorStyle" class="zone-editor" :style="editorStyle">
-            <input
-              ref="zoneInput"
-              v-model="editingValue"
-              type="text"
-              :placeholder="fieldLabel(editing)"
-              @keydown.enter="editing = null"
-              @keydown.esc="editing = null"
-              @blur="editing = null"
-            />
-          </div>
-        </template>
-      </div>
-    </div>
-
-    <CanvasToolbar
-      v-if="image"
-      :zoom-percent="zoomPercent"
-      :at-fit="atFit"
-      @zoom-in="zoomIn"
-      @zoom-out="zoomOut"
-      @toggle-zoom="toggleActual()"
-    />
-
-    <div v-if="loading" class="overlay">Décodage…</div>
-  </main>
-</template>
 
 <style scoped>
 main {

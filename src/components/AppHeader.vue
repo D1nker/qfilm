@@ -1,36 +1,47 @@
+<template>
+  <header data-tauri-drag-region :class="{ overlay: isMac }">
+    <UiMenu :entries="menu" tooltip="Menu" align="start">
+      <UiButton variant="ghost" class="brand" aria-label="Menu">
+        <span class="wordmark"><span>q</span>Film</span>
+        <ChevronDown :size="14" class="chevron" />
+      </UiButton>
+    </UiMenu>
+
+    <div class="meta">
+      <strong v-if="image">{{ image.fileName }}</strong>
+      <span>{{ status }}</span>
+    </div>
+
+    <div class="actions">
+      <UiButton @click="browse">
+        <FolderOpen :size="14" />
+        Ouvrir…
+      </UiButton>
+      <UiButton variant="primary" :disabled="!image" @click="openExport">Exporter…</UiButton>
+    </div>
+  </header>
+</template>
+
 <script setup lang="ts">
 import { computed } from "vue";
-import {
-  Ellipsis,
-  FolderOpen,
-  Keyboard,
-  Moon,
-  PanelRight,
-  PanelRightClose,
-  Sun,
-} from "lucide-vue-next";
+import { ChevronDown, FolderOpen, Keyboard, Moon, Sun } from "lucide-vue-next";
 
 import { useEditor } from "@/composables/useEditor";
 import { useExport } from "@/composables/useExport";
 import { useFrame } from "@/composables/useFrame";
 import { useHelp } from "@/composables/useHelp";
-import { useInspector } from "@/composables/useInspector";
 import { useTheme, type ThemeMode } from "@/composables/useTheme";
 import UiButton from "@/components/ui/UiButton.vue";
 import UiMenu from "@/components/ui/UiMenu.vue";
-import UiTooltip from "@/components/ui/UiTooltip.vue";
 import type { MenuEntry } from "@/components/ui/menu";
+
+const isMac = navigator.userAgent.includes("Macintosh");
 
 const { image, status, browse } = useEditor();
 const { openExport } = useExport();
 const { showFolder } = useFrame();
 const { shortcutsOpen } = useHelp();
-const { open, toggle } = useInspector();
 const { mode, set: setTheme } = useTheme();
-
-const inspectorLabel = computed(() =>
-  open.value ? "Masquer le panneau (F)" : "Afficher le panneau (F)",
-);
 
 const menu = computed<MenuEntry[]>(() => [
   {
@@ -59,43 +70,6 @@ const menu = computed<MenuEntry[]>(() => [
 ]);
 </script>
 
-<template>
-  <header>
-    <h1><span>Q</span>film</h1>
-    <div class="meta">
-      <strong v-if="image">{{ image.fileName }}</strong>
-      <span>{{ status }}</span>
-    </div>
-
-    <div class="actions">
-      <UiButton @click="browse">
-        <FolderOpen :size="14" />
-        Ouvrir…
-      </UiButton>
-      <UiButton variant="primary" :disabled="!image" @click="openExport">Exporter…</UiButton>
-
-      <UiMenu :entries="menu">
-        <UiButton variant="ghost" icon aria-label="Menu">
-          <Ellipsis :size="16" />
-        </UiButton>
-      </UiMenu>
-
-      <UiTooltip :text="inspectorLabel">
-        <UiButton
-          variant="ghost"
-          icon
-          :aria-expanded="open"
-          :aria-label="inspectorLabel"
-          @click="toggle"
-        >
-          <PanelRightClose v-if="open" :size="16" />
-          <PanelRight v-else :size="16" />
-        </UiButton>
-      </UiTooltip>
-    </div>
-  </header>
-</template>
-
 <style scoped>
 header {
   display: flex;
@@ -106,14 +80,29 @@ header {
   background: var(--surface);
 }
 
-h1 {
+header.overlay {
+  padding-left: 92px;
+}
+
+.brand {
+  gap: var(--space-1);
+  margin-left: calc(var(--space-2) * -1);
+  padding: 0 var(--space-2);
+  color: var(--text);
+}
+
+.wordmark {
   font-size: var(--text-lg);
   font-weight: var(--weight-semibold);
   letter-spacing: -0.01em;
 }
 
-h1 span {
+.wordmark span {
   color: var(--accent);
+}
+
+.chevron {
+  color: var(--text-faint);
 }
 
 .meta {
@@ -123,6 +112,7 @@ h1 span {
   color: var(--text-muted);
   font-size: var(--text-xs);
   overflow: hidden;
+  pointer-events: none;
 }
 
 .meta strong {

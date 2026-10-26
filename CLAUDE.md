@@ -1,4 +1,4 @@
-# Qfilm
+# qFilm
 
 Lightweight Lightroom-style photo editor. Tauri 2 shell, Vue 3 + TypeScript UI, Rust imaging core.
 
@@ -15,7 +15,7 @@ npm and cargo are run locally in this project (no Docker).
 ## Frontend conventions
 
 - Imports use the `@/` alias (= `src/`). Never `../` (ESLint enforces it); avoid `./` too.
-- `<script setup lang="ts">`, block order script → template → style, scoped CSS per component.
+- `<script setup lang="ts">`, block order template → script → style, scoped CSS per component.
 - State lives in composables (`src/composables`), module-level singletons, no Pinia. One concern
   each: `useEditor` (open photo, presets, thumbnails), `useLook` (preset × amount + manual
   adjustments), `useFrame` (chosen frame, its params, caption, imported frames), `useFrameThumbnails`, `useRender` (the single watcher that calls Rust),
@@ -31,10 +31,12 @@ npm and cargo are run locally in this project (no Docker).
 - Headless widgets come from Reka UI, wrapped in `src/components/ui/` as `Ui*` components
   (UiButton, UiSlider, UiSelect, UiMenu, UiDialog, UiTooltip…). Reuse them; add a new one there rather than
   styling raw elements in feature components. Icons come from `lucide-vue-next`.
-- Layout: the header holds app-level actions only (open, export, `⋯` menu, panel toggle); editing
-  and view controls (undo/redo, compare, zoom) live in the floating `CanvasToolbar`, centered on
-  the canvas. The strip under the photo (`--toolbar-clearance` in `ImageViewport`) mirrors
+- Layout: the header holds app-level things only (the qFilm wordmark is the app menu, open, export);
+  editing and view controls (undo/redo, compare, zoom) live in the floating `CanvasToolbar`,
+  centered on the canvas; the panel fold/unfold is a handle on the canvas edge (`PanelHandle`). The strip under the photo (`--toolbar-clearance` in `ImageViewport`) mirrors
   `TOOLBAR_CLEARANCE` in `useViewportNavigation`: change both together. Toasts go at the top.
+  On macOS the window uses an overlay title bar: `trafficLightPosition.y` in `tauri.conf.json` centers the
+  lights in the 52px header and `header.overlay` in `AppHeader` reserves their width; change them together.
 - Components stay small and presentational; logic goes in composables, static data in `src/lib`.
 - Shortcuts: `C` hold = original, `F` = hide/show panel, ⌘Z / ⇧⌘Z, ⌘ +/−/0 zoom, Space+drag pan.
   Never take `Tab` (keyboard navigation) and pick keys that work on AZERTY (no `\`, no dead
@@ -79,7 +81,7 @@ npm and cargo are run locally in this project (no Docker).
 - Pitch: a **film look + frame studio** (looks, grain/halation, film frames, captions), not a
   Lightroom clone. Frames and captions are the signature feature. Personal side project for now,
   to be made public later.
-- Name: **Qfilm** (repo `qfilm`). No real brand appears anywhere: looks, film stocks and edge
+- Name: **qFilm** (repo `qfilm`). No real brand appears anywhere: looks, film stocks and edge
   texts are generic (e.g. "Portrait 400", "Ambre"). Keep it that way when adding looks or frames.
   The bundle `identifier` (`io.github.d1nker.qfilm`) is a placeholder until a domain is chosen.
 - Icons: source in `branding/icon.svg` (+ `icon.png`). Regenerate with
