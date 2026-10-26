@@ -1,8 +1,18 @@
 # qFilm
 
-A lightweight Lightroom-style photo editor.
+A film look and frame studio for your photos: film looks, grain and halation, film-style borders and captions.
+
+Early stage, personal project. Open a photo, pick a look, wrap it in a frame, export.
 
 **Stack:** Tauri 2 · Vue 3 + TypeScript · Rust imaging core · Reka UI
+
+## What it does
+
+- **Looks:** film-inspired presets with an intensity slider, plus manual adjustments (exposure, contrast, highlights and shadows, colour, clarity, grain, halation, vignette).
+- **Frames:** 35 mm and medium-format film strips, instant prints, letterbox, solid and padded borders. A frame is data (`frame.json` + `frame.svg`), so you can design your own in Figma and import it as a `.zip`, a folder or by drag and drop. See [docs/FRAMES.md](docs/FRAMES.md).
+- **Captions:** text on or around the photo, edited and moved directly on the preview.
+- **Editing comfort:** undo/redo, compare with the original (hold `C`), cursor-anchored zoom and pan, light and dark themes.
+- **Export:** JPEG, PNG or 16-bit TIFF, at the original size or resized.
 
 ## Getting started
 
@@ -12,7 +22,7 @@ npm run app          # desktop app with hot reload
 npm run app:build    # production bundle
 ```
 
-Requires Node and a Rust toolchain (see the [Tauri prerequisites](https://tauri.app/start/prerequisites/)).
+Requires Node and a Rust toolchain, 1.88 or newer (see the [Tauri prerequisites](https://tauri.app/start/prerequisites/)).
 
 ## Tests
 
@@ -32,7 +42,6 @@ npm run check:all    # Prettier + ESLint + vue-tsc + rustfmt + clippy
 npm run format       # auto-format the frontend
 npm run lint:fix     # auto-fix ESLint issues
 npm run rust:fmt     # auto-format the Rust code
-cargo test --manifest-path src-tauri/Cargo.toml
 ```
 
 ## Project layout
@@ -46,11 +55,20 @@ src/
 ├─ composables/      state and logic (module-level singletons)
 ├─ lib/              typed Tauri API, static data, helpers
 └─ styles/           design tokens (light + dark) and base styles
-src-tauri/src/
-├─ commands.rs       Tauri commands (the only glue with the frontend)
-presets/builtin.json looks (add one by editing this file)
-src-tauri/frames/  built-in frames (SVG + manifest) — see docs/FRAMES.md
-└─ imaging/          decode, render pipeline, presets, borders, encode
+src-tauri/
+├─ src/
+│  ├─ commands.rs    Tauri commands (the only glue with the frontend)
+│  └─ imaging/       decode, render pipeline, presets, frames, encode
+├─ frames/           built-in frames (SVG + manifest)
+├─ presets/          looks, in builtin.json (add one by editing this file)
+└─ golden/           reference images for the rendering tests
+e2e/                 Playwright tests against a mocked Tauri bridge
+docs/                frame authoring guide
+branding/            app icon sources
 ```
 
 Conventions live in [CLAUDE.md](CLAUDE.md).
+
+## License
+
+[MIT](LICENSE). The bundled fonts keep their own licenses, in `public/fonts/`.
