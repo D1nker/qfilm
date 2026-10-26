@@ -1,4 +1,4 @@
-# Qfilm
+# qFilm
 
 A lightweight Lightroom-style photo editor.
 

@@ -1,17 +1,9 @@
-<script setup lang="ts">
-import { SHORTCUT_GROUPS } from "@/lib/shortcuts";
-import { useHelp } from "@/composables/useHelp";
-import UiDialog from "@/components/ui/UiDialog.vue";
-
-const { shortcutsOpen } = useHelp();
-</script>
-
 <template>
   <UiDialog
     v-model:open="shortcutsOpen"
     size="md"
     title="Raccourcis clavier"
-    description="La liste des raccourcis clavier de Qfilm."
+    description="La liste des raccourcis clavier de qFilm."
   >
     <section v-for="group in SHORTCUT_GROUPS" :key="group.title">
       <h3>{{ group.title }}</h3>
@@ -26,6 +18,14 @@ const { shortcutsOpen } = useHelp();
     </section>
   </UiDialog>
 </template>
+
+<script setup lang="ts">
+import { SHORTCUT_GROUPS } from "@/lib/shortcuts";
+import { useHelp } from "@/composables/useHelp";
+import UiDialog from "@/components/ui/UiDialog.vue";
+
+const { shortcutsOpen } = useHelp();
+</script>
 
 <style scoped>
 section:first-child {

@@ -1,6 +1,6 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "Qfilm",
+  "productName": "qFilm",
   "version": "0.1.0",
   "identifier": "io.github.d1nker.qfilm",
   "build": {
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Qfilm",
+        "title": "qFilm",
         "titleBarStyle": "Overlay",
         "hiddenTitle": true,
         "trafficLightPosition": { "x": 18, "y": 27 },
