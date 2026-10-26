@@ -33,7 +33,7 @@ npm and cargo are run locally in this project (no Docker).
   styling raw elements in feature components. Icons come from `lucide-vue-next`.
 - Layout: the header holds app-level things only (the qFilm wordmark is the app menu, open, export);
   editing and view controls (undo/redo, compare, zoom) live in the floating `CanvasToolbar`,
-  centered on the canvas; the panel fold/unfold is a handle on the canvas edge (`PanelHandle`). The strip under the photo (`--toolbar-clearance` in `ImageViewport`) mirrors
+  centered on the canvas; the panel fold/unfold is a handle on the canvas edge (`PanelHandle`); the panel starts folded and unfolds when the first photo opens (`useInspector`). The strip under the photo (`--toolbar-clearance` in `ImageViewport`) mirrors
   `TOOLBAR_CLEARANCE` in `useViewportNavigation`: change both together. Toasts go at the top.
   On macOS the window uses an overlay title bar: `trafficLightPosition.y` in `tauri.conf.json` centers the
   lights in the 52px header and `header.overlay` in `AppHeader` reserves their width; change them together.

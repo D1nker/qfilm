@@ -85,6 +85,26 @@ export class App {
     await expect
       .poll(() => this.calls("render_preview").then((calls) => calls.length))
       .toBeGreaterThan(0);
+    await this.layoutSettled();
+  }
+
+  async layoutSettled() {
+    await this.page.evaluate(
+      () =>
+        new Promise<void>((resolve) => {
+          const width = () => document.querySelector("main")?.getBoundingClientRect().width;
+          let last = width();
+          let steady = 0;
+          const tick = () => {
+            const now = width();
+            steady = now === last ? steady + 1 : 0;
+            last = now;
+            if (steady >= 5) resolve();
+            else requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick);
+        }),
+    );
   }
 
   get photo() {

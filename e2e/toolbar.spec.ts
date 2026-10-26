@@ -100,6 +100,32 @@ test.describe("panel handle", () => {
     await expect(handle(app)).toBeVisible();
   });
 
+  test("starts folded without a photo and unfolds once one opens", async ({ app }) => {
+    const panel = app.page.locator("aside");
+    await expect(panel).toBeHidden();
+    await expect(handle(app)).toHaveAttribute("aria-expanded", "false");
+
+    await app.openPhoto();
+
+    await expect(panel).toBeVisible();
+    await expect(handle(app)).toHaveAttribute("aria-expanded", "true");
+  });
+
+  test("can still be unfolded by hand before a photo is open", async ({ app }) => {
+    await handle(app).click();
+
+    await expect(app.page.locator("aside")).toBeVisible();
+  });
+
+  test("keeps a panel folded by hand when a second photo opens", async ({ openApp }) => {
+    await handle(openApp).click();
+    await expect(openApp.page.locator("aside")).toBeHidden();
+
+    await openApp.openPhoto();
+
+    await expect(openApp.page.locator("aside")).toBeHidden();
+  });
+
   test("folds and unfolds the panel", async ({ openApp }) => {
     const panel = openApp.page.locator("aside");
     await expect(handle(openApp)).toHaveAttribute("aria-expanded", "true");
