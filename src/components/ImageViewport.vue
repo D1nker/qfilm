@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, ref } from "vue";
-import { ImagePlus, Minus, Plus } from "lucide-vue-next";
+import { ImagePlus } from "lucide-vue-next";
 
 import type { TextZone } from "@/lib/api";
 import { useCaptionLayer } from "@/composables/useCaptionLayer";
@@ -9,8 +9,7 @@ import { useFrame } from "@/composables/useFrame";
 import { useInspector } from "@/composables/useInspector";
 import { useRender } from "@/composables/useRender";
 import { useViewportNavigation } from "@/composables/useViewportNavigation";
-import UiButton from "@/components/ui/UiButton.vue";
-import UiTooltip from "@/components/ui/UiTooltip.vue";
+import CanvasToolbar from "@/components/CanvasToolbar.vue";
 
 const { image, loading, comparing, browse } = useEditor();
 const { frame, caption, current, setParam } = useFrame();
@@ -190,24 +189,14 @@ function editCaption() {
       </div>
     </div>
 
-    <!-- Pas de focus au clic : Espace doit rester « déplacer », pas « activer le bouton ». -->
-    <div v-if="image" class="zoom-controls" @mousedown.prevent>
-      <UiTooltip text="Dézoomer (⌘ −)">
-        <UiButton variant="ghost" size="sm" icon aria-label="Dézoomer" @click="zoomOut">
-          <Minus :size="14" />
-        </UiButton>
-      </UiTooltip>
-      <UiTooltip :text="atFit ? 'Afficher à 100 %' : 'Ajuster à la fenêtre (⌘ 0)'">
-        <UiButton variant="ghost" size="sm" class="zoom-label" @click="toggleActual()">
-          {{ zoomPercent }} %
-        </UiButton>
-      </UiTooltip>
-      <UiTooltip text="Zoomer (⌘ +)">
-        <UiButton variant="ghost" size="sm" icon aria-label="Zoomer" @click="zoomIn">
-          <Plus :size="14" />
-        </UiButton>
-      </UiTooltip>
-    </div>
+    <CanvasToolbar
+      v-if="image"
+      :zoom-percent="zoomPercent"
+      :at-fit="atFit"
+      @zoom-in="zoomIn"
+      @zoom-out="zoomOut"
+      @toggle-zoom="toggleActual()"
+    />
 
     <div v-if="loading" class="overlay">Décodage…</div>
   </main>
@@ -215,6 +204,8 @@ function editCaption() {
 
 <style scoped>
 main {
+  --toolbar-clearance: 40px;
+
   position: relative;
   min-width: 0;
   min-height: 0;
@@ -250,6 +241,7 @@ main {
   min-width: 100%;
   min-height: 100%;
   padding: var(--space-8);
+  padding-bottom: calc(var(--space-8) + var(--toolbar-clearance));
 }
 
 img {
@@ -259,24 +251,6 @@ img {
   box-shadow: var(--shadow-lg);
   user-select: none;
   -webkit-user-drag: none;
-}
-
-.zoom-controls {
-  position: absolute;
-  right: var(--space-4);
-  bottom: var(--space-4);
-  display: flex;
-  align-items: center;
-  padding: 2px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--surface);
-  box-shadow: var(--shadow-md);
-}
-
-.zoom-label {
-  min-width: 52px;
-  font-variant-numeric: tabular-nums;
 }
 
 .dropzone {

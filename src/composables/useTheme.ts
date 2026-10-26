@@ -15,10 +15,10 @@ watchEffect(() => {
   localStorage.setItem(STORAGE_KEY, mode.value);
 });
 
-function toggle() {
-  mode.value = mode.value === "dark" ? "light" : "dark";
+function set(value: ThemeMode) {
+  mode.value = value;
 }
 
 export function useTheme() {
-  return { mode, toggle };
+  return { mode, set };
 }

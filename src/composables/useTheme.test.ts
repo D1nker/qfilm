@@ -22,22 +22,22 @@ describe("useTheme", () => {
     expect(document.documentElement.dataset.theme).toBe("dark");
   });
 
-  it("toggles between dark and light and applies it to the document", async () => {
+  it("switches between dark and light and applies it to the document", async () => {
     const theme = await setup();
-    theme.toggle();
+    theme.set("light");
     await nextTick();
 
     expect(theme.mode.value).toBe("light");
     expect(document.documentElement.dataset.theme).toBe("light");
 
-    theme.toggle();
+    theme.set("dark");
     await nextTick();
     expect(document.documentElement.dataset.theme).toBe("dark");
   });
 
   it("remembers the choice for the next launch", async () => {
     const theme = await setup();
-    theme.toggle();
+    theme.set("light");
     await nextTick();
     expect(localStorage.getItem("qfilm-theme")).toBe("light");
 

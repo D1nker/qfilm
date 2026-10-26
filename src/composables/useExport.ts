@@ -3,10 +3,12 @@ import { ref } from "vue";
 import { exportImage, pickDestination, type ExportFormat } from "@/lib/api";
 import { FILE_EXTENSIONS, SIZE_EDGES, type ExportSize } from "@/lib/exportOptions";
 import { useEditor } from "@/composables/useEditor";
+import { useNotice } from "@/composables/useNotice";
 import { useFrame } from "@/composables/useFrame";
 import { useLook } from "@/composables/useLook";
 
-const { image, status, error } = useEditor();
+const { image, error } = useEditor();
+const { show } = useNotice();
 const { params, activePreset } = useLook();
 const { frame, caption } = useFrame();
 
@@ -40,7 +42,7 @@ async function saveExport() {
       destination,
       { format: format.value, quality: quality.value, maxEdge: SIZE_EDGES[size.value] },
     );
-    status.value = "Export terminé";
+    show("Export terminé");
     exportOpen.value = false;
   } catch (e) {
     error.value = String(e);

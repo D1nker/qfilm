@@ -1,28 +1,62 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { FolderOpen, Moon, PanelRight, PanelRightClose, Redo2, Sun, Undo2 } from "lucide-vue-next";
+import {
+  Ellipsis,
+  FolderOpen,
+  Keyboard,
+  Moon,
+  PanelRight,
+  PanelRightClose,
+  Sun,
+} from "lucide-vue-next";
 
 import { useEditor } from "@/composables/useEditor";
 import { useExport } from "@/composables/useExport";
-import { useHistory } from "@/composables/useHistory";
+import { useFrame } from "@/composables/useFrame";
+import { useHelp } from "@/composables/useHelp";
 import { useInspector } from "@/composables/useInspector";
-import { useTheme } from "@/composables/useTheme";
+import { useTheme, type ThemeMode } from "@/composables/useTheme";
 import UiButton from "@/components/ui/UiButton.vue";
+import UiMenu from "@/components/ui/UiMenu.vue";
 import UiTooltip from "@/components/ui/UiTooltip.vue";
+import type { MenuEntry } from "@/components/ui/menu";
 
-const { image, status, comparing, browse } = useEditor();
+const { image, status, browse } = useEditor();
 const { openExport } = useExport();
+const { showFolder } = useFrame();
+const { shortcutsOpen } = useHelp();
 const { open, toggle } = useInspector();
-const { canUndo, canRedo, undo, redo } = useHistory();
-const { mode, toggle: toggleTheme } = useTheme();
+const { mode, set: setTheme } = useTheme();
 
-const themeIcon = computed(() => (mode.value === "dark" ? Moon : Sun));
-const themeLabel = computed(() =>
-  mode.value === "dark" ? "Passer en thème clair" : "Passer en thème sombre",
-);
 const inspectorLabel = computed(() =>
   open.value ? "Masquer le panneau (F)" : "Afficher le panneau (F)",
 );
+
+const menu = computed<MenuEntry[]>(() => [
+  {
+    kind: "choice",
+    label: "Thème",
+    value: mode.value,
+    options: [
+      { value: "dark", label: "Sombre", icon: Moon },
+      { value: "light", label: "Clair", icon: Sun },
+    ],
+    onChange: (value) => setTheme(value as ThemeMode),
+  },
+  { kind: "separator" },
+  {
+    kind: "item",
+    label: "Ouvrir le dossier des cadres",
+    icon: FolderOpen,
+    onSelect: () => void showFolder(),
+  },
+  {
+    kind: "item",
+    label: "Raccourcis clavier",
+    icon: Keyboard,
+    onSelect: () => (shortcutsOpen.value = true),
+  },
+]);
 </script>
 
 <template>
@@ -34,39 +68,17 @@ const inspectorLabel = computed(() =>
     </div>
 
     <div class="actions">
-      <UiTooltip text="Annuler (⌘Z)">
-        <UiButton variant="ghost" icon aria-label="Annuler" :disabled="!canUndo" @click="undo">
-          <Undo2 :size="16" />
-        </UiButton>
-      </UiTooltip>
-      <UiTooltip text="Rétablir (⇧⌘Z)">
-        <UiButton variant="ghost" icon aria-label="Rétablir" :disabled="!canRedo" @click="redo">
-          <Redo2 :size="16" />
-        </UiButton>
-      </UiTooltip>
-
-      <UiTooltip :text="themeLabel">
-        <UiButton variant="ghost" icon :aria-label="themeLabel" @click="toggleTheme">
-          <component :is="themeIcon" :size="16" />
-        </UiButton>
-      </UiTooltip>
-
-      <UiTooltip v-if="image" text="Maintenir pour voir l'original (C)">
-        <UiButton
-          variant="ghost"
-          @mousedown="comparing = true"
-          @mouseup="comparing = false"
-          @mouseleave="comparing = false"
-        >
-          {{ comparing ? "Original" : "Comparer" }}
-        </UiButton>
-      </UiTooltip>
-
       <UiButton @click="browse">
         <FolderOpen :size="14" />
         Ouvrir…
       </UiButton>
       <UiButton variant="primary" :disabled="!image" @click="openExport">Exporter…</UiButton>
+
+      <UiMenu :entries="menu">
+        <UiButton variant="ghost" icon aria-label="Menu">
+          <Ellipsis :size="16" />
+        </UiButton>
+      </UiMenu>
 
       <UiTooltip :text="inspectorLabel">
         <UiButton

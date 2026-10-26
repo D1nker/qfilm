@@ -21,7 +21,7 @@ npm and cargo are run locally in this project (no Docker).
   adjustments), `useFrame` (chosen frame, its params, caption, imported frames), `useFrameThumbnails`, `useRender` (the single watcher that calls Rust),
   `useHistory` (undo/redo of look + frame, steps collapse after a 300 ms pause), `useExport`,
   `useInspector`, `useTheme` (dark default, light), `useViewportNavigation` (zoom/pan),
-  `useShortcuts`.
+  `useShortcuts`, `useHelp` (shortcuts dialog), `useNotice` (passing messages).
 - Rendering is driven by one watcher in `useRender`: change state, never call the renderer by hand.
   Rust caches the photo render, so border-only changes are cheap.
 - Styles for content Reka teleports to `<body>` (select popup, tooltip) must be unscoped with a
@@ -29,8 +29,12 @@ npm and cargo are run locally in this project (no Docker).
 - Styling goes through design tokens in `src/styles/tokens.css` (light + dark, neutral grays,
   violet accent). No hard-coded colors, no Tailwind. Inter is the font.
 - Headless widgets come from Reka UI, wrapped in `src/components/ui/` as `Ui*` components
-  (UiButton, UiSlider, UiSelect, UiDialog, UiTooltip…). Reuse them; add a new one there rather than
+  (UiButton, UiSlider, UiSelect, UiMenu, UiDialog, UiTooltip…). Reuse them; add a new one there rather than
   styling raw elements in feature components. Icons come from `lucide-vue-next`.
+- Layout: the header holds app-level actions only (open, export, `⋯` menu, panel toggle); editing
+  and view controls (undo/redo, compare, zoom) live in the floating `CanvasToolbar`, centered on
+  the canvas. The strip under the photo (`--toolbar-clearance` in `ImageViewport`) mirrors
+  `TOOLBAR_CLEARANCE` in `useViewportNavigation`: change both together. Toasts go at the top.
 - Components stay small and presentational; logic goes in composables, static data in `src/lib`.
 - Shortcuts: `C` hold = original, `F` = hide/show panel, ⌘Z / ⇧⌘Z, ⌘ +/−/0 zoom, Space+drag pan.
   Never take `Tab` (keyboard navigation) and pick keys that work on AZERTY (no `\`, no dead

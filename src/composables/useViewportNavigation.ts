@@ -4,6 +4,8 @@ import { useEditor } from "@/composables/useEditor";
 
 /// Marge autour de la photo, la même que le padding du contenu (--space-8).
 const PADDING = 32;
+/// Bande réservée sous la photo pour la barre flottante (`--toolbar-clearance`).
+const TOOLBAR_CLEARANCE = 40;
 /// Au-delà, l'aperçu (1800 px) serait agrandi à un point où il devient flou.
 const MAX_SCALE = 2;
 const STEP = 1.25;
@@ -49,7 +51,7 @@ export function useViewportNavigation({ stage, scroller, previewImage }: Options
     return Math.min(
       1,
       (stageSize.width - PADDING * 2) / natural.width,
-      (stageSize.height - PADDING * 2) / natural.height,
+      (stageSize.height - PADDING * 2 - TOOLBAR_CLEARANCE) / natural.height,
     );
   });
 

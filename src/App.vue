@@ -5,15 +5,18 @@ import { TooltipProvider } from "reka-ui";
 import { useEditor } from "@/composables/useEditor";
 import { useFrame } from "@/composables/useFrame";
 import { useInspector } from "@/composables/useInspector";
+import { useNotice } from "@/composables/useNotice";
 import { useShortcuts } from "@/composables/useShortcuts";
 import AppHeader from "@/components/AppHeader.vue";
 import ImageViewport from "@/components/ImageViewport.vue";
 import ExportDialog from "@/components/export/ExportDialog.vue";
+import ShortcutsDialog from "@/components/ShortcutsDialog.vue";
 import InspectorPanel from "@/components/inspector/InspectorPanel.vue";
 
 const { error, init } = useEditor();
 const { init: initFrames } = useFrame();
 const { open } = useInspector();
+const { notice } = useNotice();
 
 useShortcuts();
 
@@ -28,9 +31,13 @@ onMounted(() => void Promise.all([init(), initFrames()]));
       <InspectorPanel v-show="open" class="area-inspector" />
     </div>
 
-    <p v-if="error" class="error" role="alert">{{ error }}</p>
+    <div class="toasts">
+      <p v-if="error" class="toast error" role="alert">{{ error }}</p>
+      <p v-if="notice" class="toast" role="status">{{ notice }}</p>
+    </div>
 
     <ExportDialog />
+    <ShortcutsDialog />
   </TooltipProvider>
 </template>
 
@@ -60,19 +67,32 @@ onMounted(() => void Promise.all([init(), initFrames()]));
   grid-area: inspector;
 }
 
-.error {
+/* En haut : le bas du canvas appartient à la barre d'outils flottante. */
+.toasts {
   position: fixed;
-  bottom: var(--space-4);
+  top: calc(52px + var(--space-3));
   left: 50%;
   z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  align-items: center;
   max-width: min(560px, calc(100vw - 32px));
   transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.toast {
   padding: var(--space-2) var(--space-4);
-  border: 1px solid var(--danger);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   background: var(--surface-raised);
   box-shadow: var(--shadow-md);
-  color: var(--danger);
   font-size: var(--text-sm);
+}
+
+.toast.error {
+  border-color: var(--danger);
+  color: var(--danger);
 }
 </style>
