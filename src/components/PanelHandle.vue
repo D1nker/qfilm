@@ -9,8 +9,8 @@
       @mousedown.prevent
       @click="toggle"
     >
-      <ChevronRight v-if="open" :size="14" />
-      <ChevronLeft v-else :size="14" />
+      <ChevronRight v-if="open" :size="18" />
+      <ChevronLeft v-else :size="18" />
     </button>
   </UiTooltip>
 </template>
@@ -35,8 +35,8 @@ const label = computed(() => (open.value ? "Masquer le panneau (F)" : "Afficher 
   z-index: 1;
   display: grid;
   place-items: center;
-  width: 18px;
-  height: 56px;
+  width: 24px;
+  height: 80px;
   padding: 0;
   transform: translateY(-50%);
   border: 1px solid var(--border);
@@ -52,7 +52,7 @@ const label = computed(() => (open.value ? "Masquer le panneau (F)" : "Afficher 
 }
 
 .handle:hover {
-  width: 22px;
+  width: 28px;
   color: var(--text);
 }
 
