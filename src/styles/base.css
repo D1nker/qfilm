@@ -1,0 +1,63 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--text-md);
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  /* Application de bureau : le texte ne se sélectionne que dans les champs. */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+input,
+textarea {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+/* Mêmes fichiers que ceux embarqués dans le binaire Rust : l'aperçu dessiné ici
+   doit correspondre au rendu incrusté à l'export. */
+@font-face {
+  font-family: "qfilm-condensed";
+  src: url("/fonts/RobotoCondensed-Regular.ttf") format("truetype");
+  font-display: block;
+}
+
+@font-face {
+  font-family: "qfilm-typewriter";
+  src: url("/fonts/CourierPrime-Regular.ttf") format("truetype");
+  font-display: block;
+}
+
+@font-face {
+  font-family: "qfilm-handwritten";
+  src: url("/fonts/Caveat-Regular.ttf") format("truetype");
+  font-display: block;
+}

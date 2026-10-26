@@ -1,0 +1,137 @@
+{
+  "id": "film35",
+  "name": "35 mm",
+  "description": "Bande de pellicule 35 mm, avec perforations et marquages d'usine.",
+  "rotatePortrait": true,
+  "params": [
+    {
+      "id": "stock",
+      "label": "Pellicule",
+      "type": "choice",
+      "display": "list",
+      "section": "Pellicule",
+      "default": "amber",
+      "options": [
+        {
+          "id": "amber",
+          "label": "Ambre",
+          "sets": {
+            "color": "#120f0c",
+            "ink": "#f0a63c",
+            "text": "PORTRAIT 400"
+          }
+        },
+        {
+          "id": "white",
+          "label": "Blanc",
+          "sets": {
+            "color": "#0d0d0d",
+            "ink": "#f2f2f2",
+            "text": "CLASSIQUE 400"
+          }
+        },
+        {
+          "id": "minimal",
+          "label": "Blanc sobre",
+          "sets": {
+            "color": "#0d0d0d",
+            "ink": "#f2f2f2",
+            "text": "REPORTAGE 400"
+          }
+        },
+        {
+          "id": "green",
+          "label": "Vert",
+          "sets": {
+            "color": "#0d1210",
+            "ink": "#6fce8a",
+            "text": "VERT VIF 400"
+          }
+        },
+        {
+          "id": "red",
+          "label": "Rouge",
+          "sets": {
+            "color": "#120d0d",
+            "ink": "#ef6f5c",
+            "text": "NUIT 800T"
+          }
+        },
+        {
+          "id": "cine",
+          "label": "Ciné",
+          "sets": {
+            "color": "#100e0c",
+            "ink": "#e8dcc0",
+            "text": "CINÉ 500T"
+          }
+        },
+        {
+          "id": "plain",
+          "label": "Sans marquages",
+          "sets": {
+            "color": "#0a0a0a",
+            "text": ""
+          }
+        }
+      ],
+      "persist": true
+    },
+    {
+      "id": "width",
+      "label": "Épaisseur",
+      "type": "number",
+      "min": 1,
+      "max": 30,
+      "step": 0.5,
+      "unit": "%",
+      "default": 14
+    },
+    {
+      "id": "color",
+      "label": "Support",
+      "type": "color",
+      "default": "#120f0c"
+    },
+    {
+      "id": "sprockets",
+      "label": "Perforations",
+      "type": "bool",
+      "default": true
+    },
+    {
+      "id": "ink",
+      "label": "Marquages",
+      "type": "color",
+      "default": "#f0a63c",
+      "visibleIf": {
+        "param": "stock",
+        "notEquals": "plain"
+      }
+    },
+    {
+      "id": "text",
+      "label": "Texte pellicule",
+      "type": "text",
+      "default": "PORTRAIT 400",
+      "maxLength": 60,
+      "visibleIf": {
+        "param": "stock",
+        "notEquals": "plain"
+      },
+      "fromLook": true
+    },
+    {
+      "id": "frameNumber",
+      "label": "Numéro de vue",
+      "type": "text",
+      "default": "24A",
+      "maxLength": 12,
+      "visibleIf": {
+        "param": "stock",
+        "notEquals": "plain"
+      },
+      "persist": true
+    }
+  ]
+}

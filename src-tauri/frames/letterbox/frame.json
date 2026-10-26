@@ -1,0 +1,43 @@
+{
+  "id": "letterbox",
+  "name": "Cinéma",
+  "description": "Bandes noires façon cinémascope, avec une zone de sous-titre.",
+  "captionDefaults": {
+    "color": "#f2f2f2",
+    "size": 3.5
+  },
+  "params": [
+    {
+      "id": "ratio",
+      "label": "Format",
+      "type": "choice",
+      "display": "menu",
+      "default": "239",
+      "persist": false,
+      "options": [
+        {
+          "id": "239",
+          "label": "Cinémascope 2,39:1"
+        },
+        {
+          "id": "200",
+          "label": "Univisium 2:1"
+        },
+        {
+          "id": "185",
+          "label": "Cinéma 1,85:1"
+        },
+        {
+          "id": "178",
+          "label": "16:9"
+        }
+      ]
+    },
+    {
+      "id": "color",
+      "label": "Couleur des bandes",
+      "type": "color",
+      "default": "#000000"
+    }
+  ]
+}

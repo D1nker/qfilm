@@ -1,0 +1,98 @@
+{#- Dessiné pour une photo horizontale : `rotatePortrait` (manifeste) fait tourner les photos verticales avant le dessin. Partagé par le 35 mm et le moyen format. -#}
+
+{%- macro tile(content, y, px, markers, canvas_width) -%}
+  {%- set tracking = px * 0.12 -%}
+  {%- set width = text_width(content, 'condensed', px, tracking) -%}
+  {%- if width > 1 -%}
+    {%- set gap = px * 3 -%}
+    {%- set step = width + gap -%}
+    {%- for i in range((((canvas_width - px * 0.5) / step) | int) + 1) -%}
+      {%- set x = px * 0.5 + i * step -%}
+      <text x="{{ x }}" y="{{ y + ascent('condensed', px) }}" font-family="{{ font_family('condensed') }}" font-size="{{ em('condensed', px) }}" letter-spacing="{{ tracking }}" xml:space="preserve">{{ content }}</text>
+      {%- if markers -%}
+        {%- set tx = x + width + gap * 0.35 -%}
+        {%- set ty = y + px * 0.15 -%}
+        <polygon points="{{ tx }},{{ ty }} {{ tx }},{{ ty + px * 0.5 }} {{ tx + px * 0.5 }},{{ ty + px * 0.25 }}"/>
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
+{%- endmacro -%}
+
+{%- set strip = [((photo.h * p.width / 100) | round | int), 12] | max -%}
+{%- set side = (strip * 0.30) | round | int -%}
+{%- set W = photo.w + side * 2 -%}
+{%- set H = photo.h + strip * 2 -%}
+
+{%- set all_traits = {
+  'amber':     {'barcode': true,  'markers': true,  'dots': false, 'code': '5034'},
+  'white':     {'barcode': false, 'markers': true,  'dots': false, 'code': '5063'},
+  'minimal':   {'barcode': false, 'markers': false, 'dots': false, 'code': ''},
+  'green':     {'barcode': true,  'markers': true,  'dots': false, 'code': '0761'},
+  'red':       {'barcode': true,  'markers': true,  'dots': false, 'code': '800T'},
+  'cine':      {'barcode': false, 'markers': false, 'dots': true,  'code': 'QF 23 8817'},
+  'plain':     {'barcode': false, 'markers': false, 'dots': false, 'code': ''}
+} -%}
+{%- set traits = all_traits[p.stock] -%}
+{%- set printed = p.stock != 'plain' -%}
+
+{%- if p.sprockets -%}
+  {%- set text_px = strip * 0.20 -%}
+  {%- set text_top = strip * 0.24 -%}
+  {%- set text_bottom = H - strip * 0.44 -%}
+{%- else -%}
+  {%- set text_px = strip * 0.34 -%}
+  {%- set text_top = strip * 0.30 -%}
+  {%- set text_bottom = H - strip * 0.64 -%}
+{%- endif -%}
+
+<svg xmlns="http://www.w3.org/2000/svg" width="{{ W }}" height="{{ H }}" viewBox="0 0 {{ W }} {{ H }}">
+  <rect width="{{ W }}" height="{{ H }}" fill="{{ p.color }}"/>
+
+  {%- if p.sprockets %}
+  {%- set hole_h = [strip * 0.34, 3] | max -%}
+  {%- set hole_w = [strip * 0.26, 2] | max -%}
+  {%- set pitch = [strip * 0.64, hole_w + 2] | max -%}
+  {%- set holes = (((W - hole_w - pitch * 0.5) / pitch) | int) + 1 %}
+  <g fill="{{ '#ededeb' if is_dark(p.color) else '#272727' }}">
+    {%- for row_y in [strip * 0.70, H - strip * 0.70] %}
+    {%- for i in range(holes) %}
+    <rect x="{{ pitch * 0.5 + i * pitch }}" y="{{ row_y - hole_h / 2 }}" width="{{ hole_w }}" height="{{ hole_h }}" rx="{{ hole_h * 0.26 }}"/>
+    {%- endfor %}
+    {%- endfor %}
+  </g>
+  {%- endif %}
+
+  {%- if printed %}
+  <g fill="{{ p.ink }}">
+    {%- if traits.barcode %}
+    {{ barcode(p.text, 0, strip * 0.06, W, strip * 0.13) }}
+    {{ barcode(p.frameNumber, 0, H - strip * 0.19, W, strip * 0.13) }}
+    {%- endif %}
+
+    {%- if traits.dots %}
+    {%- set dot = strip * 0.10 %}
+    {%- for row_y in [strip * 0.10, H - strip * 0.20] %}
+    {%- for i in range(((W / (dot * 3)) | int)) %}
+    <circle cx="{{ dot * 3 * (i + 1) + dot / 2 }}" cy="{{ row_y + dot / 2 }}" r="{{ dot / 2 }}"/>
+    {%- endfor %}
+    {%- endfor %}
+    {%- endif %}
+
+    {%- set code = ('   ' ~ traits.code) if traits.code else '' %}
+    {%- if p.text | trim %}
+    {{ tile((p.text | upper) ~ code, text_top, text_px, false, W) }}
+    {%- endif %}
+    {%- if p.frameNumber | trim %}
+    {{ tile(p.frameNumber | frame_sequence, text_bottom, text_px, traits.markers, W) }}
+    {%- endif %}
+  </g>
+  {%- endif %}
+
+  <!-- Repères lus par l'application (non dessinés). -->
+  <rect id="photo" x="{{ side }}" y="{{ strip }}" width="{{ photo.w }}" height="{{ photo.h }}" display="none"/>
+  {%- if printed %}
+  <rect id="zone-text" x="0" y="{{ text_top - text_px * 0.35 }}" width="{{ W }}" height="{{ text_px * 1.7 }}" display="none"/>
+  <rect id="zone-frameNumber" x="0" y="{{ text_bottom - text_px * 0.35 }}" width="{{ W }}" height="{{ text_px * 1.7 }}" display="none"/>
+  {%- endif %}
+  <rect id="caption-area" x="{{ W * 0.5 - 1 }}" y="{{ H * 0.85 - 1 }}" width="2" height="2" display="none"/>
+</svg>

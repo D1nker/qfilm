@@ -1,0 +1,10 @@
+{%- set m = [((photo.short * p.width / 100) | round | int), 1] | max -%}
+{%- set bottom = (m * 3) | round | int -%}
+{%- set W = photo.w + m * 2 -%}
+{%- set H = photo.h + m + bottom -%}
+<svg xmlns="http://www.w3.org/2000/svg" width="{{ W }}" height="{{ H }}" viewBox="0 0 {{ W }} {{ H }}">
+  <rect width="{{ W }}" height="{{ H }}" fill="{{ p.color }}"/>
+
+  <rect id="photo" x="{{ m }}" y="{{ m }}" width="{{ photo.w }}" height="{{ photo.h }}" display="none"/>
+  <rect id="caption-area" x="0" y="{{ photo.h + m }}" width="{{ W }}" height="{{ bottom }}" display="none"/>
+</svg>

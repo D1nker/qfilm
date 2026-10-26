@@ -1,0 +1,51 @@
+{
+  "id": "padding",
+  "name": "Format réseaux",
+  "description": "Complète la photo jusqu'à un format carré, portrait ou story.",
+  "captionDefaults": {
+    "color": "#1a1a1a"
+  },
+  "params": [
+    {
+      "id": "ratio",
+      "label": "Format",
+      "type": "choice",
+      "display": "menu",
+      "default": "square",
+      "options": [
+        {
+          "id": "square",
+          "label": "Carré 1:1"
+        },
+        {
+          "id": "portrait45",
+          "label": "Portrait 4:5"
+        },
+        {
+          "id": "landscape54",
+          "label": "Paysage 5:4"
+        },
+        {
+          "id": "story",
+          "label": "Story 9:16"
+        }
+      ]
+    },
+    {
+      "id": "padding",
+      "label": "Marge",
+      "type": "number",
+      "min": 0,
+      "max": 30,
+      "step": 0.5,
+      "unit": "%",
+      "default": 4
+    },
+    {
+      "id": "color",
+      "label": "Couleur",
+      "type": "color",
+      "default": "#ffffff"
+    }
+  ]
+}

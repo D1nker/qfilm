@@ -1,0 +1,16 @@
+{#- Les bandes sont dessinées dans le calque « over », par-dessus la photo. -#}
+{%- set ratios = {'239': 2.39, '200': 2.0, '185': 1.85, '178': 1.7778} -%}
+{%- set visible = (photo.w / ratios[p.ratio]) | round | int -%}
+{%- set bar = [(((photo.h - visible) / 2) | round | int), 0] | max -%}
+<svg xmlns="http://www.w3.org/2000/svg" width="{{ photo.w }}" height="{{ photo.h }}" viewBox="0 0 {{ photo.w }} {{ photo.h }}">
+  <rect id="photo" x="0" y="0" width="{{ photo.w }}" height="{{ photo.h }}" display="none"/>
+  {%- if bar > 0 %}
+  <g id="over" fill="{{ p.color }}">
+    <rect x="0" y="0" width="{{ photo.w }}" height="{{ bar }}"/>
+    <rect x="0" y="{{ photo.h - bar }}" width="{{ photo.w }}" height="{{ bar }}"/>
+  </g>
+  {%- endif %}
+  {#- Sans bande, la légende reste au bord bas de l'image. -#}
+  {%- set area = [bar, 1] | max %}
+  <rect id="caption-area" x="0" y="{{ photo.h - area }}" width="{{ photo.w }}" height="{{ area }}" display="none"/>
+</svg>

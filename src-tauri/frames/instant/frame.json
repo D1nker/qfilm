@@ -1,0 +1,28 @@
+{
+  "id": "instant",
+  "name": "Instantané",
+  "description": "Marge basse haute, comme un tirage instantané.",
+  "captionDefaults": {
+    "color": "#23262b",
+    "font": "handwritten",
+    "size": 5
+  },
+  "params": [
+    {
+      "id": "width",
+      "label": "Épaisseur",
+      "type": "number",
+      "min": 1,
+      "max": 30,
+      "step": 0.5,
+      "unit": "%",
+      "default": 6
+    },
+    {
+      "id": "color",
+      "label": "Couleur",
+      "type": "color",
+      "default": "#f6f4ee"
+    }
+  ]
+}

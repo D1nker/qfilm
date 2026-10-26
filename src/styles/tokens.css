@@ -1,0 +1,95 @@
+/* Gris strictement neutres (une surface teintée fausse le jugement des couleurs), un seul accent violet. */
+
+:root {
+  --font-sans:
+    "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-md: 13px;
+  --text-lg: 15px;
+  --text-xl: 18px;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 999px;
+
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --duration-fast: 120ms;
+  --duration: 180ms;
+
+  /* Couleurs : sombre (défaut, pour éviter un flash au chargement) */
+  --bg: oklch(0.17 0 0);
+  --surface: oklch(0.205 0 0);
+  --surface-raised: oklch(0.245 0 0);
+  --surface-hover: oklch(0.255 0 0);
+  --surface-active: oklch(0.29 0 0);
+  --canvas: oklch(0.14 0 0);
+
+  --border: oklch(1 0 0 / 0.08);
+  --border-strong: oklch(1 0 0 / 0.16);
+
+  --text: oklch(0.96 0 0);
+  --text-muted: oklch(0.7 0 0);
+  --text-faint: oklch(0.52 0 0);
+
+  --accent: oklch(0.68 0.18 285);
+  --accent-hover: oklch(0.73 0.17 285);
+  --accent-soft: oklch(0.68 0.18 285 / 0.16);
+  --accent-contrast: oklch(0.15 0.02 285);
+
+  --danger: oklch(0.7 0.17 25);
+  --danger-soft: oklch(0.7 0.17 25 / 0.16);
+
+  --focus-ring: 0 0 0 2px var(--bg), 0 0 0 4px oklch(0.68 0.18 285 / 0.6);
+
+  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.3);
+  --shadow-md: 0 4px 16px oklch(0 0 0 / 0.4);
+  --shadow-lg: 0 16px 48px oklch(0 0 0 / 0.55);
+
+  color-scheme: dark;
+}
+
+/* Clair : choisi dans l'en-tête, mémorisé par useTheme. */
+:root[data-theme="light"] {
+  --bg: oklch(0.975 0 0);
+  --surface: oklch(1 0 0);
+  --surface-raised: oklch(1 0 0);
+  --surface-hover: oklch(0.955 0 0);
+  --surface-active: oklch(0.93 0 0);
+  --canvas: oklch(0.935 0 0);
+
+  --border: oklch(0 0 0 / 0.08);
+  --border-strong: oklch(0 0 0 / 0.16);
+
+  --text: oklch(0.22 0 0);
+  --text-muted: oklch(0.5 0 0);
+  --text-faint: oklch(0.65 0 0);
+
+  --accent: oklch(0.55 0.21 285);
+  --accent-hover: oklch(0.5 0.21 285);
+  --accent-soft: oklch(0.55 0.21 285 / 0.1);
+  --accent-contrast: oklch(1 0 0);
+
+  --danger: oklch(0.58 0.2 25);
+  --danger-soft: oklch(0.58 0.2 25 / 0.1);
+
+  --focus-ring: 0 0 0 2px var(--bg), 0 0 0 4px oklch(0.55 0.21 285 / 0.55);
+
+  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.06);
+  --shadow-md: 0 4px 16px oklch(0 0 0 / 0.1);
+  --shadow-lg: 0 16px 48px oklch(0 0 0 / 0.16);
+
+  color-scheme: light;
+}

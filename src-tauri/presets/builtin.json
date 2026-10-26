@@ -1,0 +1,495 @@
+[
+  {
+    "id": "neutral",
+    "name": "Neutre",
+    "category": "Base",
+    "description": "Aucun rendu appliqué, point de départ brut.",
+    "params": {}
+  },
+  {
+    "id": "portrait_400",
+    "name": "Portrait 400",
+    "category": "Négatif couleur",
+    "description": "Carnations douces, contraste faible, dominante chaude.",
+    "params": {
+      "contrast": -0.12,
+      "grain": 0.28,
+      "halation": 0.25,
+      "lift": 0.35,
+      "saturation": -0.08,
+      "temperature": 0.18,
+      "tint": 0.05
+    }
+  },
+  {
+    "id": "dore_200",
+    "name": "Doré 200",
+    "category": "Négatif couleur",
+    "description": "Jaunes dorés, nostalgique, contraste moyen.",
+    "params": {
+      "contrast": 0.08,
+      "grain": 0.32,
+      "grainSize": 2.2,
+      "halation": 0.2,
+      "lift": 0.3,
+      "saturation": 0.15,
+      "temperature": 0.32
+    }
+  },
+  {
+    "id": "eclat_100",
+    "name": "Éclat 100",
+    "category": "Négatif couleur",
+    "description": "Très saturé, grain fin, rendu quasi numérique.",
+    "params": {
+      "contrast": 0.22,
+      "grain": 0.1,
+      "grainSize": 1.2,
+      "halation": 0.12,
+      "lift": 0.1,
+      "saturation": 0.38,
+      "temperature": -0.05
+    }
+  },
+  {
+    "id": "nuit_800t",
+    "name": "Nuit 800T",
+    "category": "Négatif couleur",
+    "description": "Équilibré tungstène, halation rouge marquée sur les lumières.",
+    "params": {
+      "contrast": 0.1,
+      "grain": 0.38,
+      "grainSize": 2.6,
+      "halation": 0.85,
+      "lift": 0.28,
+      "saturation": 0.05,
+      "temperature": -0.35,
+      "tint": 0.08
+    }
+  },
+  {
+    "id": "vert_vif_400",
+    "name": "Vert vif 400",
+    "category": "Négatif couleur",
+    "description": "Verts et cyans prononcés, rendu grand public.",
+    "params": {
+      "contrast": 0.12,
+      "grain": 0.34,
+      "grainSize": 2.2,
+      "halation": 0.18,
+      "lift": 0.22,
+      "saturation": 0.18,
+      "temperature": -0.12,
+      "tint": -0.18
+    }
+  },
+  {
+    "id": "pastel_400",
+    "name": "Pastel 400",
+    "category": "Négatif couleur",
+    "description": "Pastel, délavé, très doux dans les hautes lumières.",
+    "params": {
+      "contrast": -0.2,
+      "exposure": 0.15,
+      "grain": 0.24,
+      "grainSize": 1.8,
+      "halation": 0.22,
+      "lift": 0.45,
+      "saturation": -0.18,
+      "temperature": -0.08,
+      "tint": -0.1
+    }
+  },
+  {
+    "id": "portrait_160",
+    "name": "Portrait 160",
+    "category": "Négatif couleur",
+    "description": "Le plus doux des portraits, grain quasi invisible.",
+    "params": {
+      "contrast": -0.16,
+      "grain": 0.14,
+      "grainSize": 1.5,
+      "halation": 0.16,
+      "lift": 0.3,
+      "saturation": -0.1,
+      "temperature": 0.14,
+      "tint": 0.04
+    }
+  },
+  {
+    "id": "portrait_800",
+    "name": "Portrait 800",
+    "category": "Négatif couleur",
+    "description": "Plus chaud et plus granuleux, superbe en lumière basse.",
+    "params": {
+      "contrast": -0.05,
+      "grain": 0.44,
+      "grainSize": 2.5,
+      "halation": 0.38,
+      "lift": 0.34,
+      "saturation": -0.04,
+      "temperature": 0.22,
+      "tint": 0.06
+    }
+  },
+  {
+    "id": "retro_200",
+    "name": "Rétro 200",
+    "category": "Négatif couleur",
+    "description": "Chaud et vintage, jaunes appuyés.",
+    "params": {
+      "contrast": 0.12,
+      "grain": 0.34,
+      "grainSize": 2.3,
+      "halation": 0.2,
+      "lift": 0.32,
+      "saturation": 0.1,
+      "temperature": 0.3,
+      "tint": 0.05
+    }
+  },
+  {
+    "id": "franc_400",
+    "name": "Franc 400",
+    "category": "Négatif couleur",
+    "description": "Couleurs franches et grain marqué, très « photo de famille ».",
+    "params": {
+      "contrast": 0.18,
+      "grain": 0.46,
+      "grainSize": 2.6,
+      "halation": 0.26,
+      "lift": 0.26,
+      "saturation": 0.24,
+      "temperature": 0.26
+    }
+  },
+  {
+    "id": "cyan_200",
+    "name": "Cyan 200",
+    "category": "Négatif couleur",
+    "description": "Verts et cyans francs, rendu économique.",
+    "params": {
+      "contrast": 0.1,
+      "grain": 0.36,
+      "grainSize": 2.3,
+      "halation": 0.16,
+      "lift": 0.24,
+      "saturation": 0.12,
+      "temperature": -0.14,
+      "tint": -0.16
+    }
+  },
+  {
+    "id": "jour_50",
+    "name": "Jour 50",
+    "category": "Négatif couleur",
+    "description": "Lumière du jour, grain très fin, halation présente.",
+    "params": {
+      "contrast": 0.14,
+      "grain": 0.14,
+      "grainSize": 1.4,
+      "halation": 0.55,
+      "lift": 0.16,
+      "saturation": 0.1,
+      "temperature": 0.05
+    }
+  },
+  {
+    "id": "cine_500t",
+    "name": "Ciné 500T",
+    "category": "Négatif couleur",
+    "description": "Négatif cinéma tungstène : plat, froid, très étalé.",
+    "params": {
+      "contrast": -0.18,
+      "grain": 0.3,
+      "grainSize": 2.2,
+      "halation": 0.45,
+      "lift": 0.44,
+      "saturation": -0.1,
+      "temperature": -0.3,
+      "tint": 0.05
+    }
+  },
+  {
+    "id": "rouge_chaud_200",
+    "name": "Rouge chaud 200",
+    "category": "Négatif couleur",
+    "description": "Rouges chauds et saturés, une émulsion aujourd'hui disparue.",
+    "params": {
+      "contrast": 0.14,
+      "grain": 0.3,
+      "grainSize": 2.1,
+      "halation": 0.2,
+      "lift": 0.26,
+      "saturation": 0.22,
+      "temperature": 0.2,
+      "tint": 0.08
+    }
+  },
+  {
+    "id": "brut_400",
+    "name": "Brut 400",
+    "category": "Négatif couleur",
+    "description": "Contrasté, saturé, vigneté : rendu volontairement brut.",
+    "params": {
+      "contrast": 0.22,
+      "grain": 0.5,
+      "grainSize": 2.8,
+      "halation": 0.3,
+      "lift": 0.2,
+      "saturation": 0.3,
+      "temperature": 0.18,
+      "vignette": 0.2
+    }
+  },
+  {
+    "id": "reportage_400",
+    "name": "Reportage 400",
+    "category": "Noir & blanc",
+    "description": "Grain affirmé, contraste classique de reportage.",
+    "params": {
+      "contrast": 0.18,
+      "grain": 0.55,
+      "grainSize": 2.6,
+      "lift": 0.25,
+      "saturation": -1.0,
+      "vignette": 0.12
+    }
+  },
+  {
+    "id": "classique_400",
+    "name": "Classique 400",
+    "category": "Noir & blanc",
+    "description": "Noirs profonds, grain sec et nerveux.",
+    "params": {
+      "contrast": 0.32,
+      "grain": 0.62,
+      "grainSize": 2.2,
+      "lift": 0.12,
+      "saturation": -1.0,
+      "vignette": 0.15
+    }
+  },
+  {
+    "id": "fin_100",
+    "name": "Fin 100",
+    "category": "Noir & blanc",
+    "description": "Grain quasi inexistant, rendu très propre.",
+    "params": {
+      "contrast": 0.18,
+      "grain": 0.12,
+      "grainSize": 1.2,
+      "lift": 0.08,
+      "saturation": -1.0
+    }
+  },
+  {
+    "id": "polyvalent_400",
+    "name": "Polyvalent 400",
+    "category": "Noir & blanc",
+    "description": "Polyvalent, grain fin pour sa sensibilité.",
+    "params": {
+      "contrast": 0.22,
+      "grain": 0.28,
+      "grainSize": 1.8,
+      "lift": 0.1,
+      "saturation": -1.0
+    }
+  },
+  {
+    "id": "equilibre_125",
+    "name": "Équilibré 125",
+    "category": "Noir & blanc",
+    "description": "Contraste modéré, tons moyens riches.",
+    "params": {
+      "contrast": 0.14,
+      "grain": 0.24,
+      "grainSize": 1.6,
+      "lift": 0.14,
+      "saturation": -1.0
+    }
+  },
+  {
+    "id": "ultra_fin_50",
+    "name": "Ultra fin 50",
+    "category": "Noir & blanc",
+    "description": "Très fin et contrasté, réservé à la pleine lumière.",
+    "params": {
+      "contrast": 0.34,
+      "grain": 0.1,
+      "grainSize": 1.2,
+      "lift": 0.05,
+      "saturation": -1.0
+    }
+  },
+  {
+    "id": "velours_100",
+    "name": "Velours 100",
+    "category": "Noir & blanc",
+    "description": "Noirs velouttés et hautes lumières douces.",
+    "params": {
+      "contrast": 0.2,
+      "grain": 0.1,
+      "grainSize": 1.2,
+      "lift": 0.06,
+      "saturation": -1.0
+    }
+  },
+  {
+    "id": "doux_400",
+    "name": "Doux 400",
+    "category": "Noir & blanc",
+    "description": "N&B chromogène : très doux, ombres ouvertes.",
+    "params": {
+      "contrast": 0.02,
+      "grain": 0.18,
+      "grainSize": 1.6,
+      "lift": 0.28,
+      "saturation": -1.0
+    }
+  },
+  {
+    "id": "nocturne_3200",
+    "name": "Nocturne 3200",
+    "category": "Noir & blanc",
+    "description": "Grain énorme et ombres ouvertes, esprit reportage de nuit.",
+    "params": {
+      "contrast": -0.1,
+      "grain": 0.95,
+      "grainSize": 4.2,
+      "lift": 0.38,
+      "saturation": -1.0,
+      "vignette": 0.18
+    }
+  },
+  {
+    "id": "instantane_classique",
+    "name": "Instantané classique",
+    "category": "Instantané",
+    "description": "Délavé et chaud, noirs très remontés.",
+    "params": {
+      "contrast": -0.28,
+      "exposure": 0.1,
+      "grain": 0.2,
+      "halation": 0.3,
+      "lift": 0.78,
+      "saturation": -0.15,
+      "temperature": 0.2,
+      "tint": 0.1,
+      "vignette": 0.25
+    }
+  },
+  {
+    "id": "mini_instantane",
+    "name": "Mini instantané",
+    "category": "Instantané",
+    "description": "Clair et légèrement pastel, contraste doux.",
+    "params": {
+      "contrast": -0.15,
+      "exposure": 0.08,
+      "grain": 0.14,
+      "grainSize": 1.6,
+      "halation": 0.22,
+      "lift": 0.5,
+      "saturation": 0.1,
+      "temperature": 0.12,
+      "vignette": 0.18
+    }
+  },
+  {
+    "id": "labo_net",
+    "name": "Labo net",
+    "category": "Scanner",
+    "description": "Net et franc, hautes lumières plus froides.",
+    "params": {
+      "contrast": 0.15,
+      "grain": 0.08,
+      "grainSize": 1.4,
+      "lift": 0.14,
+      "saturation": 0.12,
+      "temperature": -0.06
+    }
+  },
+  {
+    "id": "labo_doux",
+    "name": "Labo doux",
+    "category": "Scanner",
+    "description": "Plus doux que « Labo net », verts caractéristiques.",
+    "params": {
+      "contrast": 0.05,
+      "grain": 0.06,
+      "grainSize": 1.4,
+      "lift": 0.26,
+      "saturation": 0.08,
+      "temperature": -0.1,
+      "tint": -0.14
+    }
+  },
+  {
+    "id": "scanner_a_plat",
+    "name": "Scanner à plat",
+    "category": "Scanner",
+    "description": "Scanner à plat : plus mou et plus plat, à retravailler.",
+    "params": {
+      "contrast": -0.1,
+      "grain": 0.04,
+      "grainSize": 1.6,
+      "lift": 0.18,
+      "saturation": -0.06,
+      "temperature": 0.04
+    }
+  },
+  {
+    "id": "scanner_35mm",
+    "name": "Scanner 35 mm",
+    "category": "Scanner",
+    "description": "Très piqué et neutre, dédié au 35 mm.",
+    "params": {
+      "contrast": 0.1,
+      "grain": 0.05,
+      "grainSize": 1.2,
+      "lift": 0.1,
+      "saturation": 0.04
+    }
+  },
+  {
+    "id": "scanner_neutre",
+    "name": "Scanner neutre",
+    "category": "Scanner",
+    "description": "Neutre et propre, légèrement froid.",
+    "params": {
+      "contrast": 0.08,
+      "grain": 0.05,
+      "grainSize": 1.3,
+      "lift": 0.12,
+      "saturation": 0.06,
+      "temperature": -0.04
+    }
+  },
+  {
+    "id": "scanner_fidelite",
+    "name": "Scanner haute fidélité",
+    "category": "Scanner",
+    "description": "Fidélité maximale, quasiment aucune signature.",
+    "params": {
+      "contrast": 0.04,
+      "grain": 0.03,
+      "grainSize": 1.2,
+      "lift": 0.08,
+      "saturation": 0.02
+    }
+  },
+  {
+    "id": "dslr_scan",
+    "name": "Numérisation au boîtier",
+    "category": "Scanner",
+    "description": "Base plate d'un scan au reflex, à combiner avec une pellicule.",
+    "params": {
+      "contrast": -0.05,
+      "grain": 0.02,
+      "grainSize": 1.2,
+      "lift": 0.06,
+      "saturation": -0.05
+    }
+  }
+]

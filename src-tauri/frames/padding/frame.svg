@@ -1,0 +1,21 @@
+{%- set ratios = {'square': 1.0, 'portrait45': 0.8, 'landscape54': 1.25, 'story': 0.5625} -%}
+{%- set r = ratios[p.ratio] -%}
+{%- set m = ((photo.short * p.padding / 100) | round | int) -%}
+{%- set w0 = photo.w + m * 2 -%}
+{%- set h0 = photo.h + m * 2 -%}
+{%- if w0 / h0 > r -%}
+  {%- set W = w0 -%}
+  {%- set H = (w0 / r) | round | int -%}
+{%- else -%}
+  {%- set H = h0 -%}
+  {%- set W = (h0 * r) | round | int -%}
+{%- endif -%}
+{%- set x = ((W - photo.w) / 2) | round | int -%}
+{%- set y = ((H - photo.h) / 2) | round | int -%}
+<svg xmlns="http://www.w3.org/2000/svg" width="{{ W }}" height="{{ H }}" viewBox="0 0 {{ W }} {{ H }}">
+  <rect width="{{ W }}" height="{{ H }}" fill="{{ p.color }}"/>
+  <rect id="photo" x="{{ x }}" y="{{ y }}" width="{{ photo.w }}" height="{{ photo.h }}" display="none"/>
+  {#- Sans bande sous la photo, la légende reste sur le dernier pixel de l'image. -#}
+  {%- set area = [H - y - photo.h, 1] | max %}
+  <rect id="caption-area" x="0" y="{{ H - area }}" width="{{ W }}" height="{{ area }}" display="none"/>
+</svg>
