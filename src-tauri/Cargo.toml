@@ -1,10 +1,10 @@
 [package]
 name = "app"
 version = "0.1.0"
-description = "A lightweight photo editor"
-authors = ["you"]
-license = ""
-repository = ""
+description = "Film look and frame studio"
+authors = ["D1nker"]
+license = "MIT"
+repository = "https://github.com/D1nker/qfilm"
 edition = "2024"
 rust-version = "1.88"
 

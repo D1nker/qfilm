@@ -50,7 +50,7 @@ npm and cargo are run locally in this project (no Docker).
 
 ## Rust conventions
 
-- Edition 2024, MSRV 1.85. `src-tauri/rustfmt.toml` and `[lints]` in `Cargo.toml`: clippy pedantic is on, `unsafe` is forbidden.
+- Edition 2024, MSRV 1.88 (let-chains). `src-tauri/rustfmt.toml` and `[lints]` in `Cargo.toml`: clippy pedantic is on, `unsafe` is forbidden.
 - Cast lints are allowed only inside `src/imaging` (pixel math); elsewhere fix the cast.
 - Keep `#[allow(...)]` rare, scoped to the item, with a one-line reason.
 - Frames are data, not code: a folder with `frame.json` (options) + `frame.svg` (Jinja-style template
@@ -83,6 +83,7 @@ npm and cargo are run locally in this project (no Docker).
   to be made public later.
 - Name: **qFilm** (repo `qfilm`). No real brand appears anywhere: looks, film stocks and edge
   texts are generic (e.g. "Portrait 400", "Ambre"). Keep it that way when adding looks or frames.
-  The bundle `identifier` (`io.github.d1nker.qfilm`) is a placeholder until a domain is chosen.
+  The bundle `identifier` (`io.github.d1nker.qfilm`) follows the GitHub-hosted convention: keep it,
+  changing it later moves the app's data folder and breaks signing/updater continuity.
 - Icons: source in `branding/icon.svg` (+ `icon.png`). Regenerate with
   `npm run tauri icon branding/icon.png`, then delete `src-tauri/icons/android` and `ios` (desktop only).
