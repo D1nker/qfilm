@@ -9,6 +9,7 @@ export default defineConfig({
   use: {
     baseURL: "http://localhost:5173",
     colorScheme: "dark",
+    locale: "fr-FR",
     trace: "retain-on-failure",
   },
   projects: [

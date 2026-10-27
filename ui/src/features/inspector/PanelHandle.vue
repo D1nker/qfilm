@@ -18,13 +18,14 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { ChevronLeft, ChevronRight } from "lucide-vue-next";
+import { t } from "@/shared/i18n";
 
 import { useInspector } from "@/features/inspector/useInspector";
 import UiTooltip from "@/shared/ui/UiTooltip.vue";
 
 const { open, toggle } = useInspector();
 
-const label = computed(() => (open.value ? "Masquer le panneau (F)" : "Afficher le panneau (F)"));
+const label = computed(() => t(open.value ? "panel.hide" : "panel.show"));
 </script>
 
 <style scoped>

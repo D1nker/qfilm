@@ -2,8 +2,8 @@
   <main ref="stage">
     <button v-if="!image" type="button" class="dropzone" @click="browse">
       <ImagePlus :size="28" class="icon" />
-      <span class="big">Dépose une photo ici</span>
-      <span class="hint">JPEG, PNG ou TIFF 16 bits — ou clique pour parcourir</span>
+      <span class="big">{{ t("viewer.drop") }}</span>
+      <span class="hint">{{ t("viewer.dropHint") }}</span>
     </button>
 
     <div
@@ -41,7 +41,7 @@
               class="zone"
               :class="{ active: editing === zone.field }"
               :style="zoneStyle(zone)"
-              :aria-label="`Modifier : ${fieldLabel(zone.field)}`"
+              :aria-label="t('viewer.editField', { field: fieldLabel(zone.field) })"
               @click="editZone(zone)"
             />
 
@@ -50,7 +50,7 @@
               class="zone movable"
               :class="{ active: editing === 'caption' }"
               :style="captionZoneStyle"
-              aria-label="Modifier la légende (glisser pour la déplacer)"
+              :aria-label="t('viewer.editCaption')"
               @pointerdown="startCaptionDrag"
               @pointermove="onCaptionDrag"
               @pointerup="endCaptionDrag"
@@ -83,13 +83,14 @@
       @toggle-zoom="toggleActual()"
     />
 
-    <div v-if="loading" class="overlay">Décodage…</div>
+    <div v-if="loading" class="overlay">{{ t("viewer.decoding") }}</div>
   </main>
 </template>
 
 <script setup lang="ts">
 import { computed, nextTick, ref } from "vue";
 import { ImagePlus } from "lucide-vue-next";
+import { t } from "@/shared/i18n";
 
 import type { TextZone } from "@/shared/api/api";
 import { useCaptionLayer } from "@/features/viewer/useCaptionLayer";
@@ -167,7 +168,7 @@ const editorStyle = computed(() => {
 });
 
 function fieldLabel(field: string | null) {
-  if (field === "caption") return "Légende";
+  if (field === "caption") return t("frames.caption");
   return current.value?.params.find((param) => param.id === field)?.label ?? "";
 }
 

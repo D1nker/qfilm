@@ -2,38 +2,41 @@
   <UiDialog
     v-model:open="exportOpen"
     size="md"
-    title="Exporter"
-    description="Choisis le format, la qualité et la taille de l'image exportée."
+    :title="t('export.title')"
+    :description="t('export.description')"
   >
-    <UiField label="Format">
-      <UiSelect v-model="format" :options="FORMAT_OPTIONS" />
+    <UiField :label="t('export.format')">
+      <UiSelect v-model="format" :options="formatOptions()" />
     </UiField>
 
     <UiSlider
       v-if="format === 'jpeg'"
       v-model="quality"
-      label="Qualité"
+      :label="t('export.quality')"
       :display="`${quality} %`"
       :min="60"
       :max="100"
       :step="1"
     />
 
-    <UiField label="Taille">
-      <UiSelect v-model="size" :options="SIZE_OPTIONS" />
+    <UiField :label="t('export.size')">
+      <UiSelect v-model="size" :options="sizeOptions()" />
     </UiField>
 
     <template #footer>
-      <UiButton variant="ghost" @click="exportOpen = false">Annuler</UiButton>
+      <UiButton variant="ghost" @click="exportOpen = false">
+        {{ t("common.cancel") }}
+      </UiButton>
       <UiButton variant="primary" :disabled="exporting" @click="saveExport">
-        {{ exporting ? "Export…" : "Enregistrer…" }}
+        {{ exporting ? t("export.saving") : t("export.save") }}
       </UiButton>
     </template>
   </UiDialog>
 </template>
 
 <script setup lang="ts">
-import { FORMAT_OPTIONS, SIZE_OPTIONS } from "@/features/export/exportOptions";
+import { t } from "@/shared/i18n";
+import { formatOptions, sizeOptions } from "@/features/export/exportOptions";
 import { useExport } from "@/features/export/useExport";
 import UiButton from "@/shared/ui/UiButton.vue";
 import UiDialog from "@/shared/ui/UiDialog.vue";

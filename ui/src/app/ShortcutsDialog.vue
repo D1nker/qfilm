@@ -2,10 +2,10 @@
   <UiDialog
     v-model:open="shortcutsOpen"
     size="md"
-    title="Raccourcis clavier"
-    description="La liste des raccourcis clavier de qFilm."
+    :title="t('shortcuts.title')"
+    :description="t('shortcuts.description')"
   >
-    <section v-for="group in SHORTCUT_GROUPS" :key="group.title">
+    <section v-for="group in shortcutGroups()" :key="group.title">
       <h3>{{ group.title }}</h3>
       <dl>
         <div v-for="shortcut in group.shortcuts" :key="shortcut.label" class="row">
@@ -20,7 +20,8 @@
 </template>
 
 <script setup lang="ts">
-import { SHORTCUT_GROUPS } from "@/app/shortcuts";
+import { shortcutGroups } from "@/app/shortcuts";
+import { t } from "@/shared/i18n";
 import { useHelp } from "@/app/useHelp";
 import UiDialog from "@/shared/ui/UiDialog.vue";
 

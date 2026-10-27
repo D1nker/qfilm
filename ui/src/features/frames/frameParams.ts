@@ -1,3 +1,4 @@
+import { t } from "@/shared/i18n";
 import type { Caption, FrameInfo, FrameSelection, ParamDef, ParamValue } from "@/shared/api/api";
 
 export const NONE_FRAME = "none";
@@ -65,14 +66,12 @@ export function isVisible(def: ParamDef, params: ParamValues): boolean {
   return true;
 }
 
-export const DEFAULT_SECTION = "Réglages";
-
 export function sectionsOf(frame: FrameInfo, params: ParamValues): [string, ParamDef[]][] {
   const sections = new Map<string, ParamDef[]>();
   for (const def of frame.params) {
     if (!isVisible(def, params)) continue;
 
-    const title = def.section ?? DEFAULT_SECTION;
+    const title = def.section ?? t("frames.settings");
     sections.set(title, [...(sections.get(title) ?? []), def]);
   }
   return [...sections.entries()];

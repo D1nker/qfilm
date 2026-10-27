@@ -80,7 +80,7 @@ export class App {
   }
 
   async openPhoto() {
-    await this.page.getByRole("button", { name: "Ouvrir…" }).click();
+    await this.page.getByRole("button", { name: /^(Ouvrir|Open)…$/ }).click();
     await this.photo.waitFor();
     await expect
       .poll(() => this.calls("render_preview").then((calls) => calls.length))
@@ -130,7 +130,7 @@ export class App {
     return (await this.calls(cmd)).length;
   }
 
-  tab(name: "Looks" | "Réglages" | "Cadre") {
+  tab(name: "Preset" | "Retouche" | "Cadre" | "Edit" | "Frame") {
     return this.page.getByRole("tab", { name });
   }
 

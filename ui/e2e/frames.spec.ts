@@ -194,7 +194,7 @@ test.describe("frame panel", () => {
     await shape(openApp, "35 mm").click();
     await expect(openApp.page.locator(".zone")).toHaveCount(3);
 
-    await openApp.tab("Looks").click();
+    await openApp.tab("Preset").click();
 
     await expect(openApp.page.locator(".zone")).toHaveCount(0);
   });

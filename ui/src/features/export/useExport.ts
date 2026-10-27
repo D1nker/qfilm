@@ -1,3 +1,4 @@
+import { t } from "@/shared/i18n";
 import { ref } from "vue";
 
 import { exportImage, pickDestination, type ExportFormat } from "@/shared/api/api";
@@ -42,7 +43,7 @@ async function saveExport() {
       destination,
       { format: format.value, quality: quality.value, maxEdge: SIZE_EDGES[size.value] },
     );
-    show("Export terminé");
+    show(t("export.done"));
     exportOpen.value = false;
   } catch (e) {
     error.value = String(e);

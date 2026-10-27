@@ -51,7 +51,7 @@ test.describe("opening a photo", () => {
           : original(cmd, args);
     });
 
-    await openApp.tab("Réglages").click();
+    await openApp.tab("Retouche").click();
     await openApp.page.getByRole("slider", { name: "Exposition" }).focus();
     await openApp.press("ArrowRight");
 

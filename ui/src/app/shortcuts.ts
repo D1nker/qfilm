@@ -1,3 +1,5 @@
+import { t } from "@/shared/i18n";
+
 const MOD = /Mac/i.test(navigator.userAgent) ? "⌘" : "Ctrl";
 
 export interface Shortcut {
@@ -5,24 +7,29 @@ export interface Shortcut {
   keys: string[];
 }
 
-export const SHORTCUT_GROUPS: { title: string; shortcuts: Shortcut[] }[] = [
+export interface ShortcutGroup {
+  title: string;
+  shortcuts: Shortcut[];
+}
+
+export const shortcutGroups = (): ShortcutGroup[] => [
   {
-    title: "Édition",
+    title: t("shortcuts.editing"),
     shortcuts: [
-      { label: "Annuler", keys: [MOD, "Z"] },
-      { label: "Rétablir", keys: [MOD, "⇧", "Z"] },
+      { label: t("shortcuts.undo"), keys: [MOD, "Z"] },
+      { label: t("shortcuts.redo"), keys: [MOD, "⇧", "Z"] },
     ],
   },
   {
-    title: "Affichage",
+    title: t("shortcuts.display"),
     shortcuts: [
-      { label: "Voir l'original (maintenir)", keys: ["C"] },
-      { label: "Masquer ou afficher le panneau", keys: ["F"] },
-      { label: "Zoomer", keys: [MOD, "+"] },
-      { label: "Dézoomer", keys: [MOD, "−"] },
-      { label: "Ajuster à la fenêtre", keys: [MOD, "0"] },
-      { label: "Zoomer à la molette", keys: [MOD, "molette"] },
-      { label: "Déplacer la photo", keys: ["Espace", "glisser"] },
+      { label: t("shortcuts.original"), keys: ["C"] },
+      { label: t("shortcuts.panel"), keys: ["F"] },
+      { label: t("shortcuts.zoomIn"), keys: [MOD, "+"] },
+      { label: t("shortcuts.zoomOut"), keys: [MOD, "−"] },
+      { label: t("shortcuts.fit"), keys: [MOD, "0"] },
+      { label: t("shortcuts.wheelZoom"), keys: [MOD, t("shortcuts.wheel")] },
+      { label: t("shortcuts.pan"), keys: [t("shortcuts.space"), t("shortcuts.drag")] },
     ],
   },
 ];

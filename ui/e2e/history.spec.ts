@@ -7,7 +7,7 @@ const undoButton = (app: App) => app.page.getByRole("button", { name: "Annuler",
 const redoButton = (app: App) => app.page.getByRole("button", { name: "Rétablir", exact: true });
 
 async function adjustExposure(app: App, key: "ArrowRight" | "ArrowLeft", times: number) {
-  await app.tab("Réglages").click();
+  await app.tab("Retouche").click();
   await app.page.getByRole("slider", { name: "Exposition" }).focus();
   await app.press(key, times);
 }
@@ -42,7 +42,7 @@ test.describe("undo and redo", () => {
 
     await undo(openApp);
     await expect.poll(() => exposure(openApp)).toBe(0);
-    await openApp.tab("Looks").click();
+    await openApp.tab("Preset").click();
     await expect(openApp.page.locator(".thumb.active")).toContainText("Neutre");
 
     await redo(openApp);

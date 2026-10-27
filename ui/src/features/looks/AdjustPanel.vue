@@ -1,16 +1,22 @@
 <template>
   <div>
     <div class="head">
-      <p>Réglages</p>
-      <UiButton variant="ghost" size="sm" @click="resetLook">Réinitialiser</UiButton>
+      <p>{{ t("tabs.adjust") }}</p>
+      <UiButton variant="ghost" size="sm" @click="resetLook">
+        {{ t("common.reset") }}
+      </UiButton>
     </div>
 
-    <UiCollapsible v-for="[group, items] in groupedControls" :key="group" :title="group">
+    <UiCollapsible
+      v-for="[group, items] in groupedControls"
+      :key="group"
+      :title="t(`adjust.groups.${group}`)"
+    >
       <UiSlider
         v-for="control in items"
         :key="control.key"
         :model-value="params[control.key]"
-        :label="control.label"
+        :label="t(`adjust.controls.${control.key}`)"
         :display="formatControlValue(control.key, params[control.key])"
         :min="control.min"
         :max="control.max"
@@ -24,6 +30,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { t } from "@/shared/i18n";
 
 import { controls, formatControlValue } from "@/features/looks/controls";
 import { groupBy } from "@/shared/lib/groupBy";

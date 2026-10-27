@@ -1,13 +1,13 @@
 <template>
   <div>
     <div class="head">
-      <p>Cadre</p>
+      <p>{{ t("tabs.frame") }}</p>
       <UiButton variant="ghost" size="sm" :disabled="isPristine" @click="resetFrame">
-        Réinitialiser
+        {{ t("common.reset") }}
       </UiButton>
     </div>
 
-    <UiCollapsible title="Forme">
+    <UiCollapsible :title="t('frames.shape')">
       <div class="grid">
         <UiThumbnailButton
           v-for="info in frames"
@@ -31,50 +31,51 @@
       />
     </UiCollapsible>
 
-    <UiCollapsible title="Légende">
-      <UiField label="Texte" stacked>
-        <UiInput v-model="caption.text" placeholder="Biarritz, août 2026" />
+    <UiCollapsible :title="t('frames.caption')">
+      <UiField :label="t('caption.text')" stacked>
+        <UiInput v-model="caption.text" :placeholder="t('caption.placeholder')" />
       </UiField>
 
-      <UiField label="Police">
-        <UiSelect v-model="caption.font" :options="FONTS" />
+      <UiField :label="t('caption.font')">
+        <UiSelect v-model="caption.font" :options="fontOptions()" />
       </UiField>
 
       <UiSlider
         v-model="caption.size"
-        label="Taille"
+        :label="t('caption.size')"
         :display="`${caption.size.toFixed(1)} %`"
         :min="1"
         :max="20"
         :step="0.5"
       />
 
-      <UiField label="Couleur">
+      <UiField :label="t('caption.color')">
         <UiColorInput v-model="caption.color" />
       </UiField>
 
-      <UiField label="Position" as="div">
+      <UiField :label="t('caption.position')" as="div">
         <UiButton size="sm" :disabled="caption.x === null" @click="recenterCaption">
-          Recentrer
+          {{ t("caption.recenter") }}
         </UiButton>
       </UiField>
 
       <p class="note">
-        Clique sur l'image pour modifier un texte, glisse la légende pour la placer.
+        {{ t("caption.hint") }}
       </p>
     </UiCollapsible>
 
-    <UiCollapsible title="Mes cadres" :default-open="false">
+    <UiCollapsible :title="t('frames.myFrames')" :default-open="false">
       <FrameLibrary />
     </UiCollapsible>
   </div>
 </template>
 
 <script setup lang="ts">
+import { t } from "@/shared/i18n";
 import { computed } from "vue";
 
 import type { ParamDef, ParamValue } from "@/shared/api/api";
-import { FONTS } from "@/features/frames/fonts";
+import { fontOptions } from "@/features/frames/fonts";
 import { sectionsOf } from "@/features/frames/frameParams";
 import { useFrame } from "@/features/frames/useFrame";
 import { useFrameThumbnails } from "@/features/frames/useFrameThumbnails";

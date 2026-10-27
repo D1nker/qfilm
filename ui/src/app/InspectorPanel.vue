@@ -1,7 +1,7 @@
 <template>
   <aside>
     <div class="card">
-      <UiTabs v-model="tab" :tabs="TABS">
+      <UiTabs v-model="tab" :tabs="tabs">
         <template #looks><LooksPanel @select="labelFrameFromLook" /></template>
         <template #adjust><AdjustPanel /></template>
         <template #frame><FramePanel /></template>
@@ -11,17 +11,20 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
+
+import { t } from "@/shared/i18n";
 import type { Preset } from "@/shared/api/api";
 import { useFrame, FramePanel } from "@/features/frames";
 import { useInspector, type InspectorTab } from "@/features/inspector";
 import UiTabs from "@/shared/ui/UiTabs.vue";
 import { AdjustPanel, LooksPanel } from "@/features/looks";
 
-const TABS: { value: InspectorTab; label: string }[] = [
-  { value: "looks", label: "Looks" },
-  { value: "adjust", label: "Réglages" },
-  { value: "frame", label: "Cadre" },
-];
+const tabs = computed<{ value: InspectorTab; label: string }[]>(() => [
+  { value: "looks", label: t("tabs.looks") },
+  { value: "adjust", label: t("tabs.adjust") },
+  { value: "frame", label: t("tabs.frame") },
+]);
 
 const { tab } = useInspector();
 const { labelFromLook } = useFrame();

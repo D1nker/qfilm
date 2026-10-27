@@ -36,7 +36,7 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
   adjustments), `frames/useFrame` (chosen frame, its params, caption, imported frames), `useFrameThumbnails`,
   `viewer/useRender` (the single watcher that calls Rust), `viewer/useViewportNavigation` (zoom/pan),
   `history/useHistory` (undo/redo of look + frame, steps collapse after a 300 ms pause), `export/useExport`,
-  `inspector/useInspector`, `app/useTheme` (dark default, light), `app/useShortcuts`, `app/useHelp`
+  `inspector/useInspector`, `app/useTheme` (dark default, light), `shared/i18n` (`useLocale`), `app/useShortcuts`, `app/useHelp`
   (shortcuts dialog), `shared/lib/useNotice` (passing messages).
 - Rendering is driven by one watcher in `useRender`: change state, never call the renderer by hand.
   Rust caches the photo render, so border-only changes are cheap.
@@ -61,7 +61,14 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
   `useViewportNavigation` (`:focus-visible` cannot tell the two apart in Chromium).
 - The photo area must never grow with the image: keep `minmax(0, 1fr)` / `min-height: 0` on grid
   items and let the viewport scroll instead.
-- UI strings are French for now; i18n comes later, so keep strings out of logic.
+- The UI is bilingual (French, English) with `vue-i18n`, wrapped in `src/shared/i18n`. Never write a
+  user-visible string in a component or in logic: add the key to `fr.ts` (the source of truth, it types the
+  keys) and to `en.ts` (typed against it, so a missing key does not compile), then use `t("section.key")`
+  (strict: only catalogue keys are accepted). Tables of options are functions that call `t` (`sizeOptions()`),
+  never constants, so they follow a language change. The language is the system one (French, otherwise
+  English), overridable in the qFilm menu and then remembered. Placeholders (`{name}`) must match in both
+  languages (tested). Still French only, for now: the names and categories of looks, the labels of frame
+  manifests, and Rust error messages. Tests run in French (Vitest `setup.ts`, Playwright `locale`).
 - `import type` for types (`consistent-type-imports`), `interface` over `type` for object shapes,
   no `any`, no floating promises (use `void` explicitly).
 

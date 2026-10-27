@@ -1,6 +1,7 @@
 import { open, save } from "@tauri-apps/plugin-dialog";
 
 import { commands } from "@/shared/api/bindings";
+import { t } from "@/shared/i18n";
 import type { ExportFormat } from "@/shared/api/bindings";
 
 export type {
@@ -43,7 +44,7 @@ export const {
 
 async function imageFilters() {
   const extensions = await commands.supportedExtensions();
-  return [{ name: "Images", extensions }];
+  return [{ name: t("pickers.images"), extensions }];
 }
 
 export async function pickImage(): Promise<string | null> {
@@ -51,20 +52,20 @@ export async function pickImage(): Promise<string | null> {
   return typeof selected === "string" ? selected : null;
 }
 
-const EXPORT_FILTERS: Record<ExportFormat, { name: string; extensions: string[] }> = {
+const exportFilters = (): Record<ExportFormat, { name: string; extensions: string[] }> => ({
   jpeg: { name: "JPEG", extensions: ["jpg"] },
   png: { name: "PNG", extensions: ["png"] },
-  tiff: { name: "TIFF 16 bits", extensions: ["tiff"] },
-};
+  tiff: { name: t("export.tiff"), extensions: ["tiff"] },
+});
 
 export function pickDestination(suggestedName: string, format: ExportFormat) {
-  return save({ defaultPath: suggestedName, filters: [EXPORT_FILTERS[format]] });
+  return save({ defaultPath: suggestedName, filters: [exportFilters()[format]] });
 }
 
 export async function pickFrameArchive(): Promise<string | null> {
   const selected = await open({
     multiple: false,
-    filters: [{ name: "Cadre (.zip)", extensions: ["zip"] }],
+    filters: [{ name: t("pickers.frameArchive"), extensions: ["zip"] }],
   });
   return typeof selected === "string" ? selected : null;
 }

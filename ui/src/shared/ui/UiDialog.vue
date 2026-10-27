@@ -10,7 +10,7 @@
         <header class="head">
           <DialogTitle class="title">{{ title }}</DialogTitle>
           <DialogDescription class="sr-only">{{ description }}</DialogDescription>
-          <DialogClose class="close" aria-label="Fermer">
+          <DialogClose class="close" :aria-label="t('dialog.close')">
             <X :size="16" />
           </DialogClose>
         </header>
@@ -38,6 +38,8 @@ import {
   DialogTitle,
 } from "reka-ui";
 import { X } from "lucide-vue-next";
+
+import { t } from "@/shared/i18n";
 
 withDefaults(
   defineProps<{

@@ -1,10 +1,11 @@
 import type { FontChoice } from "@/shared/api/api";
+import { t } from "@/shared/i18n";
 
-export const FONTS: { value: FontChoice; label: string }[] = [
-  { value: "condensed", label: "Condensée" },
-  { value: "typewriter", label: "Machine à écrire" },
-  { value: "handwritten", label: "Manuscrite" },
-];
+export const fontOptions = (): { value: FontChoice; label: string }[] =>
+  (["condensed", "typewriter", "handwritten"] as const).map((value) => ({
+    value,
+    label: t(`caption.fonts.${value}`),
+  }));
 
 export const FONT_FAMILIES: Record<FontChoice, string> = {
   condensed: "qfilm-condensed",

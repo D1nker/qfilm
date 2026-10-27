@@ -38,12 +38,12 @@ test.describe("looks", () => {
     await openApp.page.getByRole("slider", { name: "Intensité" }).focus();
     await openApp.press("ArrowLeft", 50);
 
-    await openApp.tab("Réglages").click();
+    await openApp.tab("Retouche").click();
     await openApp.page.getByRole("slider", { name: "Exposition" }).focus();
     await openApp.press("ArrowRight", 10);
     await expect.poll(async () => (await openApp.lastRender()).params.exposure).toBeCloseTo(0.6);
 
-    await openApp.tab("Looks").click();
+    await openApp.tab("Preset").click();
     await openApp.page.getByRole("slider", { name: "Intensité" }).focus();
     await openApp.press("ArrowRight", 50);
 
@@ -51,7 +51,7 @@ test.describe("looks", () => {
   });
 
   test("double-clicking a slider resets it to zero", async ({ openApp }) => {
-    await openApp.tab("Réglages").click();
+    await openApp.tab("Retouche").click();
     await openApp.page.getByRole("slider", { name: "Exposition" }).focus();
     await openApp.press("ArrowRight", 30);
     await expect.poll(async () => (await openApp.lastRender()).params.exposure).toBeCloseTo(0.3);
@@ -62,7 +62,7 @@ test.describe("looks", () => {
   });
 
   test("shows signed values with units on the sliders", async ({ openApp }) => {
-    await openApp.tab("Réglages").click();
+    await openApp.tab("Retouche").click();
     const exposure = openApp.page.locator(".slider", { hasText: "Exposition" });
     await exposure.getByRole("slider").focus();
     await openApp.press("ArrowRight", 25);
@@ -72,21 +72,21 @@ test.describe("looks", () => {
 
   test("the reset button brings back a neutral look", async ({ openApp }) => {
     await openApp.page.getByRole("button", { name: "Portrait 400" }).click();
-    await openApp.tab("Réglages").click();
+    await openApp.tab("Retouche").click();
 
     await openApp.page.getByRole("button", { name: "Réinitialiser" }).click();
 
     await expect
       .poll(async () => (await openApp.lastRender()).params)
       .toMatchObject({ exposure: 0, contrast: 0, grainSize: 2 });
-    await openApp.tab("Looks").click();
+    await openApp.tab("Preset").click();
     await expect(openApp.page.locator(".thumb.active")).toContainText("Neutre");
   });
 
   test("choosing a look names the film stock printed on the frame", async ({ openApp }) => {
     await openApp.tab("Cadre").click();
     await openApp.page.locator(".grid .thumb", { hasText: "35 mm" }).click();
-    await openApp.tab("Looks").click();
+    await openApp.tab("Preset").click();
 
     await openApp.page.getByRole("button", { name: "Doré 200" }).click();
 

@@ -2,7 +2,7 @@
   <div>
     <UiSlider
       v-model="amount"
-      label="Intensité"
+      :label="t('looks.intensity')"
       :display="`${Math.round(amount * 100)} %`"
       :min="0"
       :max="1"
@@ -27,6 +27,7 @@
 </template>
 
 <script setup lang="ts">
+import { t } from "@/shared/i18n";
 import type { Preset } from "@/shared/api/api";
 import { useEditor } from "@/features/photo";
 import { useLook } from "@/features/looks/useLook";

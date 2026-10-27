@@ -1,9 +1,10 @@
 import type { ExportFormat } from "@/shared/api/api";
+import { t } from "@/shared/i18n";
 
-export const FORMAT_OPTIONS: { value: ExportFormat; label: string }[] = [
+export const formatOptions = (): { value: ExportFormat; label: string }[] => [
   { value: "jpeg", label: "JPEG" },
   { value: "png", label: "PNG" },
-  { value: "tiff", label: "TIFF 16 bits" },
+  { value: "tiff", label: t("export.tiff") },
 ];
 
 export const FILE_EXTENSIONS: Record<ExportFormat, string> = {
@@ -14,8 +15,8 @@ export const FILE_EXTENSIONS: Record<ExportFormat, string> = {
 
 export type ExportSize = "original" | "4096" | "2048" | "1080";
 
-export const SIZE_OPTIONS: { value: ExportSize; label: string }[] = [
-  { value: "original", label: "Taille d'origine" },
+export const sizeOptions = (): { value: ExportSize; label: string }[] => [
+  { value: "original", label: t("export.sizeOriginal") },
   { value: "4096", label: "4096 px" },
   { value: "2048", label: "2048 px" },
   { value: "1080", label: "1080 px" },

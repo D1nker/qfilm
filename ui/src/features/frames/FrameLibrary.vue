@@ -1,24 +1,29 @@
 <template>
   <div class="library">
-    <p class="intro">
-      Un cadre est un dossier avec un <code>frame.json</code> et un <code>frame.svg</code>. Importe
-      une archive <code>.zip</code> (ou dépose-la sur la fenêtre), ou un dossier.
-    </p>
+    <i18n-t keypath="frames.library.intro" tag="p" class="intro">
+      <template #manifest><code>frame.json</code></template>
+      <template #template><code>frame.svg</code></template>
+      <template #zip><code>.zip</code></template>
+    </i18n-t>
 
     <div class="actions">
-      <UiButton size="sm" @click="importArchive">Importer un .zip</UiButton>
-      <UiButton size="sm" @click="importFolder">Importer un dossier</UiButton>
+      <UiButton size="sm" @click="importArchive">
+        {{ t("frames.library.importArchive") }}
+      </UiButton>
+      <UiButton size="sm" @click="importFolder">
+        {{ t("frames.library.importFolder") }}
+      </UiButton>
     </div>
 
     <ul v-if="mine.length" class="list">
       <li v-for="info in mine" :key="info.id">
         <span class="name">{{ info.name }}</span>
-        <UiTooltip text="Supprimer ce cadre">
+        <UiTooltip :text="t('frames.library.remove')">
           <UiButton
             variant="ghost"
             size="sm"
             icon
-            :aria-label="`Supprimer le cadre ${info.name}`"
+            :aria-label="t('frames.library.removeNamed', { name: info.name })"
             @click="remove(info.id)"
           >
             <Trash2 :size="14" />
@@ -26,7 +31,7 @@
         </UiTooltip>
       </li>
     </ul>
-    <p v-else class="empty">Aucun cadre importé pour l'instant.</p>
+    <p v-else class="empty">{{ t("frames.library.empty") }}</p>
 
     <ul v-if="issues.length" class="issues" role="alert">
       <li v-for="issue in issues" :key="issue.folder">
@@ -37,12 +42,12 @@
     <div class="actions">
       <UiButton variant="ghost" size="sm" @click="showFolder">
         <FolderOpen :size="14" />
-        Ouvrir le dossier
+        {{ t("frames.library.openFolder") }}
       </UiButton>
-      <UiTooltip text="Relire le dossier, pour voir un cadre en cours d'écriture">
+      <UiTooltip :text="t('frames.library.reloadHint')">
         <UiButton variant="ghost" size="sm" @click="reload">
           <RefreshCw :size="14" />
-          Recharger
+          {{ t("frames.library.reload") }}
         </UiButton>
       </UiTooltip>
     </div>
@@ -50,6 +55,7 @@
 </template>
 
 <script setup lang="ts">
+import { t } from "@/shared/i18n";
 import { computed } from "vue";
 import { FolderOpen, RefreshCw, Trash2 } from "lucide-vue-next";
 

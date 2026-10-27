@@ -1,24 +1,24 @@
 <template>
   <!-- Pas de focus au clic : Espace doit rester « déplacer », pas « activer le bouton ». -->
-  <div class="toolbar" role="toolbar" aria-label="Outils de la photo" @mousedown.prevent>
-    <UiTooltip text="Annuler (⌘Z)">
+  <div class="toolbar" role="toolbar" :aria-label="t('toolbar.label')" @mousedown.prevent>
+    <UiTooltip :text="t('toolbar.undoTip')">
       <UiButton
         variant="ghost"
         size="sm"
         icon
-        aria-label="Annuler"
+        :aria-label="t('toolbar.undo')"
         :disabled="!canUndo"
         @click="undo"
       >
         <Undo2 :size="15" />
       </UiButton>
     </UiTooltip>
-    <UiTooltip text="Rétablir (⇧⌘Z)">
+    <UiTooltip :text="t('toolbar.redoTip')">
       <UiButton
         variant="ghost"
         size="sm"
         icon
-        aria-label="Rétablir"
+        :aria-label="t('toolbar.redo')"
         :disabled="!canRedo"
         @click="redo"
       >
@@ -28,7 +28,7 @@
 
     <span class="separator" />
 
-    <UiTooltip text="Maintenir pour voir l'original (C)">
+    <UiTooltip :text="t('toolbar.compareTip')">
       <UiButton
         variant="ghost"
         size="sm"
@@ -37,24 +37,36 @@
         @mouseleave="comparing = false"
       >
         <Eye :size="15" />
-        {{ comparing ? "Original" : "Comparer" }}
+        {{ comparing ? t("toolbar.original") : t("toolbar.compare") }}
       </UiButton>
     </UiTooltip>
 
     <span class="separator" />
 
-    <UiTooltip text="Dézoomer (⌘ −)">
-      <UiButton variant="ghost" size="sm" icon aria-label="Dézoomer" @click="emit('zoomOut')">
+    <UiTooltip :text="t('toolbar.zoomOutTip')">
+      <UiButton
+        variant="ghost"
+        size="sm"
+        icon
+        :aria-label="t('toolbar.zoomOut')"
+        @click="emit('zoomOut')"
+      >
         <Minus :size="14" />
       </UiButton>
     </UiTooltip>
-    <UiTooltip :text="atFit ? 'Afficher à 100 %' : 'Ajuster à la fenêtre (⌘ 0)'">
+    <UiTooltip :text="atFit ? t('toolbar.actualSize') : t('toolbar.fit')">
       <UiButton variant="ghost" size="sm" class="zoom-label" @click="emit('toggleZoom')">
         {{ zoomPercent }} %
       </UiButton>
     </UiTooltip>
-    <UiTooltip text="Zoomer (⌘ +)">
-      <UiButton variant="ghost" size="sm" icon aria-label="Zoomer" @click="emit('zoomIn')">
+    <UiTooltip :text="t('toolbar.zoomInTip')">
+      <UiButton
+        variant="ghost"
+        size="sm"
+        icon
+        :aria-label="t('toolbar.zoomIn')"
+        @click="emit('zoomIn')"
+      >
         <Plus :size="14" />
       </UiButton>
     </UiTooltip>
@@ -63,6 +75,7 @@
 
 <script setup lang="ts">
 import { Eye, Minus, Plus, Redo2, Undo2 } from "lucide-vue-next";
+import { t } from "@/shared/i18n";
 
 import { useEditor } from "@/features/photo";
 import { useHistory } from "@/features/history";
