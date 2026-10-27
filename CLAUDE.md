@@ -48,8 +48,9 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
   (UiButton, UiSlider, UiSelect, UiMenu, UiDialog, UiTooltip…). Reuse them; add a new one there rather than
   styling raw elements in feature components. Icons come from `lucide-vue-next`.
 - Layout: the header holds app-level things only (the qFilm wordmark is the app menu: frames folder and shortcuts; open; export);
-  theme and language live in the `PreferencesBar` (`UiSegmented` controls) in the canvas's bottom-left corner,
-  on the line of the floating toolbar, so they stay reachable before any photo is open;
+  theme and language live behind a preferences button (`PreferencesButton`, a `UiPopover` of `UiSegmented`
+  controls) in the canvas's bottom-left corner, on the line of the floating toolbar, so they stay reachable
+  before any photo is open;
   editing and view controls (undo/redo, compare, zoom) live in the floating `CanvasToolbar`,
   centered on the canvas; the panel fold/unfold is a handle on the canvas edge (`PanelHandle`); the panel
   starts folded and unfolds when the first photo opens (`useInspector`). The strip under the photo

@@ -134,6 +134,19 @@ export class App {
     return this.page.getByRole("tab", { name });
   }
 
+  get preferencesButton() {
+    return this.page.getByRole("button", { name: /^(Préférences|Preferences)$/ });
+  }
+
+  /// Ouvre les préférences si besoin, choisit une option (thème ou langue) puis les referme.
+  async choose(name: string) {
+    const option = this.page.getByRole("radio", { name });
+    if (!(await option.isVisible())) await this.preferencesButton.click();
+    await option.click();
+    await this.page.keyboard.press("Escape");
+    await expect(option).toHaveCount(0);
+  }
+
   async emit(event: string, payload: unknown) {
     await this.page.evaluate(
       ([name, data]) =>

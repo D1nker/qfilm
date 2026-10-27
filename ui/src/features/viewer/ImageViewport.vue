@@ -258,7 +258,7 @@ img {
 
 .dropzone {
   position: absolute;
-  inset: var(--space-8);
+  inset: var(--space-8) var(--space-8) calc(var(--space-8) + var(--toolbar-clearance));
   display: flex;
   flex-direction: column;
   align-items: center;

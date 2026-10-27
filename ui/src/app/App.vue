@@ -3,7 +3,7 @@
     <div class="layout" :class="{ collapsed: !open }">
       <AppHeader class="area-header" />
       <ImageViewport class="area-main" />
-      <PreferencesBar class="area-preferences" />
+      <PreferencesButton class="area-preferences" />
       <InspectorPanel v-show="open" class="area-inspector" />
     </div>
 
@@ -31,7 +31,7 @@ import { ImageViewport } from "@/features/viewer";
 import { ExportDialog } from "@/features/export";
 import ShortcutsDialog from "@/app/ShortcutsDialog.vue";
 import InspectorPanel from "@/app/InspectorPanel.vue";
-import PreferencesBar from "@/app/PreferencesBar.vue";
+import PreferencesButton from "@/app/PreferencesButton.vue";
 
 const { error, init } = useEditor();
 const { init: initFrames } = useFrame();

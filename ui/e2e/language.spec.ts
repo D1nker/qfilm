@@ -31,7 +31,7 @@ test.describe("language", () => {
   test("switches from the preferences bar, translating dialogs, and remembers it", async ({
     openApp,
   }) => {
-    await choice(openApp, "English").click();
+    await openApp.choose("English");
 
     expect(await html(openApp)).toBe("en");
     await expect(openApp.tab("Edit")).toBeVisible();
@@ -43,11 +43,13 @@ test.describe("language", () => {
     expect(await html(openApp)).toBe("en");
     await expect(openApp.page.getByRole("button", { name: "Open…" })).toBeVisible();
 
-    await choice(openApp, "Français").click();
+    await openApp.choose("Français");
     await expect(openApp.page.getByRole("button", { name: "Ouvrir…" })).toBeVisible();
   });
 
   test("shows the current language as checked", async ({ app }) => {
+    await app.preferencesButton.click();
+
     await expect(choice(app, "Français")).toBeChecked();
     await expect(choice(app, "English")).not.toBeChecked();
   });
@@ -87,7 +89,7 @@ test.describe("looks and frames", () => {
   });
 
   test("follow a language change without reloading", async ({ openApp }) => {
-    await openApp.page.getByRole("radio", { name: "English" }).click();
+    await openApp.choose("English");
 
     await expect(openApp.page.getByRole("button", { name: "Golden 200" })).toBeVisible();
     await expect(openApp.page.getByRole("button", { name: "Doré 200" })).toHaveCount(0);
@@ -96,14 +98,14 @@ test.describe("looks and frames", () => {
     await openApp.page.locator(".grid .thumb", { hasText: "35 mm" }).click();
     await expect(openApp.page.getByRole("slider", { name: "Thickness" })).toBeVisible();
 
-    await openApp.page.getByRole("radio", { name: "Français" }).click();
+    await openApp.choose("Français");
     await expect(openApp.page.getByRole("slider", { name: "Épaisseur" })).toBeVisible();
   });
 
   test("keep the text a look gives to a frame in the language it was chosen in", async ({
     openApp,
   }) => {
-    await openApp.page.getByRole("radio", { name: "English" }).click();
+    await openApp.choose("English");
     await openApp.tab("Frame").click();
     await openApp.page.locator(".grid .thumb", { hasText: "35 mm" }).click();
 
@@ -115,18 +117,67 @@ test.describe("looks and frames", () => {
   });
 });
 
-test.describe("preferences bar", () => {
-  const bar = (app: App) => app.page.getByRole("group", { name: "Préférences" });
+test.describe("preferences", () => {
+  test("are one discreet button until opened", async ({ app }) => {
+    await expect(app.preferencesButton).toBeVisible();
+    await expect(app.page.getByRole("radio")).toHaveCount(0);
+  });
 
-  test("is there before any photo, as compact icon and code buttons", async ({ app }) => {
-    await expect(bar(app)).toBeVisible();
+  test("open as compact icon and code buttons", async ({ app }) => {
+    await app.preferencesButton.click();
+
     await expect(app.page.getByRole("radio")).toHaveCount(4);
     await expect(choice(app, "Français")).toHaveText("FR");
     await expect(choice(app, "English")).toHaveText("EN");
     await expect(choice(app, "Sombre")).toHaveText("");
   });
 
+  test("stay open after a choice so the change can be seen, and close with Escape", async ({
+    app,
+  }) => {
+    await app.preferencesButton.click();
+    await choice(app, "English").click();
+
+    await expect(choice(app, "English")).toBeChecked();
+    await expect(app.page.getByText("Language", { exact: true })).toBeVisible();
+
+    await app.page.keyboard.press("Escape");
+    await expect(app.page.getByRole("radio")).toHaveCount(0);
+    await expect(app.preferencesButton).toBeFocused();
+  });
+
+  test("close when clicking elsewhere", async ({ app }) => {
+    await app.preferencesButton.click();
+    await expect(app.page.getByRole("radio")).toHaveCount(4);
+
+    await app.page.mouse.click(700, 300);
+
+    await expect(app.page.getByRole("radio")).toHaveCount(0);
+  });
+
+  test("open without a tooltip on any of their controls", async ({ app }) => {
+    await app.preferencesButton.click();
+    await expect(app.page.getByRole("radio")).toHaveCount(4);
+    await app.page.waitForTimeout(600);
+
+    await expect(app.page.getByRole("tooltip")).toHaveCount(0);
+  });
+
+  test("show a tooltip on hover, but not over the open popover", async ({ app }) => {
+    await app.preferencesButton.hover();
+    await expect(app.page.getByRole("tooltip")).toHaveText("Préférences");
+
+    await app.preferencesButton.click();
+    await app.page.mouse.move(700, 300);
+    await app.preferencesButton.hover();
+    await app.page.waitForTimeout(600);
+
+    await expect(app.page.getByRole("tooltip")).toHaveCount(0);
+  });
+
   test("the checked choice looks different from the others", async ({ app }) => {
+    await app.preferencesButton.click();
+    await app.page.getByRole("dialog").hover();
     const background = (name: string) =>
       choice(app, name).evaluate((element) => getComputedStyle(element).backgroundColor);
 
@@ -134,7 +185,8 @@ test.describe("preferences bar", () => {
     expect(await background("English")).toBe("rgba(0, 0, 0, 0)");
   });
 
-  test("moves between the choices with the keyboard", async ({ app }) => {
+  test("move between the choices with the keyboard", async ({ app }) => {
+    await app.preferencesButton.click();
     await choice(app, "Français").focus();
     await app.page.keyboard.press("ArrowRight");
     await app.page.keyboard.press("Space");
@@ -142,7 +194,22 @@ test.describe("preferences bar", () => {
     await expect(choice(app, "English")).toBeChecked();
   });
 
-  test("sits on the toolbar line without touching the photo", async ({ openApp }) => {
+  test("stay clear of the drop zone before a photo is open", async ({ app }) => {
+    const bottomOf = (selector: string) =>
+      app.page
+        .locator(selector)
+        .first()
+        .evaluate((element) => element.getBoundingClientRect().bottom);
+    const topOf = (selector: string) =>
+      app.page
+        .locator(selector)
+        .first()
+        .evaluate((element) => element.getBoundingClientRect().top);
+
+    expect(await bottomOf(".dropzone")).toBeLessThanOrEqual(await topOf(".preferences"));
+  });
+
+  test("sit on the toolbar line without touching the photo", async ({ openApp }) => {
     const box = (selector: string) =>
       openApp.page
         .locator(selector)
@@ -151,7 +218,7 @@ test.describe("preferences bar", () => {
           const { top, bottom, left, right } = element.getBoundingClientRect();
           return { top, bottom, left, right };
         });
-    const preferences = await box('[role="group"][aria-label="Préférences"]');
+    const preferences = await box(".preferences");
     const toolbar = await box('[role="toolbar"]');
     const photo = await box("main img");
 
