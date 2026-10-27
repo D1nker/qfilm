@@ -290,6 +290,12 @@ golden_frame!(
     Caption::default()
 );
 golden_frame!(
+    frame_film35_custom_ink,
+    landscape(),
+    film_frame("film35", "amber", json!({ "ink": "#33aaff" })),
+    Caption::default()
+);
+golden_frame!(
     frame_film35_no_sprockets,
     landscape(),
     film_frame("film35", "amber", json!({ "sprockets": false })),

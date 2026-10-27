@@ -53,7 +53,7 @@
   {%- set hole_w = [strip * 0.26, 2] | max -%}
   {%- set pitch = [strip * 0.64, hole_w + 2] | max -%}
   {%- set holes = (((W - hole_w - pitch * 0.5) / pitch) | int) + 1 %}
-  <g fill="{{ '#ededeb' if is_dark(p.color) else '#272727' }}">
+  <g fill="{{ p.ink if printed else ('#ededeb' if is_dark(p.color) else '#272727') }}">
     {%- for row_y in [strip * 0.70, H - strip * 0.70] %}
     {%- for i in range(holes) %}
     <rect x="{{ pitch * 0.5 + i * pitch }}" y="{{ row_y - hole_h / 2 }}" width="{{ hole_w }}" height="{{ hole_h }}" rx="{{ hole_h * 0.26 }}"/>
