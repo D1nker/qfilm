@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>qFilm</title>
+    <meta
+      name="description"
+      content="A film look and frame studio for your photos: film looks, grain and halation, film-style borders and captions."
+    />
+    <link rel="icon" type="image/svg+xml" href="icon.svg" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="top">
+      <a class="brand" href="#top"><img src="icon.svg" alt="" width="28" height="28" /> qFilm</a>
+      <nav>
+        <a href="#features">Features</a>
+        <a href="#download">Download</a>
+        <a href="https://github.com/D1nker/qfilm">GitHub</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <h1>Give your photos a <span>film look</span> and a frame.</h1>
+        <p class="lead">
+          qFilm is a small desktop app for film-inspired looks, grain and halation, film-style
+          borders and captions. Open a photo, pick a look, wrap it in a frame, export.
+        </p>
+        <p><a class="button primary" href="#download">Download</a></p>
+      </section>
+
+      <section id="features" class="features">
+        <article>
+          <h2>Looks</h2>
+          <p>
+            Film-inspired presets with an intensity slider, plus manual adjustments: exposure,
+            contrast, colour, clarity, grain, halation, vignette.
+          </p>
+        </article>
+        <article>
+          <h2>Frames</h2>
+          <p>
+            35 mm and medium-format strips, instant prints, letterbox and more. A frame is just an
+            SVG and a small manifest: design yours in Figma and import it.
+          </p>
+        </article>
+        <article>
+          <h2>Captions</h2>
+          <p>Write on the photo or in the border, and move the text right on the preview.</p>
+        </article>
+        <article>
+          <h2>Export</h2>
+          <p>JPEG, PNG or 16-bit TIFF, at full size or resized.</p>
+        </article>
+      </section>
+
+      <section id="download" class="download">
+        <h2>Download</h2>
+        <p class="status" id="status">
+          qFilm is in early development: there is no public release yet.
+        </p>
+        <div class="platforms">
+          <a class="button" data-os="mac" href="https://github.com/D1nker/qfilm/releases/latest">
+            macOS
+          </a>
+          <a
+            class="button"
+            data-os="windows"
+            href="https://github.com/D1nker/qfilm/releases/latest"
+          >
+            Windows
+          </a>
+          <a class="button" data-os="linux" href="https://github.com/D1nker/qfilm/releases/latest">
+            Linux
+          </a>
+        </div>
+        <p class="note">
+          Free and open source under the MIT license.
+          <a href="https://github.com/D1nker/qfilm">Source on GitHub</a>.
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      <p>qFilm · MIT license</p>
+    </footer>
+
+    <script src="main.js"></script>
+  </body>
+</html>
