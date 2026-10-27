@@ -1,7 +1,7 @@
 <template>
   <aside>
     <UiTabs v-model="tab" :tabs="TABS">
-      <template #looks><LooksPanel /></template>
+      <template #looks><LooksPanel @select="labelFrameFromLook" /></template>
       <template #adjust><AdjustPanel /></template>
       <template #frame><FramePanel /></template>
     </UiTabs>
@@ -9,6 +9,8 @@
 </template>
 
 <script setup lang="ts">
+import type { Preset } from "@/lib/api";
+import { useFrame } from "@/composables/useFrame";
 import { useInspector, type InspectorTab } from "@/composables/useInspector";
 import UiTabs from "@/components/ui/UiTabs.vue";
 import AdjustPanel from "@/components/inspector/AdjustPanel.vue";
@@ -22,6 +24,11 @@ const TABS: { value: InspectorTab; label: string }[] = [
 ];
 
 const { tab } = useInspector();
+const { labelFromLook } = useFrame();
+
+function labelFrameFromLook(preset: Preset) {
+  labelFromLook(preset.id, preset.name);
+}
 </script>
 
 <style scoped>

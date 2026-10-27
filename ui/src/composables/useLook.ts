@@ -2,7 +2,7 @@ import { computed, reactive, ref } from "vue";
 
 import type { Preset, RenderParams } from "@/lib/api";
 import { controls } from "@/lib/controls";
-import { NEUTRAL } from "@/lib/defaults";
+import { NEUTRAL } from "@/lib/neutral";
 
 type ParamKey = keyof RenderParams;
 

@@ -17,7 +17,7 @@ import {
   type ParamDef,
   type ParamValue,
 } from "@/lib/api";
-import { DEFAULT_CAPTION } from "@/lib/defaults";
+import { DEFAULT_CAPTION } from "@/lib/captionDefaults";
 import {
   NONE_FRAME,
   captionDefaultsOf,

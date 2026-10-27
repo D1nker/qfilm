@@ -1,4 +1,4 @@
-import type { Caption, RenderParams } from "@/lib/api";
+import type { RenderParams } from "@/lib/api";
 
 export const NEUTRAL: RenderParams = {
   exposure: 0,
@@ -17,13 +17,4 @@ export const NEUTRAL: RenderParams = {
   grain: 0,
   grainSize: 2,
   vignette: 0,
-};
-
-export const DEFAULT_CAPTION: Caption = {
-  text: "",
-  font: "condensed",
-  size: 4,
-  color: "#ffffff",
-  x: null,
-  y: null,
 };
