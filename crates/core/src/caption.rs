@@ -8,7 +8,7 @@ use super::buffer::{ImageBuf, srgb_to_linear};
 use super::fonts::{FontChoice, face, text_width};
 use super::frame::TextZone;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, specta::Type)]
 #[serde(default, rename_all = "camelCase")]
 pub struct Caption {
     pub text: String,

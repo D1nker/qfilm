@@ -15,7 +15,7 @@ static TYPEWRITER: LazyLock<FontRef<'static>> =
 static HANDWRITTEN: LazyLock<FontRef<'static>> =
     LazyLock::new(|| FontRef::try_from_slice(HANDWRITTEN_DATA).expect("police intégrée valide"));
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize, specta::Type)]
 #[serde(rename_all = "camelCase")]
 pub enum FontChoice {
     #[default]

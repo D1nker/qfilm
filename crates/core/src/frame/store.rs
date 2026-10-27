@@ -15,7 +15,7 @@ const MAX_MANIFEST_BYTES: u64 = 256 * 1024;
 const MAX_TEMPLATE_BYTES: u64 = 8 * 1024 * 1024;
 const MAX_ARCHIVE_BYTES: u64 = 16 * 1024 * 1024;
 
-#[derive(Debug, Clone, serde::Serialize)]
+#[derive(Debug, Clone, serde::Serialize, specta::Type)]
 pub struct LoadIssue {
     pub folder: String,
     pub message: String,

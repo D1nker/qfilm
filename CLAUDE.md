@@ -74,6 +74,14 @@ holds files shared by both sides, `docs/` and `branding/` are what they say. Fro
   extraction, no file access from SVG. Keep those guarantees (and their tests) when touching it.
 - `qfilm-core` is UI-agnostic: no Tauri types in it. Tauri glue stays in `desktop/src/commands.rs`.
 - Errors: `thiserror` enums, serialized to the frontend as strings.
+- The Rust/UI contract is generated: `ui/src/lib/bindings.ts` comes from the commands and wire types
+  (`tauri-specta`, versions pinned exactly: it is still a release candidate). Never edit it by hand. A command
+  is `#[tauri::command]` + `#[specta::specta]` and is registered in `desktop/src/bindings.rs`; a type that
+  crosses the bridge derives `specta::Type`. After changing either, run `npm run rust:bindings`; a test fails
+  while the file is stale. `ui/src/lib/api.ts` is the only consumer: it re-exports the generated commands and
+  friendly type names, and holds the native dialogs. Command errors reject with a string (`Throw` mode).
+- `desktop/src/commands/` has one module per domain (`image`, `render`, `export`, `frames`); shared state is
+  in `state.rs`.
 - Tests: Vitest unit tests sit next to their module (`*.test.ts`); composables hold module-level
   state, so load them with `fresh()` from `ui/src/test/fresh.ts` and mock Rust with `apiMock()`. The
   Playwright suite in `ui/e2e/` runs the real UI against `ui/e2e/support/tauri-mock.js` (real frame

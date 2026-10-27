@@ -7,13 +7,14 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
 use super::FrameError;
+use crate::fonts::FontChoice;
 
 const MAX_PARAMS: usize = 64;
 const MAX_OPTIONS: usize = 48;
 const MAX_TEXT_LENGTH: usize = 500;
 const DEFAULT_TEXT_LENGTH: usize = 80;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, specta::Type)]
 #[serde(rename_all = "camelCase")]
 pub struct FrameManifest {
     pub id: String,
@@ -28,12 +29,13 @@ pub struct FrameManifest {
     pub rotate_portrait: bool,
     /// Réglages de la légende repris quand on choisit ce cadre (seuls les champs présents).
     #[serde(default)]
+    #[specta(type = CaptionDefaults)]
     pub caption_defaults: Map<String, Value>,
     #[serde(default)]
     pub params: Vec<ParamDef>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, specta::Type)]
 #[serde(rename_all = "camelCase")]
 pub struct ParamDef {
     pub id: String,
@@ -55,7 +57,7 @@ pub struct ParamDef {
     pub kind: ParamKind,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, specta::Type)]
 // `rename_all` ne renomme que les variantes ; `rename_all_fields` renomme leurs champs
 // (`maxLength`). Sans lui, ces champs seraient ignorés en silence.
 #[serde(
@@ -81,6 +83,7 @@ pub enum ParamKind {
     Text {
         default: String,
         #[serde(default = "default_text_length")]
+        #[specta(type = u32)]
         max_length: usize,
     },
     Choice {
@@ -95,7 +98,7 @@ const fn default_text_length() -> usize {
     DEFAULT_TEXT_LENGTH
 }
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, specta::Type)]
 #[serde(rename_all = "camelCase")]
 pub enum ChoiceDisplay {
     #[default]
@@ -103,24 +106,49 @@ pub enum ChoiceDisplay {
     List,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, specta::Type)]
 #[serde(rename_all = "camelCase")]
 pub struct ChoiceOption {
     pub id: String,
     pub label: String,
     /// Valeurs imposées à d'autres réglages (une pellicule fixe couleur, encre et texte).
     #[serde(default)]
+    #[specta(type = BTreeMap<String, ParamValue>)]
     pub sets: BTreeMap<String, Value>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, specta::Type)]
 #[serde(rename_all = "camelCase")]
 pub struct Condition {
     pub param: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[specta(type = Option<ParamValue>)]
     pub equals: Option<Value>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[specta(type = Option<ParamValue>)]
     pub not_equals: Option<Value>,
+}
+
+/// Valeur d'un réglage de cadre. Le moteur manipule du JSON brut : ce type ne sert qu'à décrire
+/// l'API au frontend.
+#[derive(Debug, Clone, Serialize, Deserialize, specta::Type)]
+#[serde(untagged)]
+pub enum ParamValue {
+    Number(f64),
+    Flag(bool),
+    Text(String),
+}
+
+/// Réglages de légende qu'un cadre peut imposer ; chacun est facultatif.
+#[derive(Debug, Clone, Serialize, Deserialize, specta::Type)]
+#[serde(rename_all = "camelCase")]
+pub struct CaptionDefaults {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub color: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub font: Option<FontChoice>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub size: Option<f32>,
 }
 
 pub fn is_hex_color(value: &str) -> bool {

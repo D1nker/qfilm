@@ -42,11 +42,12 @@ pub enum FrameError {
     Package(String),
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, specta::Type)]
 #[serde(rename_all = "camelCase")]
 pub struct FrameSelection {
     pub id: String,
     #[serde(default)]
+    #[specta(type = std::collections::BTreeMap<String, manifest::ParamValue>)]
     pub params: Map<String, Value>,
 }
 
@@ -59,7 +60,7 @@ impl Default for FrameSelection {
     }
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, specta::Type)]
 #[serde(rename_all = "camelCase")]
 pub struct TextZone {
     pub field: String,

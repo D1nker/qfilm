@@ -1,6 +1,8 @@
+mod bindings;
 mod commands;
+mod state;
 
-use commands::AppState;
+use state::AppState;
 use tauri::Manager;
 
 /// # Panics
@@ -24,21 +26,7 @@ pub fn run() {
             }
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![
-            commands::list_presets,
-            commands::supported_extensions,
-            commands::open_image,
-            commands::preset_thumbnails,
-            commands::frame_thumbnails,
-            commands::render_preview,
-            commands::export_image,
-            commands::close_image,
-            commands::list_frames,
-            commands::reload_frames,
-            commands::import_frame,
-            commands::remove_frame,
-            commands::open_frames_folder,
-        ])
+        .invoke_handler(bindings::builder().invoke_handler())
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

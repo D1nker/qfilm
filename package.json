@@ -22,6 +22,7 @@
     "format:check": "prettier --check .",
     "rust:fmt": "cargo fmt --all",
     "rust:fmt:check": "cargo fmt --all --check",
+    "rust:bindings": "UPDATE_BINDINGS=1 cargo test -p app bindings",
     "rust:lint": "cargo clippy --workspace --all-targets -- -D warnings",
     "check": "npm run format:check && npm run lint && npm run typecheck",
     "check:rust": "npm run rust:fmt:check && npm run rust:lint",

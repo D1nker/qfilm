@@ -53,3 +53,9 @@ impl serde::Serialize for PhotoError {
         serializer.serialize_str(&self.to_string())
     }
 }
+
+impl specta::Type for PhotoError {
+    fn definition(_: &mut specta::Types) -> specta::datatype::DataType {
+        specta::datatype::Primitive::str.into()
+    }
+}

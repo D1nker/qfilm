@@ -42,6 +42,7 @@ npm run check:all    # Prettier + ESLint + vue-tsc + rustfmt + clippy
 npm run format       # auto-format the frontend
 npm run lint:fix     # auto-fix ESLint issues
 npm run rust:fmt     # auto-format the Rust code
+npm run rust:bindings # regenerate ui/src/lib/bindings.ts after changing a command or a wire type
 ```
 
 ## Project layout
@@ -54,10 +55,10 @@ ui/                  Vue app (npm workspace): Vite, Vitest, Playwright, ESLint
 │  │  ├─ inspector/  right panel: Looks / Réglages / Cadre tabs
 │  │  └─ export/     export dialog (format, quality, size)
 │  ├─ composables/   state and logic (module-level singletons)
-│  ├─ lib/           typed Tauri API, static data, helpers
+│  ├─ lib/           typed Tauri API (bindings.ts is generated), static data, helpers
 │  └─ styles/        design tokens (light + dark) and base styles
 └─ e2e/              Playwright tests against a mocked Tauri bridge
-desktop/             thin Tauri shell: commands, app state, config, icons
+desktop/             thin Tauri shell: commands/ (by domain), state, bindings, config, icons
 crates/core/         qfilm-core: the imaging engine (no Tauri dependency)
 ├─ src/              decode, render pipeline, presets, frames, caption, encode
 ├─ frames/           built-in frames (SVG + manifest)

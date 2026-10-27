@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use super::buffer::{ImageBuf, linear_to_srgb, srgb_to_linear};
 
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, specta::Type)]
 #[serde(default, rename_all = "camelCase")]
 pub struct RenderParams {
     /// En diaphragmes (EV).

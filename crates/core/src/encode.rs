@@ -36,7 +36,7 @@ pub fn to_data_url(img: &ImageBuf, quality: u8) -> Result<String, PhotoError> {
     ))
 }
 
-#[derive(Debug, Clone, Copy, Deserialize)]
+#[derive(Debug, Clone, Copy, Deserialize, specta::Type)]
 #[serde(rename_all = "lowercase")]
 pub enum ExportFormat {
     Jpeg,
@@ -55,7 +55,7 @@ impl ExportFormat {
     }
 }
 
-#[derive(Debug, Clone, Copy, Deserialize)]
+#[derive(Debug, Clone, Copy, Deserialize, specta::Type)]
 #[serde(rename_all = "camelCase")]
 pub struct ExportOptions {
     pub format: ExportFormat,

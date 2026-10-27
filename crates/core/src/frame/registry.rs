@@ -8,7 +8,7 @@ use crate::caption::{self, Caption};
 
 pub const NONE_ID: &str = "none";
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, specta::Type)]
 #[serde(rename_all = "camelCase")]
 pub struct FrameInfo {
     #[serde(flatten)]
