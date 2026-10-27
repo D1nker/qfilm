@@ -1,4 +1,4 @@
-//! Le contrat avec l'interface : `ui/src/lib/bindings.ts` est généré à partir des commandes et
+//! Le contrat avec l'interface : `ui/src/shared/api/bindings.ts` est généré à partir des commandes et
 //! des types Rust, jamais écrit à la main.
 
 use specta_typescript::semantic;
@@ -38,7 +38,7 @@ mod tests {
     use super::builder;
 
     fn committed_file() -> PathBuf {
-        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../ui/src/lib/bindings.ts")
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../ui/src/shared/api/bindings.ts")
     }
 
     /// Échoue si `bindings.ts` n'est plus à jour. `UPDATE_BINDINGS=1 cargo test bindings` le
@@ -61,7 +61,7 @@ mod tests {
         let current = std::fs::read_to_string(&committed).unwrap_or_default();
         assert!(
             current == generated,
-            "ui/src/lib/bindings.ts est périmé : lance `npm run rust:bindings`"
+            "ui/src/shared/api/bindings.ts est périmé : lance `npm run rust:bindings`"
         );
     }
 }

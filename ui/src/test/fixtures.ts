@@ -1,4 +1,4 @@
-import type { ChoiceOption, FrameInfo, ParamDef } from "@/lib/api";
+import type { ChoiceOption, FrameInfo, ParamDef } from "@/shared/api/api";
 
 const STOCKS: ChoiceOption[] = [
   {

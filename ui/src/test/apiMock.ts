@@ -1,6 +1,6 @@
 import { vi } from "vitest";
 
-/// Un double de `@/lib/api` : chaque appel vers Rust devient un espion que le test pilote.
+/// Un double de `@/shared/api/api` : chaque appel vers Rust devient un espion que le test pilote.
 export function apiMock() {
   return {
     closeImage: vi.fn(),

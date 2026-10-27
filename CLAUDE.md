@@ -22,28 +22,38 @@ holds files shared by both sides, `docs/` and `branding/` are what they say. Fro
 
 - Imports use the `@/` alias (= `ui/src/`). Never `../` (ESLint enforces it); avoid `./` too.
 - `<script setup lang="ts">`, block order template → script → style, scoped CSS per component.
-- State lives in composables (`src/composables`), module-level singletons, no Pinia. One concern
-  each: `useEditor` (open photo, presets, thumbnails), `useLook` (preset × amount + manual
-  adjustments), `useFrame` (chosen frame, its params, caption, imported frames), `useFrameThumbnails`, `useRender` (the single watcher that calls Rust),
-  `useHistory` (undo/redo of look + frame, steps collapse after a 300 ms pause), `useExport`,
-  `useInspector`, `useTheme` (dark default, light), `useViewportNavigation` (zoom/pan),
-  `useShortcuts`, `useHelp` (shortcuts dialog), `useNotice` (passing messages).
+- Code is organised by feature, under `src/`: `features/<name>/` (components, composables, helpers and
+  tests of one concern), `shared/` (`ui/` kit, `api/` bridge, `lib/` helpers), `app/` (shell: App, header,
+  shortcuts, theme, and the inspector panel that composes the features), `styles/`, `test/` (helpers).
+  Boundaries are enforced by ESLint (`FEATURE_DEPENDENCIES` in `eslint.config.js`, an acyclic graph from
+  `photo` up to `viewer`): a feature imports another only through its `index.ts` (public API, `@/features/<name>`),
+  only if the table allows it, and never from `app`; `shared` imports no feature. A feature that needs to
+  react to another is wired by the host (see `LooksPanel` emitting `select`, handled in `InspectorPanel`).
+  A new file that another feature needs must be exported from its `index.ts`.
+- State lives in composables inside their feature, module-level singletons, no Pinia. One concern
+  each: `photo/useEditor` (open photo, presets, thumbnails), `looks/useLook` (preset × amount + manual
+  adjustments), `frames/useFrame` (chosen frame, its params, caption, imported frames), `useFrameThumbnails`,
+  `viewer/useRender` (the single watcher that calls Rust), `viewer/useViewportNavigation` (zoom/pan),
+  `history/useHistory` (undo/redo of look + frame, steps collapse after a 300 ms pause), `export/useExport`,
+  `inspector/useInspector`, `app/useTheme` (dark default, light), `app/useShortcuts`, `app/useHelp`
+  (shortcuts dialog), `shared/lib/useNotice` (passing messages).
 - Rendering is driven by one watcher in `useRender`: change state, never call the renderer by hand.
   Rust caches the photo render, so border-only changes are cheap.
 - Styles for content Reka teleports to `<body>` (select popup, tooltip) must be unscoped with a
   namespaced class (`.ui-select-content`): scoped CSS does not reach it.
-- Styling goes through design tokens in `src/styles/tokens.css` (light + dark, neutral grays,
+- Styling goes through design tokens in `ui/src/styles/tokens.css` (light + dark, neutral grays,
   violet accent). No hard-coded colors, no Tailwind. Inter is the font.
-- Headless widgets come from Reka UI, wrapped in `src/components/ui/` as `Ui*` components
+- Headless widgets come from Reka UI, wrapped in `src/shared/ui/` as `Ui*` components
   (UiButton, UiSlider, UiSelect, UiMenu, UiDialog, UiTooltip…). Reuse them; add a new one there rather than
   styling raw elements in feature components. Icons come from `lucide-vue-next`.
 - Layout: the header holds app-level things only (the qFilm wordmark is the app menu, open, export);
   editing and view controls (undo/redo, compare, zoom) live in the floating `CanvasToolbar`,
-  centered on the canvas; the panel fold/unfold is a handle on the canvas edge (`PanelHandle`); the panel starts folded and unfolds when the first photo opens (`useInspector`). The strip under the photo (`--toolbar-clearance` in `ImageViewport`) mirrors
-  `TOOLBAR_CLEARANCE` in `useViewportNavigation`: change both together. Toasts go at the top.
+  centered on the canvas; the panel fold/unfold is a handle on the canvas edge (`PanelHandle`); the panel
+  starts folded and unfolds when the first photo opens (`useInspector`). The strip under the photo
+  (`--toolbar-clearance` in `ImageViewport`) mirrors `TOOLBAR_CLEARANCE` in `useViewportNavigation`: change both together. Toasts go at the top.
   On macOS the window uses an overlay title bar: `trafficLightPosition.y` in `tauri.conf.json` centers the
   lights in the 52px header and `header.overlay` in `AppHeader` reserves their width; change them together.
-- Components stay small and presentational; logic goes in composables, static data in `src/lib`.
+- Components stay small and presentational; logic goes in composables, static data in the feature's own helper files (`controls.ts`, `fonts.ts`…).
 - Shortcuts: `C` hold = original, `F` = hide/show panel, ⌘Z / ⇧⌘Z, ⌘ +/−/0 zoom, Space+drag pan.
   Never take `Tab` (keyboard navigation) and pick keys that work on AZERTY (no `\`, no dead
   keys). Space must not re-trigger a button that was merely clicked: see `lastInput` in
@@ -66,7 +76,7 @@ holds files shared by both sides, `docs/` and `branding/` are what they say. Fro
   rendered by resvg, composited in linear light). The Frame panel is generated from the manifest.
   Built-in frames live in `crates/core/frames/`; the authoring guide is `docs/FRAMES.md` (keep it in
   sync with `crates/core/src/frame/`). Frame state: `useFrame` (`frame` + `caption` + `memory` for
-  `persist` params), pure helpers in `src/lib/frameParams.ts` (mirror Rust's coercion).
+  `persist` params), pure helpers in `src/features/frames/frameParams.ts` (mirror Rust's coercion).
 - Presets live in `crates/core/presets/builtin.json` (embedded at build time, validated by tests).
   Only non-default params are written. To add a look, edit that file.
 - Frames engine: `crates/core/src/frame/` (manifest validation → template → raster/compose → registry/store).
@@ -74,11 +84,11 @@ holds files shared by both sides, `docs/` and `branding/` are what they say. Fro
   extraction, no file access from SVG. Keep those guarantees (and their tests) when touching it.
 - `qfilm-core` is UI-agnostic: no Tauri types in it. Tauri glue stays in `desktop/src/commands.rs`.
 - Errors: `thiserror` enums, serialized to the frontend as strings.
-- The Rust/UI contract is generated: `ui/src/lib/bindings.ts` comes from the commands and wire types
+- The Rust/UI contract is generated: `ui/src/shared/api/bindings.ts` comes from the commands and wire types
   (`tauri-specta`, versions pinned exactly: it is still a release candidate). Never edit it by hand. A command
   is `#[tauri::command]` + `#[specta::specta]` and is registered in `desktop/src/bindings.rs`; a type that
   crosses the bridge derives `specta::Type`. After changing either, run `npm run rust:bindings`; a test fails
-  while the file is stale. `ui/src/lib/api.ts` is the only consumer: it re-exports the generated commands and
+  while the file is stale. `ui/src/shared/api/api.ts` is the only consumer: it re-exports the generated commands and
   friendly type names, and holds the native dialogs. Command errors reject with a string (`Throw` mode).
 - `desktop/src/commands/` has one module per domain (`image`, `render`, `export`, `frames`); shared state is
   in `state.rs`.

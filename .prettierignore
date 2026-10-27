@@ -3,6 +3,6 @@ node_modules
 desktop
 crates
 target
-ui/src/lib/bindings.ts
+ui/src/shared/api/bindings.ts
 public
 package-lock.json

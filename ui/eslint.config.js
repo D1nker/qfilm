@@ -3,10 +3,55 @@ import { defineConfigWithVueTs, vueTsConfigs } from "@vue/eslint-config-typescri
 import pluginVue from "eslint-plugin-vue";
 import skipFormatting from "@vue/eslint-config-prettier/skip-formatting";
 
+const NO_PARENT_IMPORTS = {
+  group: ["../*"],
+  message: "Utiliser l'alias `@/` plutôt qu'un chemin relatif parent.",
+};
+
+// Qui a le droit d'importer qui : un graphe sans cycle, du plus bas (photo) au plus haut (viewer).
+const FEATURE_DEPENDENCIES = {
+  photo: [],
+  looks: ["photo"],
+  inspector: ["photo"],
+  frames: ["photo", "looks", "inspector"],
+  history: ["photo", "looks", "frames"],
+  export: ["photo", "looks", "frames"],
+  viewer: ["photo", "looks", "frames", "history", "inspector"],
+};
+
+const restrictImports = (...patterns) => ["error", { patterns: [NO_PARENT_IMPORTS, ...patterns] }];
+
+const featureBoundaries = Object.entries(FEATURE_DEPENDENCIES).map(([feature, allowed]) => ({
+  name: `app/boundaries/${feature}`,
+  files: [`src/features/${feature}/**/*.{ts,vue}`],
+  rules: {
+    "no-restricted-imports": restrictImports(
+      ...Object.keys(FEATURE_DEPENDENCIES)
+        .filter((other) => other !== feature)
+        .flatMap((other) =>
+          allowed.includes(other)
+            ? [
+                {
+                  group: [`@/features/${other}/*`],
+                  message: `Passer par l'index public : \`@/features/${other}\`.`,
+                },
+              ]
+            : [
+                {
+                  group: [`@/features/${other}`, `@/features/${other}/*`],
+                  message: `\`${feature}\` ne dépend pas de \`${other}\` (voir FEATURE_DEPENDENCIES).`,
+                },
+              ],
+        ),
+      { group: ["@/app/*"], message: "Une feature ne dépend pas de la couche `app`." },
+    ),
+  },
+}));
+
 export default defineConfigWithVueTs(
   { name: "app/files-to-lint", files: ["**/*.{ts,mts,vue}"] },
 
-  globalIgnores(["**/dist/**", "**/node_modules/**", "src/lib/bindings.ts"]),
+  globalIgnores(["**/dist/**", "**/node_modules/**", "src/shared/api/bindings.ts"]),
 
   pluginVue.configs["flat/recommended"],
   vueTsConfigs.recommendedTypeChecked,
@@ -53,6 +98,30 @@ export default defineConfigWithVueTs(
       "vue/no-unused-refs": "error",
       "vue/prefer-true-attribute-shorthand": "error",
       "vue/v-on-event-hyphenation": ["error", "always"],
+    },
+  },
+
+  ...featureBoundaries,
+
+  {
+    name: "app/boundaries/shared",
+    files: ["src/shared/**/*.{ts,vue}"],
+    rules: {
+      "no-restricted-imports": restrictImports({
+        group: ["@/features/*", "@/app/*"],
+        message: "`shared` ne dépend d'aucune feature ni de la couche `app`.",
+      }),
+    },
+  },
+
+  {
+    name: "app/boundaries/app",
+    files: ["src/app/**/*.{ts,vue}"],
+    rules: {
+      "no-restricted-imports": restrictImports({
+        group: ["@/features/*/*"],
+        message: "Passer par l'index public d'une feature : `@/features/<nom>`.",
+      }),
     },
   },
 
