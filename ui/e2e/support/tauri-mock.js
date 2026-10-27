@@ -25,26 +25,39 @@
     grainSize: 2,
     vignette: 0,
   };
+  const inLanguage = (text, language) => (typeof text === "string" ? text : text[language]);
   const preset = (id, name, category, params = {}) => ({
     id,
     name,
     category,
-    description: `Description de ${name}`,
+    description: {
+      fr: `Description de ${inLanguage(name, "fr")}`,
+      en: `Description of ${inLanguage(name, "en")}`,
+    },
     params: { ...neutral, ...params },
   });
+  const colorNegative = { fr: "Négatif couleur", en: "Color negative" };
   const presets = [
-    preset("neutral", "Neutre", "Base"),
-    preset("portrait", "Portrait 400", "Négatif couleur", {
+    preset("neutral", { fr: "Neutre", en: "Neutral" }, "Base"),
+    preset("portrait", "Portrait 400", colorNegative, {
       exposure: 1,
       contrast: -0.4,
       grainSize: 4,
     }),
-    preset("dore", "Doré 200", "Négatif couleur", { temperature: 0.5, saturation: 0.3 }),
-    preset("classique", "Classique 400", "Noir & blanc", {
-      saturation: -1,
-      contrast: 0.5,
-      grain: 0.6,
+    preset("dore", { fr: "Doré 200", en: "Golden 200" }, colorNegative, {
+      temperature: 0.5,
+      saturation: 0.3,
     }),
+    preset(
+      "classique",
+      { fr: "Classique 400", en: "Classic 400" },
+      { fr: "Noir & blanc", en: "Black & white" },
+      {
+        saturation: -1,
+        contrast: 0.5,
+        grain: 0.6,
+      },
+    ),
   ];
   const thumbnailColors = {
     neutral: ["#4a6fa5", "#c97b4a"],
@@ -55,7 +68,7 @@
 
   const none = {
     id: "none",
-    name: "Aucun",
+    name: { fr: "Aucun", en: "None" },
     description: "",
     author: "",
     rotatePortrait: false,

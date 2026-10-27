@@ -1,7 +1,13 @@
 {
   "id": "instant",
-  "name": "Instantané",
-  "description": "Marge basse haute, comme un tirage instantané.",
+  "name": {
+    "fr": "Instantané",
+    "en": "Instant"
+  },
+  "description": {
+    "fr": "Marge basse haute, comme un tirage instantané.",
+    "en": "A deeper bottom margin, like an instant print."
+  },
   "captionDefaults": {
     "color": "#23262b",
     "font": "handwritten",
@@ -10,7 +16,10 @@
   "params": [
     {
       "id": "width",
-      "label": "Épaisseur",
+      "label": {
+        "fr": "Épaisseur",
+        "en": "Thickness"
+      },
       "type": "number",
       "min": 1,
       "max": 30,
@@ -20,7 +29,10 @@
     },
     {
       "id": "color",
-      "label": "Couleur",
+      "label": {
+        "fr": "Couleur",
+        "en": "Color"
+      },
       "type": "color",
       "default": "#f6f4ee"
     }

@@ -47,7 +47,9 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
 - Headless widgets come from Reka UI, wrapped in `src/shared/ui/` as `Ui*` components
   (UiButton, UiSlider, UiSelect, UiMenu, UiDialog, UiTooltip…). Reuse them; add a new one there rather than
   styling raw elements in feature components. Icons come from `lucide-vue-next`.
-- Layout: the header holds app-level things only (the qFilm wordmark is the app menu, open, export);
+- Layout: the header holds app-level things only (the qFilm wordmark is the app menu: frames folder and shortcuts; open; export);
+  theme and language live in the `PreferencesBar` (`UiSegmented` controls) in the canvas's bottom-left corner,
+  on the line of the floating toolbar, so they stay reachable before any photo is open;
   editing and view controls (undo/redo, compare, zoom) live in the floating `CanvasToolbar`,
   centered on the canvas; the panel fold/unfold is a handle on the canvas edge (`PanelHandle`); the panel
   starts folded and unfolds when the first photo opens (`useInspector`). The strip under the photo
@@ -67,8 +69,10 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
   (strict: only catalogue keys are accepted). Tables of options are functions that call `t` (`sizeOptions()`),
   never constants, so they follow a language change. The language is the system one (French, otherwise
   English), overridable in the qFilm menu and then remembered. Placeholders (`{name}`) must match in both
-  languages (tested). Still French only, for now: the names and categories of looks, the labels of frame
-  manifests, and Rust error messages. Tests run in French (Vitest `setup.ts`, Playwright `locale`).
+  languages (tested). Texts that come from data (look names, categories and descriptions, frame manifests)
+  are `LocalizedText` in Rust: a plain string or a `{ "fr": …, "en": … }` map; the UI shows them with
+  `localized()` and groups on `textKey()` (never on the displayed text). Built-in looks and frames must have
+  both `fr` and `en` (tested); imported frames may have any. Still French only: Rust error messages. Tests run in French (Vitest `setup.ts`, Playwright `locale`).
 - `import type` for types (`consistent-type-imports`), `interface` over `type` for object shapes,
   no `any`, no floating promises (use `void` explicitly).
 

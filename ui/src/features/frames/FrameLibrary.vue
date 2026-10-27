@@ -17,13 +17,13 @@
 
     <ul v-if="mine.length" class="list">
       <li v-for="info in mine" :key="info.id">
-        <span class="name">{{ info.name }}</span>
+        <span class="name">{{ localized(info.name) }}</span>
         <UiTooltip :text="t('frames.library.remove')">
           <UiButton
             variant="ghost"
             size="sm"
             icon
-            :aria-label="t('frames.library.removeNamed', { name: info.name })"
+            :aria-label="t('frames.library.removeNamed', { name: localized(info.name) })"
             @click="remove(info.id)"
           >
             <Trash2 :size="14" />
@@ -55,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import { t } from "@/shared/i18n";
+import { localized, t } from "@/shared/i18n";
 import { computed } from "vue";
 import { FolderOpen, RefreshCw, Trash2 } from "lucide-vue-next";
 

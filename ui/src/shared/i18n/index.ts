@@ -54,3 +54,19 @@ function set(value: Locale) {
 export function useLocale() {
   return { locale, set };
 }
+
+/// Un texte venu des données : une chaîne pour toutes les langues, ou une chaîne par langue.
+export type LocalizedText = string | Record<string, string>;
+
+/// Le texte dans la langue courante, à défaut en anglais, en français, puis dans n'importe laquelle.
+export function localized(text: LocalizedText | null | undefined): string {
+  if (!text) return "";
+  if (typeof text === "string") return text;
+  return text[locale.value] ?? text.en ?? text.fr ?? Object.values(text)[0] ?? "";
+}
+
+/// Identifie un texte quelle que soit la langue affichée : sert à regrouper (catégories, sections).
+export function textKey(text: LocalizedText): string {
+  if (typeof text === "string") return text;
+  return text.en ?? text.fr ?? Object.values(text)[0] ?? "";
+}

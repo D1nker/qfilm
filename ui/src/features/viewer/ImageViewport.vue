@@ -90,7 +90,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref } from "vue";
 import { ImagePlus } from "lucide-vue-next";
-import { t } from "@/shared/i18n";
+import { localized, t } from "@/shared/i18n";
 
 import type { TextZone } from "@/shared/api/api";
 import { useCaptionLayer } from "@/features/viewer/useCaptionLayer";
@@ -169,7 +169,7 @@ const editorStyle = computed(() => {
 
 function fieldLabel(field: string | null) {
   if (field === "caption") return t("frames.caption");
-  return current.value?.params.find((param) => param.id === field)?.label ?? "";
+  return localized(current.value?.params.find((param) => param.id === field)?.label);
 }
 
 const editingValue = computed({

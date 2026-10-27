@@ -1,14 +1,23 @@
 {
   "id": "solid",
-  "name": "Marge unie",
-  "description": "Une marge régulière autour de la photo.",
+  "name": {
+    "fr": "Marge unie",
+    "en": "Solid margin"
+  },
+  "description": {
+    "fr": "Une marge régulière autour de la photo.",
+    "en": "An even margin around the photo."
+  },
   "captionDefaults": {
     "color": "#1a1a1a"
   },
   "params": [
     {
       "id": "width",
-      "label": "Épaisseur",
+      "label": {
+        "fr": "Épaisseur",
+        "en": "Thickness"
+      },
       "type": "number",
       "min": 1,
       "max": 30,
@@ -18,7 +27,10 @@
     },
     {
       "id": "color",
-      "label": "Couleur",
+      "label": {
+        "fr": "Couleur",
+        "en": "Color"
+      },
       "type": "color",
       "default": "#ffffff"
     }

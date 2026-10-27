@@ -68,14 +68,14 @@ export type ChoiceOption = ChoiceOption_Serialize | ChoiceOption_Deserialize;
 
 export type ChoiceOption_Deserialize = {
 	id: string,
-	label: string,
+	label: LocalizedText,
 	/**  Valeurs imposées à d'autres réglages (une pellicule fixe couleur, encre et texte). */
 	sets?: { [key in string]: ParamValue },
 };
 
 export type ChoiceOption_Serialize = {
 	id: string,
-	label: string,
+	label: LocalizedText,
 	/**  Valeurs imposées à d'autres réglages (une pellicule fixe couleur, encre et texte). */
 	sets: { [key in string]: ParamValue },
 };
@@ -146,8 +146,8 @@ export type FrameManifest = FrameManifest_Serialize | FrameManifest_Deserialize;
 
 export type FrameManifest_Deserialize = {
 	id: string,
-	name: string,
-	description?: string,
+	name: LocalizedText,
+	description?: LocalizedText,
 	author?: string,
 	/**
 	 *  Gabarit dessiné pour une photo horizontale : les photos verticales sont tournées avant,
@@ -161,8 +161,8 @@ export type FrameManifest_Deserialize = {
 
 export type FrameManifest_Serialize = {
 	id: string,
-	name: string,
-	description: string,
+	name: LocalizedText,
+	description: LocalizedText,
 	author: string,
 	/**
 	 *  Gabarit dessiné pour une photo horizontale : les photos verticales sont tournées avant,
@@ -199,12 +199,14 @@ export type LoadIssue = {
 	message: string,
 };
 
+export type LocalizedText = string | { [key in string]: string };
+
 export type ParamDef = ParamDef_Serialize | ParamDef_Deserialize;
 
 export type ParamDef_Deserialize = {
 	id: string,
-	label: string,
-	section?: string | null,
+	label: LocalizedText,
+	section?: LocalizedText | null,
 	visibleIf?: Condition_Deserialize | null,
 	/**  Transmis au gabarit mais absent du panneau. */
 	hidden?: boolean,
@@ -216,8 +218,8 @@ export type ParamDef_Deserialize = {
 
 export type ParamDef_Serialize = {
 	id: string,
-	label: string,
-	section?: string,
+	label: LocalizedText,
+	section?: LocalizedText,
 	visibleIf?: Condition_Serialize,
 	/**  Transmis au gabarit mais absent du panneau. */
 	hidden?: boolean,
@@ -248,18 +250,18 @@ export type PresetThumbnail = {
 
 export type Preset_Deserialize = {
 	id: string,
-	name: string,
-	category: string,
-	description: string,
+	name: LocalizedText,
+	category: LocalizedText,
+	description: LocalizedText,
 	/**  Seuls les réglages non nuls sont à écrire. */
 	params?: RenderParams_Deserialize,
 };
 
 export type Preset_Serialize = {
 	id: string,
-	name: string,
-	category: string,
-	description: string,
+	name: LocalizedText,
+	category: LocalizedText,
+	description: LocalizedText,
 	/**  Seuls les réglages non nuls sont à écrire. */
 	params: RenderParams_Serialize,
 };

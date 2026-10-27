@@ -1,20 +1,35 @@
 {
   "id": "film120",
-  "name": "Moyen format",
-  "description": "Pellicule 120 : pas de perforations, marquages sur le bord.",
+  "name": {
+    "fr": "Moyen format",
+    "en": "Medium format"
+  },
+  "description": {
+    "fr": "Pellicule 120 : pas de perforations, marquages sur le bord.",
+    "en": "120 film: no sprocket holes, markings along the edge."
+  },
   "rotatePortrait": true,
   "params": [
     {
       "id": "stock",
-      "label": "Pellicule",
+      "label": {
+        "fr": "Pellicule",
+        "en": "Film stock"
+      },
       "type": "choice",
       "display": "list",
-      "section": "Pellicule",
+      "section": {
+        "fr": "Pellicule",
+        "en": "Film stock"
+      },
       "default": "amber",
       "options": [
         {
           "id": "amber",
-          "label": "Ambre",
+          "label": {
+            "fr": "Ambre",
+            "en": "Amber"
+          },
           "sets": {
             "color": "#120f0c",
             "ink": "#f0a63c",
@@ -23,7 +38,10 @@
         },
         {
           "id": "white",
-          "label": "Blanc",
+          "label": {
+            "fr": "Blanc",
+            "en": "White"
+          },
           "sets": {
             "color": "#0d0d0d",
             "ink": "#f2f2f2",
@@ -32,7 +50,10 @@
         },
         {
           "id": "minimal",
-          "label": "Blanc sobre",
+          "label": {
+            "fr": "Blanc sobre",
+            "en": "Plain white"
+          },
           "sets": {
             "color": "#0d0d0d",
             "ink": "#f2f2f2",
@@ -41,7 +62,10 @@
         },
         {
           "id": "green",
-          "label": "Vert",
+          "label": {
+            "fr": "Vert",
+            "en": "Green"
+          },
           "sets": {
             "color": "#0d1210",
             "ink": "#6fce8a",
@@ -50,7 +74,10 @@
         },
         {
           "id": "red",
-          "label": "Rouge",
+          "label": {
+            "fr": "Rouge",
+            "en": "Red"
+          },
           "sets": {
             "color": "#120d0d",
             "ink": "#ef6f5c",
@@ -59,7 +86,10 @@
         },
         {
           "id": "cine",
-          "label": "Ciné",
+          "label": {
+            "fr": "Ciné",
+            "en": "Cine"
+          },
           "sets": {
             "color": "#100e0c",
             "ink": "#e8dcc0",
@@ -68,7 +98,10 @@
         },
         {
           "id": "plain",
-          "label": "Sans marquages",
+          "label": {
+            "fr": "Sans marquages",
+            "en": "No markings"
+          },
           "sets": {
             "color": "#0a0a0a",
             "text": ""
@@ -79,7 +112,10 @@
     },
     {
       "id": "width",
-      "label": "Épaisseur",
+      "label": {
+        "fr": "Épaisseur",
+        "en": "Thickness"
+      },
       "type": "number",
       "min": 1,
       "max": 30,
@@ -89,20 +125,29 @@
     },
     {
       "id": "color",
-      "label": "Support",
+      "label": {
+        "fr": "Support",
+        "en": "Base"
+      },
       "type": "color",
       "default": "#120f0c"
     },
     {
       "id": "sprockets",
-      "label": "Perforations",
+      "label": {
+        "fr": "Perforations",
+        "en": "Sprocket holes"
+      },
       "type": "bool",
       "default": false,
       "hidden": true
     },
     {
       "id": "ink",
-      "label": "Marquages",
+      "label": {
+        "fr": "Marquages",
+        "en": "Markings"
+      },
       "type": "color",
       "default": "#f0a63c",
       "visibleIf": {
@@ -112,7 +157,10 @@
     },
     {
       "id": "text",
-      "label": "Texte pellicule",
+      "label": {
+        "fr": "Texte pellicule",
+        "en": "Film text"
+      },
       "type": "text",
       "default": "PORTRAIT 400",
       "maxLength": 60,
@@ -124,7 +172,10 @@
     },
     {
       "id": "frameNumber",
-      "label": "Numéro de vue",
+      "label": {
+        "fr": "Numéro de vue",
+        "en": "Frame number"
+      },
       "type": "text",
       "default": "24A",
       "maxLength": 12,

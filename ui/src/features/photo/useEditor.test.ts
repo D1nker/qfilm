@@ -95,12 +95,27 @@ describe("useEditor", () => {
 
     await editor.init();
 
-    expect(
-      editor.groupedPresets.value.map(([category, items]) => [category, items.length]),
-    ).toEqual([
+    expect(editor.groupedPresets.value.map((group) => [group.key, group.items.length])).toEqual([
       ["Couleur", 2],
       ["N&B", 1],
     ]);
+  });
+
+  it("groups translated categories together whatever the language shown", async () => {
+    const { api, editor } = await setup();
+    const color = { fr: "Négatif couleur", en: "Color negative" };
+    api.listPresets.mockResolvedValue([
+      { id: "a", name: "A", category: color, description: "", params: {} },
+      { id: "b", name: "B", category: "Base", description: "", params: {} },
+      { id: "c", name: "C", category: { ...color }, description: "", params: {} },
+    ] as never);
+
+    await editor.init();
+
+    const [first, second] = editor.groupedPresets.value;
+    expect(first?.items.map((preset) => preset.id)).toEqual(["a", "c"]);
+    expect(first?.title).toEqual(color);
+    expect(second?.key).toBe("Base");
   });
 
   it("opens a dropped photo but leaves a dropped .zip to the frame importer", async () => {

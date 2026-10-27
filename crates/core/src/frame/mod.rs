@@ -22,6 +22,7 @@ pub use registry::{FrameInfo, FrameRegistry};
 pub use store::{LoadIssue, UserFrames};
 
 use super::buffer::ImageBuf;
+use super::text::LocalizedText;
 use template::FrameTemplate;
 
 #[derive(Debug, Error)]
@@ -124,8 +125,8 @@ impl Frame {
         Self {
             manifest: FrameManifest {
                 id: registry::NONE_ID.into(),
-                name: "Aucun".into(),
-                description: String::new(),
+                name: LocalizedText::translations([("fr", "Aucun"), ("en", "None")]),
+                description: LocalizedText::default(),
                 author: String::new(),
                 rotate_portrait: false,
                 caption_defaults: Map::new(),

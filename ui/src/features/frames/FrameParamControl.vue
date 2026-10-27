@@ -2,7 +2,7 @@
   <UiSlider
     v-if="def.type === 'number'"
     :model-value="number"
-    :label="def.label"
+    :label="localized(def.label)"
     :display="`${number.toFixed(decimalsOf(def.step))}${def.unit ? ` ${def.unit}` : ''}`"
     :min="def.min"
     :max="def.max"
@@ -10,15 +10,15 @@
     @update:model-value="emit('change', $event)"
   />
 
-  <UiField v-else-if="def.type === 'color'" :label="def.label">
+  <UiField v-else-if="def.type === 'color'" :label="localized(def.label)">
     <UiColorInput :model-value="text" @update:model-value="emit('change', $event)" />
   </UiField>
 
-  <UiField v-else-if="def.type === 'bool'" :label="def.label">
+  <UiField v-else-if="def.type === 'bool'" :label="localized(def.label)">
     <UiSwitch :model-value="flag" @update:model-value="emit('change', $event)" />
   </UiField>
 
-  <UiField v-else-if="def.type === 'text'" :label="def.label" stacked>
+  <UiField v-else-if="def.type === 'text'" :label="localized(def.label)" stacked>
     <UiInput
       :model-value="text"
       :maxlength="def.maxLength"
@@ -33,11 +33,11 @@
       :active="option.id === text"
       @click="emit('change', option.id)"
     >
-      {{ option.label }}
+      {{ localized(option.label) }}
     </UiListItem>
   </template>
 
-  <UiField v-else-if="def.type === 'choice'" :label="def.label">
+  <UiField v-else-if="def.type === 'choice'" :label="localized(def.label)">
     <UiSelect :model-value="text" :options="menu" @update:model-value="emit('change', $event)" />
   </UiField>
 </template>
@@ -47,6 +47,7 @@ import { computed } from "vue";
 
 import type { ParamDef, ParamValue } from "@/shared/api/api";
 import { decimalsOf } from "@/features/frames/frameParams";
+import { localized } from "@/shared/i18n";
 import UiColorInput from "@/shared/ui/UiColorInput.vue";
 import UiField from "@/shared/ui/UiField.vue";
 import UiInput from "@/shared/ui/UiInput.vue";
@@ -63,7 +64,7 @@ const number = computed(() => Number(props.value));
 const flag = computed(() => props.value === true);
 const menu = computed(() =>
   props.def.type === "choice"
-    ? props.def.options.map((option) => ({ value: option.id, label: option.label }))
+    ? props.def.options.map((option) => ({ value: option.id, label: localized(option.label) }))
     : [],
 );
 </script>

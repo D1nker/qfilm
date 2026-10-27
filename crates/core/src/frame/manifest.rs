@@ -8,19 +8,23 @@ use serde_json::{Map, Value};
 
 use super::FrameError;
 use crate::fonts::FontChoice;
+use crate::text::LocalizedText;
 
 const MAX_PARAMS: usize = 64;
 const MAX_OPTIONS: usize = 48;
 const MAX_TEXT_LENGTH: usize = 500;
+const MAX_NAME_LENGTH: usize = 60;
+const MAX_LABEL_LENGTH: usize = 80;
+const MAX_DESCRIPTION_LENGTH: usize = 500;
 const DEFAULT_TEXT_LENGTH: usize = 80;
 
 #[derive(Debug, Clone, Serialize, Deserialize, specta::Type)]
 #[serde(rename_all = "camelCase")]
 pub struct FrameManifest {
     pub id: String,
-    pub name: String,
+    pub name: LocalizedText,
     #[serde(default)]
-    pub description: String,
+    pub description: LocalizedText,
     #[serde(default)]
     pub author: String,
     /// Gabarit dessiné pour une photo horizontale : les photos verticales sont tournées avant,
@@ -39,9 +43,9 @@ pub struct FrameManifest {
 #[serde(rename_all = "camelCase")]
 pub struct ParamDef {
     pub id: String,
-    pub label: String,
+    pub label: LocalizedText,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub section: Option<String>,
+    pub section: Option<LocalizedText>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub visible_if: Option<Condition>,
     /// Transmis au gabarit mais absent du panneau.
@@ -110,7 +114,7 @@ pub enum ChoiceDisplay {
 #[serde(rename_all = "camelCase")]
 pub struct ChoiceOption {
     pub id: String,
-    pub label: String,
+    pub label: LocalizedText,
     /// Valeurs imposées à d'autres réglages (une pellicule fixe couleur, encre et texte).
     #[serde(default)]
     #[specta(type = BTreeMap<String, ParamValue>)]
@@ -238,8 +242,14 @@ impl FrameManifest {
                 self.id
             ));
         }
-        if self.name.trim().is_empty() || self.name.chars().count() > 60 {
-            return fail("le nom doit faire entre 1 et 60 caractères".into());
+        if let Err(message) = self.name.validate("le nom", MAX_NAME_LENGTH) {
+            return fail(message);
+        }
+        if let Err(message) = self
+            .description
+            .validate_optional("la description", MAX_DESCRIPTION_LENGTH)
+        {
+            return fail(message);
         }
         if self.params.len() > MAX_PARAMS {
             return fail(format!("{MAX_PARAMS} réglages au maximum"));
@@ -256,8 +266,17 @@ impl FrameManifest {
             if !ids.insert(param.id.as_str()) {
                 return fail(format!("réglage « {} » en double", param.id));
             }
-            if param.label.trim().is_empty() {
-                return fail(format!("le réglage « {} » n'a pas de libellé", param.id));
+            if let Err(message) = param
+                .label
+                .validate(&format!("le libellé de « {} »", param.id), MAX_LABEL_LENGTH)
+            {
+                return fail(message);
+            }
+            if let Some(section) = &param.section
+                && let Err(message) =
+                    section.validate(&format!("la section de « {} »", param.id), MAX_LABEL_LENGTH)
+            {
+                return fail(message);
             }
             validate_kind(&param.id, &param.kind)?;
             if param.from_look && !matches!(param.kind, ParamKind::Text { .. }) {
@@ -360,6 +379,12 @@ fn validate_kind(id: &str, kind: &ParamKind) -> Result<(), FrameError> {
                         "identifiant de choix « {} » invalide ou en double",
                         option.id
                     ));
+                }
+                if let Err(message) = option.label.validate(
+                    &format!("le libellé du choix « {} »", option.id),
+                    MAX_LABEL_LENGTH,
+                ) {
+                    return fail(message);
                 }
             }
             if !options.iter().any(|option| &option.id == default) {

@@ -1,4 +1,6 @@
-import { t } from "@/shared/i18n";
+import { en } from "@/shared/i18n/en";
+import { fr } from "@/shared/i18n/fr";
+import { textKey, type LocalizedText } from "@/shared/i18n";
 import type { Caption, FrameInfo, FrameSelection, ParamDef, ParamValue } from "@/shared/api/api";
 
 export const NONE_FRAME = "none";
@@ -66,15 +68,26 @@ export function isVisible(def: ParamDef, params: ParamValues): boolean {
   return true;
 }
 
-export function sectionsOf(frame: FrameInfo, params: ParamValues): [string, ParamDef[]][] {
-  const sections = new Map<string, ParamDef[]>();
+const DEFAULT_SECTION: LocalizedText = { fr: fr.frames.settings, en: en.frames.settings };
+
+export interface Section {
+  key: string;
+  title: LocalizedText;
+  defs: ParamDef[];
+}
+
+export function sectionsOf(frame: FrameInfo, params: ParamValues): Section[] {
+  const sections = new Map<string, Section>();
   for (const def of frame.params) {
     if (!isVisible(def, params)) continue;
 
-    const title = def.section ?? t("frames.settings");
-    sections.set(title, [...(sections.get(title) ?? []), def]);
+    const title = def.section ?? DEFAULT_SECTION;
+    const key = textKey(title);
+    const section = sections.get(key) ?? { key, title, defs: [] };
+    section.defs.push(def);
+    sections.set(key, section);
   }
-  return [...sections.entries()];
+  return [...sections.values()];
 }
 
 export function decimalsOf(step: number): number {

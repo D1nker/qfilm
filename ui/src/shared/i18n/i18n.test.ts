@@ -74,6 +74,52 @@ describe("language", () => {
   });
 });
 
+describe("texts that come from the data", () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  const text = { fr: "Cadre", en: "Frame" };
+
+  it("shows the current language, and follows a language change", async () => {
+    systemLanguage("fr-FR");
+    const { localized, useLocale } = await setup();
+
+    expect(localized(text)).toBe("Cadre");
+    useLocale().set("en");
+    expect(localized(text)).toBe("Frame");
+  });
+
+  it("shows a plain string in every language", async () => {
+    systemLanguage("en-US");
+    const { localized } = await setup();
+
+    expect(localized("35 mm")).toBe("35 mm");
+  });
+
+  it("falls back to English, then French, then anything, then nothing", async () => {
+    systemLanguage("en-US");
+    const { localized, useLocale } = await setup();
+    useLocale().set("fr");
+
+    expect(localized({ en: "Frame" })).toBe("Frame");
+    expect(localized({ fr: "Cadre" })).toBe("Cadre");
+    expect(localized({ de: "Rahmen" })).toBe("Rahmen");
+    expect(localized({})).toBe("");
+    expect(localized(undefined)).toBe("");
+  });
+
+  it("identifies a text the same way in every language", async () => {
+    systemLanguage("fr-FR");
+    const { textKey, useLocale } = await setup();
+    const before = textKey(text);
+    useLocale().set("en");
+
+    expect(textKey(text)).toBe(before);
+    expect(textKey("Base")).toBe("Base");
+  });
+});
+
 describe("catalogues", () => {
   it("have the same keys, none of them empty", () => {
     const french = leaves(fr);

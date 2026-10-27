@@ -12,7 +12,7 @@
         <UiThumbnailButton
           v-for="info in frames"
           :key="info.id"
-          :name="info.name"
+          :name="localized(info.name)"
           :src="thumbnails[info.id]"
           :active="info.id === frame.id"
           fit="contain"
@@ -21,9 +21,13 @@
       </div>
     </UiCollapsible>
 
-    <UiCollapsible v-for="[title, defs] in sections" :key="`${frame.id}:${title}`" :title="title">
+    <UiCollapsible
+      v-for="section in sections"
+      :key="`${frame.id}:${section.key}`"
+      :title="localized(section.title)"
+    >
       <FrameParamControl
-        v-for="def in defs"
+        v-for="def in section.defs"
         :key="def.id"
         :def="def"
         :value="valueOf(def)"
@@ -71,7 +75,7 @@
 </template>
 
 <script setup lang="ts">
-import { t } from "@/shared/i18n";
+import { localized, t } from "@/shared/i18n";
 import { computed } from "vue";
 
 import type { ParamDef, ParamValue } from "@/shared/api/api";

@@ -13,7 +13,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 
-import { t } from "@/shared/i18n";
+import { localized, t } from "@/shared/i18n";
 import type { Preset } from "@/shared/api/api";
 import { useFrame, FramePanel } from "@/features/frames";
 import { useInspector, type InspectorTab } from "@/features/inspector";
@@ -30,7 +30,7 @@ const { tab } = useInspector();
 const { labelFromLook } = useFrame();
 
 function labelFrameFromLook(preset: Preset) {
-  labelFromLook(preset.id, preset.name);
+  labelFromLook(preset.id, localized(preset.name));
 }
 </script>
 

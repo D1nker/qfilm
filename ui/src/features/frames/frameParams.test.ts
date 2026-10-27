@@ -10,6 +10,7 @@ import {
   sectionsOf,
   selectionFor,
 } from "@/features/frames/frameParams";
+import { localized } from "@/shared/i18n";
 import { film35, noFrame, solid } from "@/test/fixtures";
 
 const def = (id: string, frame = film35): ParamDef => {
@@ -122,8 +123,8 @@ describe("isVisible and sectionsOf", () => {
   it("groups visible settings by section, in manifest order, with a default section", () => {
     const sections = sectionsOf(film35, defaultParams(film35));
 
-    expect(sections.map(([title]) => title)).toEqual(["Pellicule", "Réglages"]);
-    expect(sections[1]?.[1].map((param) => param.id)).toEqual([
+    expect(sections.map((section) => localized(section.title))).toEqual(["Pellicule", "Réglages"]);
+    expect(sections[1]?.defs.map((param) => param.id)).toEqual([
       "width",
       "color",
       "ink",
@@ -135,7 +136,7 @@ describe("isVisible and sectionsOf", () => {
   it("drops conditional settings from their section when the condition fails", () => {
     const sections = sectionsOf(film35, { ...defaultParams(film35), stock: "plain" });
 
-    expect(sections[1]?.[1].map((param) => param.id)).toEqual(["width", "color"]);
+    expect(sections[1]?.defs.map((param) => param.id)).toEqual(["width", "color"]);
   });
 });
 

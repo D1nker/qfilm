@@ -303,7 +303,15 @@ fn builtin_frames_cannot_be_replaced_or_removed() {
     assert!(registry.add_user(impostor).is_err());
     assert!(registry.remove_user("solid").is_err());
     assert!(registry.remove_user("inconnu").is_err());
-    assert_eq!(registry.get("solid").unwrap().manifest.name, "Marge unie");
+    assert_eq!(
+        registry
+            .get("solid")
+            .unwrap()
+            .manifest
+            .name
+            .in_language("fr"),
+        "Marge unie"
+    );
 }
 
 #[test]
@@ -320,7 +328,15 @@ fn user_frames_are_added_updated_and_removed() {
 
     registry.add_user(make("V1")).unwrap();
     registry.add_user(make("V2")).unwrap();
-    assert_eq!(registry.get("mine").unwrap().manifest.name, "V2");
+    assert_eq!(
+        registry
+            .get("mine")
+            .unwrap()
+            .manifest
+            .name
+            .in_language("fr"),
+        "V2"
+    );
     assert_eq!(
         registry
             .list()
@@ -407,7 +423,7 @@ fn a_folder_can_be_imported_and_reloaded() {
     let (frames, issues) = store.load_all();
     assert!(issues.is_empty(), "{issues:?}");
     assert_eq!(frames.len(), 1);
-    assert_eq!(frames[0].manifest.name, "Importé");
+    assert_eq!(frames[0].manifest.name.in_language("fr"), "Importé");
 }
 
 #[test]
@@ -664,4 +680,77 @@ fn a_figma_style_export_renders() {
         cream[0] > 0.8 && cream[1] > 0.8 && cream[2] > 0.7,
         "{cream:?}"
     );
+}
+
+#[test]
+fn every_builtin_frame_speaks_both_languages() {
+    use crate::frame::{FrameRegistry, ParamKind};
+
+    for info in FrameRegistry::builtin().list() {
+        let manifest = &info.manifest;
+        let mut texts = vec![
+            (format!("{} (nom)", manifest.id), &manifest.name),
+            (
+                format!("{} (description)", manifest.id),
+                &manifest.description,
+            ),
+        ];
+        for param in &manifest.params {
+            texts.push((
+                format!("{}.{} (libellé)", manifest.id, param.id),
+                &param.label,
+            ));
+            if let Some(section) = &param.section {
+                texts.push((format!("{}.{} (section)", manifest.id, param.id), section));
+            }
+            if let ParamKind::Choice { options, .. } = &param.kind {
+                for option in options {
+                    texts.push((
+                        format!("{}.{}.{} (choix)", manifest.id, param.id, option.id),
+                        &option.label,
+                    ));
+                }
+            }
+        }
+
+        for (context, text) in texts {
+            for language in ["fr", "en"] {
+                assert!(text.has_language(language), "{context} : pas de {language}");
+            }
+        }
+    }
+}
+
+fn parse(json: &str) -> FrameManifest {
+    serde_json::from_str(json).expect("manifeste lisible")
+}
+
+#[test]
+fn a_manifest_may_mix_plain_and_translated_texts() {
+    let manifest = parse(
+        r#"{ "id": "mixed", "name": { "fr": "Mixte", "en": "Mixed" }, "description": "Une seule langue",
+             "params": [ { "id": "w", "label": "Largeur", "type": "number",
+                           "min": 0, "max": 10, "step": 1, "default": 5 } ] }"#,
+    );
+
+    manifest.validate().expect("manifeste valide");
+}
+
+#[test]
+fn a_manifest_with_an_untranslated_label_in_a_language_is_refused() {
+    let manifest = parse(
+        r#"{ "id": "bad", "name": "Ok",
+             "params": [ { "id": "w", "label": { "fr": "Largeur", "en": "" }, "type": "number",
+                           "min": 0, "max": 10, "step": 1, "default": 5 } ] }"#,
+    );
+
+    let error = manifest.validate().expect_err("libellé vide en anglais");
+    assert!(error.to_string().contains("libellé"), "{error}");
+}
+
+#[test]
+fn a_manifest_with_a_hostile_language_code_is_refused() {
+    let manifest = parse(r#"{ "id": "bad", "name": { "fr": "Ok", "../../etc": "x" } }"#);
+
+    assert!(manifest.validate().is_err());
 }

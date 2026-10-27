@@ -21,6 +21,7 @@ pub mod fonts;
 pub mod frame;
 pub mod preset;
 pub mod render;
+pub mod text;
 
 #[cfg(test)]
 mod golden;

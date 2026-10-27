@@ -11,11 +11,16 @@
       class="amount"
     />
 
-    <UiCollapsible v-for="[category, items] in groupedPresets" :key="category" :title="category">
+    <UiCollapsible v-for="group in groupedPresets" :key="group.key" :title="localized(group.title)">
       <div class="grid">
-        <UiTooltip v-for="preset in items" :key="preset.id" :text="preset.description" side="left">
+        <UiTooltip
+          v-for="preset in group.items"
+          :key="preset.id"
+          :text="localized(preset.description)"
+          side="left"
+        >
           <UiThumbnailButton
-            :name="preset.name"
+            :name="localized(preset.name)"
             :src="thumbnails[preset.id]"
             :active="preset.id === activePreset"
             @click="select(preset)"
@@ -27,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import { t } from "@/shared/i18n";
+import { localized, t } from "@/shared/i18n";
 import type { Preset } from "@/shared/api/api";
 import { useEditor } from "@/features/photo";
 import { useLook } from "@/features/looks/useLook";

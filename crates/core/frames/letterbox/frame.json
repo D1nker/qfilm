@@ -1,7 +1,13 @@
 {
   "id": "letterbox",
-  "name": "Cinéma",
-  "description": "Bandes noires façon cinémascope, avec une zone de sous-titre.",
+  "name": {
+    "fr": "Cinéma",
+    "en": "Cinema"
+  },
+  "description": {
+    "fr": "Bandes noires façon cinémascope, avec une zone de sous-titre.",
+    "en": "Cinemascope-style black bars, with a subtitle area."
+  },
   "captionDefaults": {
     "color": "#f2f2f2",
     "size": 3.5
@@ -17,7 +23,10 @@
       "options": [
         {
           "id": "239",
-          "label": "Cinémascope 2,39:1"
+          "label": {
+            "fr": "Cinémascope 2,39:1",
+            "en": "Cinemascope 2.39:1"
+          }
         },
         {
           "id": "200",
@@ -25,7 +34,10 @@
         },
         {
           "id": "185",
-          "label": "Cinéma 1,85:1"
+          "label": {
+            "fr": "Cinéma 1,85:1",
+            "en": "Cinema 1.85:1"
+          }
         },
         {
           "id": "178",
@@ -35,7 +47,10 @@
     },
     {
       "id": "color",
-      "label": "Couleur des bandes",
+      "label": {
+        "fr": "Couleur des bandes",
+        "en": "Bar color"
+      },
       "type": "color",
       "default": "#000000"
     }

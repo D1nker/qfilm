@@ -10,6 +10,7 @@ import {
   type ImageMeta,
   type Preset,
 } from "@/shared/api/api";
+import { textKey } from "@/shared/i18n";
 import { groupBy } from "@/shared/lib/groupBy";
 
 const presets = ref<Preset[]>([]);
@@ -21,7 +22,13 @@ const error = ref("");
 const loading = ref(false);
 const comparing = ref(false);
 
-const groupedPresets = computed(() => groupBy(presets.value, (preset) => preset.category));
+const groupedPresets = computed(() =>
+  groupBy(presets.value, (preset) => textKey(preset.category)).map(([key, items]) => ({
+    key,
+    title: items[0]?.category ?? key,
+    items,
+  })),
+);
 
 async function init() {
   presets.value = await listPresets();

@@ -53,6 +53,68 @@ test.describe("language", () => {
   });
 });
 
+test.describe("looks and frames", () => {
+  test("show their French names on a French system", async ({ openApp }) => {
+    await expect(openApp.page.getByRole("button", { name: "Doré 200" })).toBeVisible();
+    await expect(openApp.page.getByRole("button", { name: "Négatif couleur" })).toBeVisible();
+  });
+
+  test.describe("on an English system", () => {
+    test.use({ locale: "en-US" });
+
+    test("show their English names, categories and descriptions", async ({ openApp }) => {
+      await expect(openApp.page.getByRole("button", { name: "Golden 200" })).toBeVisible();
+      await expect(openApp.page.getByRole("button", { name: "Color negative" })).toBeVisible();
+      await expect(openApp.page.getByRole("button", { name: /Neutral/ })).toBeVisible();
+
+      await openApp.page.getByRole("button", { name: "Golden 200" }).hover();
+      await expect(openApp.page.getByRole("tooltip")).toHaveText("Description of Golden 200");
+    });
+
+    test("show the frames in English, down to the settings of a frame", async ({ openApp }) => {
+      await openApp.tab("Frame").click();
+      await expect(openApp.page.locator(".grid .thumb", { hasText: "None" })).toBeVisible();
+      await expect(openApp.page.locator(".grid .thumb", { hasText: "Solid margin" })).toBeVisible();
+
+      await openApp.page.locator(".grid .thumb", { hasText: "35 mm" }).click();
+      await expect(
+        openApp.page.getByRole("button", { name: "Film stock", exact: true }),
+      ).toBeVisible();
+      await expect(openApp.page.getByRole("button", { name: "Plain white" })).toBeVisible();
+      await expect(openApp.page.getByRole("slider", { name: "Thickness" })).toBeVisible();
+      await expect(openApp.page.getByText("Sprocket holes")).toBeVisible();
+    });
+  });
+
+  test("follow a language change without reloading", async ({ openApp }) => {
+    await openApp.page.getByRole("radio", { name: "English" }).click();
+
+    await expect(openApp.page.getByRole("button", { name: "Golden 200" })).toBeVisible();
+    await expect(openApp.page.getByRole("button", { name: "Doré 200" })).toHaveCount(0);
+
+    await openApp.tab("Frame").click();
+    await openApp.page.locator(".grid .thumb", { hasText: "35 mm" }).click();
+    await expect(openApp.page.getByRole("slider", { name: "Thickness" })).toBeVisible();
+
+    await openApp.page.getByRole("radio", { name: "Français" }).click();
+    await expect(openApp.page.getByRole("slider", { name: "Épaisseur" })).toBeVisible();
+  });
+
+  test("keep the text a look gives to a frame in the language it was chosen in", async ({
+    openApp,
+  }) => {
+    await openApp.page.getByRole("radio", { name: "English" }).click();
+    await openApp.tab("Frame").click();
+    await openApp.page.locator(".grid .thumb", { hasText: "35 mm" }).click();
+
+    await openApp.tab("Preset").click();
+    await openApp.page.getByRole("button", { name: "Golden 200" }).click();
+    await expect
+      .poll(async () => (await openApp.lastRender()).frame.params.text)
+      .toBe("GOLDEN 200");
+  });
+});
+
 test.describe("preferences bar", () => {
   const bar = (app: App) => app.page.getByRole("group", { name: "Préférences" });
 

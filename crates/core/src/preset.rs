@@ -1,3 +1,4 @@
+use crate::text::LocalizedText;
 use std::sync::LazyLock;
 
 use serde::{Deserialize, Serialize};
@@ -8,9 +9,9 @@ use super::render::RenderParams;
 #[serde(rename_all = "camelCase")]
 pub struct Preset {
     pub id: String,
-    pub name: String,
-    pub category: String,
-    pub description: String,
+    pub name: LocalizedText,
+    pub category: LocalizedText,
+    pub description: LocalizedText,
     /// Seuls les réglages non nuls sont à écrire.
     #[serde(default)]
     pub params: RenderParams,
@@ -39,11 +40,25 @@ mod tests {
 
         let mut ids = HashSet::new();
         for preset in presets {
-            assert!(
-                !preset.id.is_empty() && !preset.name.is_empty(),
-                "{preset:?}"
-            );
+            assert!(!preset.id.is_empty(), "{preset:?}");
             assert!(ids.insert(&preset.id), "id en double : {}", preset.id);
+        }
+    }
+
+    #[test]
+    fn every_builtin_look_speaks_both_languages() {
+        for preset in builtin() {
+            for (what, text) in [
+                ("nom", &preset.name),
+                ("catégorie", &preset.category),
+                ("description", &preset.description),
+            ] {
+                let context = format!("{} ({what})", preset.id);
+                text.validate(&context, 120).expect("texte valide");
+                for language in ["fr", "en"] {
+                    assert!(text.has_language(language), "{context} : pas de {language}");
+                }
+            }
         }
     }
 

@@ -126,6 +126,21 @@ Un gabarit qui boucle sans fin est arrêté (budget d'instructions) : l'applicat
 
 Le panneau **construit ses contrôles à partir de cette liste** : pas d'interface à écrire.
 
+### Textes dans plusieurs langues
+
+Tout texte affiché (`name`, `description`, `label`, `section`, et le `label` de chaque choix) est soit
+une **chaîne simple**, valable dans toutes les langues, soit une **chaîne par langue** :
+
+```json
+"name": { "fr": "Mon cadre", "en": "My frame" },
+"label": "35 mm"
+```
+
+L'application affiche la langue choisie et, à défaut, l'anglais, puis le français, puis n'importe
+laquelle : un cadre qui n'a qu'une langue reste utilisable partout. Les codes de langue sont en
+minuscules (`fr`, `en`, `pt-br`…), 12 langues au plus. Les cadres livrés avec l'application doivent
+avoir `fr` **et** `en` (un test le vérifie) ; les cadres importés n'y sont pas tenus.
+
 ### Types de réglages
 
 | `type`   | contrôle      | champs                                                                 |
@@ -201,7 +216,8 @@ Conseil : fais d'abord marcher un cadre fixe (sans expression), puis remplace le
 
 Un cadre qui ne passe pas la validation n'est jamais chargé, et l'application dit pourquoi :
 
-- manifeste invalide (identifiant, bornes, couleur, choix, `sets` vers un réglage inconnu…) ;
+- manifeste invalide (identifiant, bornes, couleur, choix, `sets` vers un réglage inconnu, texte vide
+  ou trop long dans une langue, code de langue fantaisiste…) ;
 - gabarit qui ne se compile pas, ou qui utilise une variable inconnue (les fautes de frappe sont des
   erreurs, pas des blancs) ;
 - SVG illisible, repère `photo` absent, repère qui n'est pas un `<rect>`, en double ou à coordonnées
