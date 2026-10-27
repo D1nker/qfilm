@@ -1,10 +1,12 @@
 <template>
   <aside>
-    <UiTabs v-model="tab" :tabs="TABS">
-      <template #looks><LooksPanel @select="labelFrameFromLook" /></template>
-      <template #adjust><AdjustPanel /></template>
-      <template #frame><FramePanel /></template>
-    </UiTabs>
+    <div class="card">
+      <UiTabs v-model="tab" :tabs="TABS">
+        <template #looks><LooksPanel @select="labelFrameFromLook" /></template>
+        <template #adjust><AdjustPanel /></template>
+        <template #frame><FramePanel /></template>
+      </UiTabs>
+    </div>
   </aside>
 </template>
 
@@ -33,8 +35,16 @@ function labelFrameFromLook(preset: Preset) {
 aside {
   min-width: 0;
   min-height: 0;
-  border-left: 1px solid var(--border);
+  padding: var(--space-3) var(--space-3) var(--space-3) 0;
+  background: var(--canvas);
+}
+
+.card {
+  height: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
   background: var(--surface);
+  box-shadow: var(--shadow-md);
   overflow: hidden;
 }
 </style>
