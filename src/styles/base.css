@@ -46,18 +46,18 @@ button {
    doit correspondre au rendu incrusté à l'export. */
 @font-face {
   font-family: "qfilm-condensed";
-  src: url("/fonts/RobotoCondensed-Regular.ttf") format("truetype");
+  src: url("@fonts/RobotoCondensed-Regular.ttf") format("truetype");
   font-display: block;
 }
 
 @font-face {
   font-family: "qfilm-typewriter";
-  src: url("/fonts/CourierPrime-Regular.ttf") format("truetype");
+  src: url("@fonts/CourierPrime-Regular.ttf") format("truetype");
   font-display: block;
 }
 
 @font-face {
   font-family: "qfilm-handwritten";
-  src: url("/fonts/Caveat-Regular.ttf") format("truetype");
+  src: url("@fonts/Caveat-Regular.ttf") format("truetype");
   font-display: block;
 }

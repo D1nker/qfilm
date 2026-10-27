@@ -55,13 +55,13 @@ src/
 ├─ composables/      state and logic (module-level singletons)
 ├─ lib/              typed Tauri API, static data, helpers
 └─ styles/           design tokens (light + dark) and base styles
-src-tauri/
-├─ src/
-│  ├─ commands.rs    Tauri commands (the only glue with the frontend)
-│  └─ imaging/       decode, render pipeline, presets, frames, encode
+crates/core/         qfilm-core: the imaging engine (no Tauri dependency)
+├─ src/              decode, render pipeline, presets, frames, caption, encode
 ├─ frames/           built-in frames (SVG + manifest)
 ├─ presets/          looks, in builtin.json (add one by editing this file)
 └─ golden/           reference images for the rendering tests
+src-tauri/           thin Tauri shell: commands, app state, config
+assets/fonts/        fonts shared by the engine (embedded) and the UI
 e2e/                 Playwright tests against a mocked Tauri bridge
 docs/                frame authoring guide
 branding/            app icon sources
@@ -71,4 +71,4 @@ Conventions live in [CLAUDE.md](CLAUDE.md).
 
 ## License
 
-[MIT](LICENSE). The bundled fonts keep their own licenses, in `public/fonts/`.
+[MIT](LICENSE). The bundled fonts keep their own licenses, in `assets/fonts/`.

@@ -3,7 +3,7 @@
 Un **cadre** est un dossier de deux fichiers que l'application interprète : ajouter un cadre,
 c'est déposer ces fichiers, sans écrire de code. Les cadres livrés (marge unie, instantané,
 35 mm, moyen format, cinéma, format réseaux) sont écrits exactement de cette façon : ils sont dans
-[`src-tauri/frames/`](../src-tauri/frames) et servent d'exemples.
+[`crates/core/frames/`](../crates/core/frames) et servent d'exemples.
 
 ```
 mon-cadre/
@@ -17,7 +17,7 @@ mets-le dans le dossier des cadres (**Ouvrir le dossier**) et clique sur **Recha
 
 ## Démarrer le plus vite possible
 
-1. Copie [`src-tauri/frames/padding/`](../src-tauri/frames/padding) (le plus court).
+1. Copie [`crates/core/frames/padding/`](../crates/core/frames/padding) (le plus court).
 2. Change `id` et `name` dans `frame.json` : l'id doit être unique.
 3. Modifie `frame.svg`, importe, regarde.
 

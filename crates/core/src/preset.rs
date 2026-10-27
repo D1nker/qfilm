@@ -17,7 +17,7 @@ pub struct Preset {
 }
 
 static BUILTIN: LazyLock<Vec<Preset>> = LazyLock::new(|| {
-    serde_json::from_str(include_str!("../../presets/builtin.json"))
+    serde_json::from_str(include_str!("../presets/builtin.json"))
         .expect("presets/builtin.json est invalide")
 });
 

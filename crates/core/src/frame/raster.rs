@@ -10,8 +10,8 @@ use resvg::usvg;
 use roxmltree::{Document, Node};
 
 use super::{FrameError, Rendered, TextZone};
-use crate::imaging::buffer::{ImageBuf, srgb_to_linear};
-use crate::imaging::fonts::FONT_DB;
+use crate::buffer::{ImageBuf, srgb_to_linear};
+use crate::fonts::FONT_DB;
 
 const MAX_CANVAS_PIXELS: u64 = 600_000_000;
 const MAX_CANVAS_FACTOR: u32 = 4;

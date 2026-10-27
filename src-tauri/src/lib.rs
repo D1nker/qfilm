@@ -1,5 +1,4 @@
 mod commands;
-mod imaging;
 
 use commands::AppState;
 use tauri::Manager;

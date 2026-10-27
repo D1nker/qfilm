@@ -84,23 +84,16 @@ checksum = "330a5ed07fa54e4702c9d6c4174f74427fc0ef6e214bbd677ae50a5099946470"
 name = "app"
 version = "0.1.0"
 dependencies = [
- "ab_glyph",
- "base64 0.23.1",
  "image",
  "log",
- "minijinja",
+ "qfilm-core",
  "rayon",
- "resvg",
- "roxmltree",
  "serde",
- "serde_json",
  "tauri",
  "tauri-build",
  "tauri-plugin-dialog",
  "tauri-plugin-log",
  "tauri-plugin-opener",
- "thiserror 2.0.20",
- "zip",
 ]
 
 [[package]]
@@ -2996,6 +2989,23 @@ name = "pxfm"
 version = "0.1.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d55d956fa96f5ec02be2e13af0e20391a5aa83d6a074e3ad368959d0fab299ea"
+
+[[package]]
+name = "qfilm-core"
+version = "0.1.0"
+dependencies = [
+ "ab_glyph",
+ "base64 0.23.1",
+ "image",
+ "minijinja",
+ "rayon",
+ "resvg",
+ "roxmltree",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.20",
+ "zip",
+]
 
 [[package]]
 name = "quick-error"

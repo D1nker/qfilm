@@ -1,6 +1,6 @@
 # qFilm
 
-Lightweight Lightroom-style photo editor. Tauri 2 shell, Vue 3 + TypeScript UI, Rust imaging core.
+Film look and frame studio. Tauri 2 shell, Vue 3 + TypeScript UI, Rust imaging core.
 
 ## Commands
 
@@ -50,30 +50,33 @@ npm and cargo are run locally in this project (no Docker).
 
 ## Rust conventions
 
-- Edition 2024, MSRV 1.88 (let-chains). `src-tauri/rustfmt.toml` and `[lints]` in `Cargo.toml`: clippy pedantic is on, `unsafe` is forbidden.
-- Cast lints are allowed only inside `src/imaging` (pixel math); elsewhere fix the cast.
+- Cargo workspace at the root: `crates/core` (`qfilm-core`, the imaging engine, no Tauri dependency, so the
+  compiler enforces it) and `src-tauri` (thin Tauri shell: commands, app state, plugins). Assets shared with the
+  UI live in `assets/` (fonts: embedded by Rust, served to the UI through the `@fonts` Vite alias).
+- Edition 2024, MSRV 1.88 (let-chains). `rustfmt.toml` and `[workspace.lints]` in the root `Cargo.toml`: clippy pedantic is on, `unsafe` is forbidden.
+- Cast lints are allowed only inside `qfilm-core` (pixel math); elsewhere fix the cast.
 - Keep `#[allow(...)]` rare, scoped to the item, with a one-line reason.
 - Frames are data, not code: a folder with `frame.json` (options) + `frame.svg` (Jinja-style template
   rendered by resvg, composited in linear light). The Frame panel is generated from the manifest.
-  Built-in frames live in `src-tauri/frames/`; the authoring guide is `docs/FRAMES.md` (keep it in
-  sync with `src/imaging/frame/`). Frame state: `useFrame` (`frame` + `caption` + `memory` for
+  Built-in frames live in `crates/core/frames/`; the authoring guide is `docs/FRAMES.md` (keep it in
+  sync with `crates/core/src/frame/`). Frame state: `useFrame` (`frame` + `caption` + `memory` for
   `persist` params), pure helpers in `src/lib/frameParams.ts` (mirror Rust's coercion).
-- Presets live in `src-tauri/presets/builtin.json` (embedded at build time, validated by tests).
+- Presets live in `crates/core/presets/builtin.json` (embedded at build time, validated by tests).
   Only non-default params are written. To add a look, edit that file.
-- Frames engine: `imaging/frame/` (manifest validation → template → raster/compose → registry/store).
+- Frames engine: `crates/core/src/frame/` (manifest validation → template → raster/compose → registry/store).
   Imported frames are untrusted input: size caps, strict validation, dry-run render, no disk
   extraction, no file access from SVG. Keep those guarantees (and their tests) when touching it.
-- `imaging/` is UI-agnostic: no Tauri types in it. Tauri glue stays in `commands.rs`.
+- `qfilm-core` is UI-agnostic: no Tauri types in it. Tauri glue stays in `src-tauri/src/commands.rs`.
 - Errors: `thiserror` enums, serialized to the frontend as strings.
 - Tests: Vitest unit tests sit next to their module (`*.test.ts`); composables hold module-level
   state, so load them with `fresh()` from `src/test/fresh.ts` and mock Rust with `apiMock()`. The
   Playwright suite in `e2e/` runs the real UI against `e2e/support/tauri-mock.js` (real frame
   manifests, fake Rust); use the `openApp` fixture and `expect.poll`, not fixed sleeps. Check that a
   new test fails when the behavior it guards is broken.
-- Golden-image tests (`src/imaging/golden.rs`, references in `src-tauri/golden/`) guard every frame
+- Golden-image tests (`crates/core/src/golden.rs`, references in `crates/core/golden/`) guard every frame
   shape/edge and the look pipeline. After an _intended_ rendering change run
   `UPDATE_GOLDEN=1 cargo test golden` and **look at the PNGs** before committing them. Failures
-  write the actual output to `src-tauri/target/golden-failures/`. The test scene has a 0–2 gray
+  write the actual output to `target/golden-failures/`. The test scene has a 0–2 gray
   ramp and odd dimensions on purpose; mutation-checked (8/8 injected bugs caught).
 
 ## Product direction

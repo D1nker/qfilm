@@ -3,8 +3,8 @@ use super::Frame;
 macro_rules! bundle {
     ($manifest:literal, $svg:literal) => {
         (
-            include_str!(concat!("../../../frames/", $manifest)),
-            include_str!(concat!("../../../frames/", $svg)),
+            include_str!(concat!("../../frames/", $manifest)),
+            include_str!(concat!("../../frames/", $svg)),
         )
     };
 }

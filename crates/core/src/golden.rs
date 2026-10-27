@@ -1,6 +1,6 @@
 //! Tests d'images de référence : le rendu est déterministe, une image synthétique doit redonner
 //! les mêmes pixels. Après un changement voulu : `UPDATE_GOLDEN=1 cargo test golden`, puis relire
-//! les PNG. Un échec écrit l'image obtenue dans `target/golden-failures/`.
+//! les PNG. Un échec écrit l'image obtenue dans `target/golden-failures/` à la racine du dépôt.
 
 use std::path::PathBuf;
 use std::sync::LazyLock;
@@ -126,7 +126,8 @@ fn assert_golden(name: &str, image: &ImageBuf) {
 
     let ratio = differing as f32 / actual.len() as f32;
     if ratio > MAX_DIFFERING_RATIO || worst > MAX_DIFFERENCE {
-        let failures = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("target/golden-failures");
+        let failures =
+            PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../target/golden-failures");
         std::fs::create_dir_all(&failures).unwrap();
         let output = failures.join(format!("{name}.png"));
         image::RgbImage::from_raw(image.width, image.height, actual)

@@ -4,9 +4,9 @@ use ab_glyph::{Font, FontRef, PxScale, ScaleFont};
 use resvg::usvg::fontdb;
 use serde::{Deserialize, Serialize};
 
-static CONDENSED_DATA: &[u8] = include_bytes!("../../../public/fonts/RobotoCondensed-Regular.ttf");
-static TYPEWRITER_DATA: &[u8] = include_bytes!("../../../public/fonts/CourierPrime-Regular.ttf");
-static HANDWRITTEN_DATA: &[u8] = include_bytes!("../../../public/fonts/Caveat-Regular.ttf");
+static CONDENSED_DATA: &[u8] = include_bytes!("../../../assets/fonts/RobotoCondensed-Regular.ttf");
+static TYPEWRITER_DATA: &[u8] = include_bytes!("../../../assets/fonts/CourierPrime-Regular.ttf");
+static HANDWRITTEN_DATA: &[u8] = include_bytes!("../../../assets/fonts/Caveat-Regular.ttf");
 
 static CONDENSED: LazyLock<FontRef<'static>> =
     LazyLock::new(|| FontRef::try_from_slice(CONDENSED_DATA).expect("police intégrée valide"));

@@ -9,15 +9,15 @@ use rayon::prelude::*;
 use serde::Serialize;
 use tauri::State;
 
-use crate::imaging::buffer::ImageBuf;
-use crate::imaging::caption::Caption;
-use crate::imaging::encode::ExportOptions;
-use crate::imaging::frame::{
+use qfilm_core::buffer::ImageBuf;
+use qfilm_core::caption::Caption;
+use qfilm_core::encode::ExportOptions;
+use qfilm_core::frame::{
     FrameInfo, FrameRegistry, FrameSelection, LoadIssue, TextZone, UserFrames,
 };
-use crate::imaging::preset::Preset;
-use crate::imaging::render::RenderParams;
-use crate::imaging::{PhotoError, decode, encode, preset, render};
+use qfilm_core::preset::Preset;
+use qfilm_core::render::RenderParams;
+use qfilm_core::{PhotoError, decode, encode, preset, render};
 
 const PREVIEW_MAX_EDGE: u32 = 1800;
 const PREVIEW_JPEG_QUALITY: u8 = 88;

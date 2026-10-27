@@ -5,6 +5,13 @@
     clippy::cast_precision_loss,
     clippy::cast_sign_loss
 )]
+// Crate interne, un seul consommateur : ces lints d'API publique n'apportent que du bruit.
+#![allow(
+    clippy::must_use_candidate,
+    clippy::return_self_not_must_use,
+    clippy::missing_errors_doc,
+    clippy::missing_panics_doc
+)]
 
 pub mod buffer;
 pub mod caption;

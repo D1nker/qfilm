@@ -7,7 +7,10 @@ const host = process.env.TAURI_DEV_HOST;
 export default defineConfig({
   plugins: [vue()],
   resolve: {
-    alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
+    alias: {
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
+      "@fonts": fileURLToPath(new URL("./assets/fonts", import.meta.url)),
+    },
   },
   // Tauri affiche ses propres erreurs dans le terminal : ne pas les effacer
   clearScreen: false,
@@ -18,7 +21,7 @@ export default defineConfig({
     host: host || false,
     hmr: host ? { protocol: "ws", host, port: 1421 } : undefined,
     watch: {
-      ignored: ["**/src-tauri/**"],
+      ignored: ["**/src-tauri/**", "**/crates/**", "**/target/**"],
     },
   },
   envPrefix: ["VITE_", "TAURI_ENV_*"],

@@ -9,8 +9,8 @@ use minijinja::{AutoEscape, Environment, Error, ErrorKind, UndefinedBehavior, co
 use serde_json::{Map, Value as Json};
 
 use super::FrameError;
-use crate::imaging::buffer::srgb_to_linear;
-use crate::imaging::fonts::{self, FontChoice};
+use crate::buffer::srgb_to_linear;
+use crate::fonts::{self, FontChoice};
 
 const TEMPLATE_NAME: &str = "frame.svg";
 

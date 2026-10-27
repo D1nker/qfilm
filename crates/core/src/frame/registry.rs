@@ -3,8 +3,8 @@ use serde::Serialize;
 use super::builtin;
 use super::manifest::FrameManifest;
 use super::{Frame, FrameError, FrameSelection, Rendered};
-use crate::imaging::buffer::ImageBuf;
-use crate::imaging::caption::{self, Caption};
+use crate::buffer::ImageBuf;
+use crate::caption::{self, Caption};
 
 pub const NONE_ID: &str = "none";
 
