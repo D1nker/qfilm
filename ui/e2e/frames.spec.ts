@@ -44,7 +44,7 @@ test.describe("frame panel", () => {
       stock: "amber",
       width: 14,
       color: "#120f0c",
-      sprockets: true,
+      sprockets: false,
       text: "PORTRAIT 400",
       frameNumber: "24A",
     });
@@ -78,6 +78,19 @@ test.describe("frame panel", () => {
 
     expect(room).not.toBeNull();
     for (const side of Object.values(room ?? {})) expect(side).toBeGreaterThanOrEqual(4);
+  });
+
+  test("starts the 35 mm strip without sprocket holes, and draws them when asked", async ({
+    openApp,
+  }) => {
+    await shape(openApp, "35 mm").click();
+    const sprockets = openApp.page.getByRole("switch", { name: "Perforations" });
+
+    await expect(sprockets).not.toBeChecked();
+    await sprockets.click();
+
+    await expect(sprockets).toBeChecked();
+    await expect.poll(async () => (await frameParams(openApp)).sprockets).toBe(true);
   });
 
   test("keeps the caption when the frame changes", async ({ openApp }) => {

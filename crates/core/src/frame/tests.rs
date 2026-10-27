@@ -754,3 +754,13 @@ fn a_manifest_with_a_hostile_language_code_is_refused() {
 
     assert!(manifest.validate().is_err());
 }
+
+#[test]
+fn the_35mm_strip_hides_its_sprocket_holes_until_asked() {
+    let registry = FrameRegistry::builtin();
+
+    for (id, expected) in [("film35", false), ("film120", false)] {
+        let defaults = registry.get(id).expect("cadre livré").manifest.defaults();
+        assert_eq!(defaults.get("sprockets"), Some(&json!(expected)), "{id}");
+    }
+}

@@ -136,7 +136,7 @@
         "en": "Sprocket holes"
       },
       "type": "bool",
-      "default": true
+      "default": false
     },
     {
       "id": "ink",

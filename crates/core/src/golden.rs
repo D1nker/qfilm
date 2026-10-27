@@ -165,6 +165,10 @@ fn film_frame(id: &str, stock: &str, extra: Value) -> FrameSelection {
 
     let mut params: Map<String, Value> = manifest.defaults();
     params.insert("stock".into(), json!(stock));
+    // Les références dessinent les perforations ; le manifeste, lui, ne les montre pas par défaut.
+    if id == "film35" {
+        params.insert("sprockets".into(), json!(true));
+    }
     for param in &manifest.params {
         if let ParamKind::Choice { options, .. } = &param.kind
             && let Some(option) = options.iter().find(|option| option.id == stock)

@@ -30,7 +30,7 @@ describe("coerce", () => {
     expect(coerce(def("width"), "12")).toBe(14);
     expect(coerce(def("width"), Number.NaN)).toBe(14);
     expect(coerce(def("width"), Number.POSITIVE_INFINITY)).toBe(14);
-    expect(coerce(def("sprockets"), "true")).toBe(true);
+    expect(coerce(def("sprockets"), "true")).toBe(false);
     expect(coerce(def("text"), 5)).toBe("PORTRAIT 400");
   });
 

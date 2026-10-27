@@ -39,7 +39,7 @@ function filmParams(width: number): ParamDef[] {
       default: width,
     },
     { id: "color", label: "Support", type: "color", default: "#120f0c" },
-    { id: "sprockets", label: "Perforations", type: "bool", default: true, hidden: true },
+    { id: "sprockets", label: "Perforations", type: "bool", default: false, hidden: true },
     { id: "ink", label: "Marquages", type: "color", default: "#f0a63c", visibleIf: printed },
     {
       id: "text",
