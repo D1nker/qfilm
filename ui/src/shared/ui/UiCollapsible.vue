@@ -18,6 +18,10 @@ withDefaults(defineProps<{ title: string; defaultOpen?: boolean }>(), { defaultO
 </script>
 
 <style scoped>
+.group {
+  --ring-room: 6px;
+}
+
 .group + .group {
   margin-top: var(--space-3);
 }
@@ -58,6 +62,9 @@ withDefaults(defineProps<{ title: string; defaultOpen?: boolean }>(), { defaultO
 }
 
 .content {
+  /* Le rognage de l'animation couperait l'anneau de focus des contrôles collés au bord. */
+  margin: calc(var(--ring-room) * -1);
+  padding: var(--ring-room);
   overflow: hidden;
 }
 

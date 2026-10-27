@@ -56,6 +56,30 @@ test.describe("frame panel", () => {
     await expect(openApp.page.getByText("Texte pellicule")).toBeVisible();
   });
 
+  test("leaves room for the focus ring of a field that touches the section edge", async ({
+    openApp,
+  }) => {
+    const field = openApp.page.getByPlaceholder("Biarritz, août 2026");
+    await field.focus();
+
+    const room = await field.evaluate((input) => {
+      let clip = input.parentElement;
+      while (clip && getComputedStyle(clip).overflow !== "hidden") clip = clip.parentElement;
+      if (!clip) return null;
+      const inner = input.getBoundingClientRect();
+      const outer = clip.getBoundingClientRect();
+      return {
+        left: inner.left - outer.left,
+        right: outer.right - inner.right,
+        top: inner.top - outer.top,
+        bottom: outer.bottom - inner.bottom,
+      };
+    });
+
+    expect(room).not.toBeNull();
+    for (const side of Object.values(room ?? {})) expect(side).toBeGreaterThanOrEqual(4);
+  });
+
   test("keeps the caption when the frame changes", async ({ openApp }) => {
     const caption = openApp.page.getByPlaceholder("Biarritz, août 2026");
     await caption.fill("Salut");
