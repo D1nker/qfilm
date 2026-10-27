@@ -47,22 +47,23 @@ npm run rust:fmt     # auto-format the Rust code
 ## Project layout
 
 ```
-src/
-├─ components/       app components
-│  ├─ ui/            in-house UI kit built on Reka UI
-│  ├─ inspector/     right panel: Looks / Réglages / Cadre tabs
-│  └─ export/        export dialog (format, quality, size)
-├─ composables/      state and logic (module-level singletons)
-├─ lib/              typed Tauri API, static data, helpers
-└─ styles/           design tokens (light + dark) and base styles
+ui/                  Vue app (npm workspace): Vite, Vitest, Playwright, ESLint
+├─ src/
+│  ├─ components/    app components
+│  │  ├─ ui/         in-house UI kit built on Reka UI
+│  │  ├─ inspector/  right panel: Looks / Réglages / Cadre tabs
+│  │  └─ export/     export dialog (format, quality, size)
+│  ├─ composables/   state and logic (module-level singletons)
+│  ├─ lib/           typed Tauri API, static data, helpers
+│  └─ styles/        design tokens (light + dark) and base styles
+└─ e2e/              Playwright tests against a mocked Tauri bridge
+desktop/             thin Tauri shell: commands, app state, config, icons
 crates/core/         qfilm-core: the imaging engine (no Tauri dependency)
 ├─ src/              decode, render pipeline, presets, frames, caption, encode
 ├─ frames/           built-in frames (SVG + manifest)
 ├─ presets/          looks, in builtin.json (add one by editing this file)
 └─ golden/           reference images for the rendering tests
-src-tauri/           thin Tauri shell: commands, app state, config
 assets/fonts/        fonts shared by the engine (embedded) and the UI
-e2e/                 Playwright tests against a mocked Tauri bridge
 docs/                frame authoring guide
 branding/            app icon sources
 ```

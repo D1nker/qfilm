@@ -6,7 +6,7 @@ import skipFormatting from "@vue/eslint-config-prettier/skip-formatting";
 export default defineConfigWithVueTs(
   { name: "app/files-to-lint", files: ["**/*.{ts,mts,vue}"] },
 
-  globalIgnores(["**/dist/**", "**/node_modules/**", "**/target/**", "src-tauri/**", "crates/**"]),
+  globalIgnores(["**/dist/**", "**/node_modules/**"]),
 
   pluginVue.configs["flat/recommended"],
   vueTsConfigs.recommendedTypeChecked,

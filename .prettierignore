@@ -1,6 +1,6 @@
 dist
 node_modules
-src-tauri
+desktop
 crates
 target
 public

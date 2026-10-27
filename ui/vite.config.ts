@@ -9,7 +9,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
-      "@fonts": fileURLToPath(new URL("./assets/fonts", import.meta.url)),
+      "@fonts": fileURLToPath(new URL("../assets/fonts", import.meta.url)),
     },
   },
   // Tauri affiche ses propres erreurs dans le terminal : ne pas les effacer
@@ -20,9 +20,6 @@ export default defineConfig({
     strictPort: true,
     host: host || false,
     hmr: host ? { protocol: "ws", host, port: 1421 } : undefined,
-    watch: {
-      ignored: ["**/src-tauri/**", "**/crates/**", "**/target/**"],
-    },
   },
   envPrefix: ["VITE_", "TAURI_ENV_*"],
 });

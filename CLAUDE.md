@@ -12,9 +12,15 @@ Film look and frame studio. Tauri 2 shell, Vue 3 + TypeScript UI, Rust imaging c
 
 npm and cargo are run locally in this project (no Docker).
 
+## Repository layout
+
+Monorepo. `ui/` is the Vue app (npm workspace `@qfilm/ui`: Vite, Vitest, Playwright, ESLint and tsconfigs live
+there; the root scripts delegate to it), `desktop/` is the Tauri shell, `crates/core/` is the engine, `assets/`
+holds files shared by both sides, `docs/` and `branding/` are what they say. Frontend paths below are relative to `ui/`.
+
 ## Frontend conventions
 
-- Imports use the `@/` alias (= `src/`). Never `../` (ESLint enforces it); avoid `./` too.
+- Imports use the `@/` alias (= `ui/src/`). Never `../` (ESLint enforces it); avoid `./` too.
 - `<script setup lang="ts">`, block order template → script → style, scoped CSS per component.
 - State lives in composables (`src/composables`), module-level singletons, no Pinia. One concern
   each: `useEditor` (open photo, presets, thumbnails), `useLook` (preset × amount + manual
@@ -51,7 +57,7 @@ npm and cargo are run locally in this project (no Docker).
 ## Rust conventions
 
 - Cargo workspace at the root: `crates/core` (`qfilm-core`, the imaging engine, no Tauri dependency, so the
-  compiler enforces it) and `src-tauri` (thin Tauri shell: commands, app state, plugins). Assets shared with the
+  compiler enforces it) and `desktop` (thin Tauri shell: commands, app state, plugins). Assets shared with the
   UI live in `assets/` (fonts: embedded by Rust, served to the UI through the `@fonts` Vite alias).
 - Edition 2024, MSRV 1.88 (let-chains). `rustfmt.toml` and `[workspace.lints]` in the root `Cargo.toml`: clippy pedantic is on, `unsafe` is forbidden.
 - Cast lints are allowed only inside `qfilm-core` (pixel math); elsewhere fix the cast.
@@ -66,11 +72,11 @@ npm and cargo are run locally in this project (no Docker).
 - Frames engine: `crates/core/src/frame/` (manifest validation → template → raster/compose → registry/store).
   Imported frames are untrusted input: size caps, strict validation, dry-run render, no disk
   extraction, no file access from SVG. Keep those guarantees (and their tests) when touching it.
-- `qfilm-core` is UI-agnostic: no Tauri types in it. Tauri glue stays in `src-tauri/src/commands.rs`.
+- `qfilm-core` is UI-agnostic: no Tauri types in it. Tauri glue stays in `desktop/src/commands.rs`.
 - Errors: `thiserror` enums, serialized to the frontend as strings.
 - Tests: Vitest unit tests sit next to their module (`*.test.ts`); composables hold module-level
-  state, so load them with `fresh()` from `src/test/fresh.ts` and mock Rust with `apiMock()`. The
-  Playwright suite in `e2e/` runs the real UI against `e2e/support/tauri-mock.js` (real frame
+  state, so load them with `fresh()` from `ui/src/test/fresh.ts` and mock Rust with `apiMock()`. The
+  Playwright suite in `ui/e2e/` runs the real UI against `ui/e2e/support/tauri-mock.js` (real frame
   manifests, fake Rust); use the `openApp` fixture and `expect.poll`, not fixed sleeps. Check that a
   new test fails when the behavior it guards is broken.
 - Golden-image tests (`crates/core/src/golden.rs`, references in `crates/core/golden/`) guard every frame
@@ -89,4 +95,4 @@ npm and cargo are run locally in this project (no Docker).
   The bundle `identifier` (`io.github.d1nker.qfilm`) follows the GitHub-hosted convention: keep it,
   changing it later moves the app's data folder and breaks signing/updater continuity.
 - Icons: source in `branding/icon.svg` (+ `icon.png`). Regenerate with
-  `npm run tauri icon branding/icon.png`, then delete `src-tauri/icons/android` and `ios` (desktop only).
+  `npm run tauri icon branding/icon.png`, then delete `desktop/icons/android` and `ios` (desktop only).

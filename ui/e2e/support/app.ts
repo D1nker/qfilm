@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 
 import { expect, test as base, type Page } from "@playwright/test";
 
-const FRAMES_DIRECTORY = fileURLToPath(new URL("../../crates/core/frames/", import.meta.url));
+const FRAMES_DIRECTORY = fileURLToPath(new URL("../../../crates/core/frames/", import.meta.url));
 const MOCK_SCRIPT = fileURLToPath(new URL("./tauri-mock.js", import.meta.url));
 
 const BUILTIN_FRAMES = ["solid", "instant", "film35", "film120", "letterbox", "padding"];
