@@ -17,7 +17,7 @@ npm and cargo are run locally in this project (no Docker).
 Monorepo. `ui/` is the Vue app (npm workspace `@qfilm/ui`: Vite, Vitest, Playwright, ESLint and tsconfigs live
 there; the root scripts delegate to it), `desktop/` is the Tauri shell, `crates/core/` is the engine, `assets/`
 holds files shared by both sides, `website/` is the static download page (plain HTML/CSS/JS, no build
-step, preview with `python3 -m http.server -d website`), `docs/` and `branding/` are what they say. Frontend paths below are relative to `ui/`.
+step, preview with `npm run website`), `docs/` and `branding/` are what they say. Frontend paths below are relative to `ui/`.
 
 ## Frontend conventions
 

@@ -13,6 +13,7 @@
     "build": "npm run build -w @qfilm/ui",
     "preview": "npm run preview -w @qfilm/ui",
     "tauri": "tauri",
+    "website": "vite website --port 4000",
     "app": "tauri dev",
     "app:build": "tauri build",
     "typecheck": "npm run typecheck -w @qfilm/ui",
