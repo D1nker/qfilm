@@ -8,12 +8,15 @@ export const fr = {
   },
   menu: {
     label: "Menu",
+    framesFolder: "Ouvrir le dossier des cadres",
+    shortcuts: "Raccourcis clavier",
+  },
+  preferences: {
+    label: "Préférences",
     theme: "Thème",
     dark: "Sombre",
     light: "Clair",
     language: "Langue",
-    framesFolder: "Ouvrir le dossier des cadres",
-    shortcuts: "Raccourcis clavier",
   },
   tabs: {
     looks: "Preset",

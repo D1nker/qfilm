@@ -3,6 +3,7 @@
     <div class="layout" :class="{ collapsed: !open }">
       <AppHeader class="area-header" />
       <ImageViewport class="area-main" />
+      <PreferencesBar class="area-preferences" />
       <InspectorPanel v-show="open" class="area-inspector" />
     </div>
 
@@ -30,6 +31,7 @@ import { ImageViewport } from "@/features/viewer";
 import { ExportDialog } from "@/features/export";
 import ShortcutsDialog from "@/app/ShortcutsDialog.vue";
 import InspectorPanel from "@/app/InspectorPanel.vue";
+import PreferencesBar from "@/app/PreferencesBar.vue";
 
 const { error, init } = useEditor();
 const { init: initFrames } = useFrame();
@@ -65,6 +67,15 @@ onMounted(() => void Promise.all([init(), initFrames()]));
 
 .area-inspector {
   grid-area: inspector;
+}
+
+/* Dans le coin du canvas, sur la ligne de la barre d'outils flottante. */
+.area-preferences {
+  z-index: 1;
+  grid-area: main;
+  align-self: end;
+  justify-self: start;
+  margin: 0 0 var(--space-4) var(--space-4);
 }
 
 /* En haut : le bas du canvas appartient à la barre d'outils flottante. */

@@ -26,14 +26,13 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { ChevronDown, FolderOpen, Keyboard, Languages, Moon, Sun } from "lucide-vue-next";
+import { ChevronDown, FolderOpen, Keyboard } from "lucide-vue-next";
 
 import { useEditor } from "@/features/photo";
 import { useExport } from "@/features/export";
 import { useFrame } from "@/features/frames";
 import { useHelp } from "@/app/useHelp";
-import { useTheme, type ThemeMode } from "@/app/useTheme";
-import { LOCALES, t, useLocale, type Locale } from "@/shared/i18n";
+import { t } from "@/shared/i18n";
 import UiButton from "@/shared/ui/UiButton.vue";
 import UiMenu from "@/shared/ui/UiMenu.vue";
 import type { MenuEntry } from "@/shared/ui/menu";
@@ -44,28 +43,8 @@ const { image, status, browse } = useEditor();
 const { openExport } = useExport();
 const { showFolder } = useFrame();
 const { shortcutsOpen } = useHelp();
-const { mode, set: setTheme } = useTheme();
-const { locale, set: setLocale } = useLocale();
 
 const menu = computed<MenuEntry[]>(() => [
-  {
-    kind: "choice",
-    label: t("menu.theme"),
-    value: mode.value,
-    options: [
-      { value: "dark", label: t("menu.dark"), icon: Moon },
-      { value: "light", label: t("menu.light"), icon: Sun },
-    ],
-    onChange: (value) => setTheme(value as ThemeMode),
-  },
-  {
-    kind: "choice",
-    label: t("menu.language"),
-    value: locale.value,
-    options: LOCALES.map((option) => ({ ...option, icon: Languages })),
-    onChange: (value) => setLocale(value as Locale),
-  },
-  { kind: "separator" },
   {
     kind: "item",
     label: t("menu.framesFolder"),

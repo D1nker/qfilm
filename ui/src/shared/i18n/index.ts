@@ -6,9 +6,9 @@ import { fr, type Messages } from "@/shared/i18n/fr";
 
 export type Locale = "fr" | "en";
 
-export const LOCALES: { value: Locale; label: string }[] = [
-  { value: "fr", label: "Français" },
-  { value: "en", label: "English" },
+export const LOCALES: { value: Locale; label: string; code: string }[] = [
+  { value: "fr", label: "Français", code: "FR" },
+  { value: "en", label: "English", code: "EN" },
 ];
 
 const STORAGE_KEY = "qfilm-locale";

@@ -14,33 +14,6 @@
                   v-if="entry.kind === 'separator'"
                   class="ui-menu-separator"
                 />
-
-                <template v-else-if="entry.kind === 'choice'">
-                  <DropdownMenuLabel class="ui-menu-label">{{ entry.label }}</DropdownMenuLabel>
-                  <DropdownMenuRadioGroup
-                    :model-value="entry.value"
-                    @update:model-value="choose(entry, $event)"
-                  >
-                    <DropdownMenuRadioItem
-                      v-for="option in entry.options"
-                      :key="option.value"
-                      :value="option.value"
-                      class="ui-menu-item"
-                    >
-                      <component
-                        :is="option.icon"
-                        v-if="option.icon"
-                        :size="14"
-                        class="ui-menu-icon"
-                      />
-                      <span class="ui-menu-text">{{ option.label }}</span>
-                      <DropdownMenuItemIndicator class="ui-menu-check">
-                        <Check :size="14" />
-                      </DropdownMenuItemIndicator>
-                    </DropdownMenuRadioItem>
-                  </DropdownMenuRadioGroup>
-                </template>
-
                 <DropdownMenuItem v-else class="ui-menu-item" @select="entry.onSelect()">
                   <component :is="entry.icon" v-if="entry.icon" :size="14" class="ui-menu-icon" />
                   <span class="ui-menu-text">{{ entry.label }}</span>
@@ -68,19 +41,14 @@ import {
   TooltipTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuItemIndicator,
-  DropdownMenuLabel,
   DropdownMenuPortal,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
   DropdownMenuRoot,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "reka-ui";
-import { Check } from "lucide-vue-next";
 import { ref, watch } from "vue";
 
-import type { MenuChoice, MenuEntry } from "@/shared/ui/menu";
+import type { MenuEntry } from "@/shared/ui/menu";
 
 withDefaults(defineProps<{ entries: MenuEntry[]; tooltip?: string; align?: "start" | "end" }>(), {
   tooltip: undefined,
@@ -95,10 +63,6 @@ const tooltipOpen = ref(false);
 watch(menuOpen, (open) => {
   if (open) tooltipOpen.value = false;
 });
-
-function choose(entry: MenuChoice, value: unknown) {
-  if (typeof value === "string") entry.onChange(value);
-}
 </script>
 
 <style>
@@ -114,15 +78,6 @@ function choose(entry: MenuChoice, value: unknown) {
   border-radius: var(--radius-md);
   background: var(--surface-raised);
   box-shadow: var(--shadow-md);
-}
-
-.ui-menu-label {
-  padding: 6px var(--space-2) 2px;
-  color: var(--text-faint);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-medium);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
 }
 
 .ui-menu-item {
@@ -146,10 +101,6 @@ function choose(entry: MenuChoice, value: unknown) {
 
 .ui-menu-text {
   flex: 1;
-}
-
-.ui-menu-check {
-  color: var(--accent);
 }
 
 .ui-menu-separator {

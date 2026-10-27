@@ -10,12 +10,15 @@ export const en: Messages = {
   },
   menu: {
     label: "Menu",
+    framesFolder: "Open the frames folder",
+    shortcuts: "Keyboard shortcuts",
+  },
+  preferences: {
+    label: "Preferences",
     theme: "Theme",
     dark: "Dark",
     light: "Light",
     language: "Language",
-    framesFolder: "Open the frames folder",
-    shortcuts: "Keyboard shortcuts",
   },
   tabs: {
     looks: "Preset",

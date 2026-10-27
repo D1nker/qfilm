@@ -2,10 +2,7 @@ import { expect, test, type App } from "./support/app";
 
 const html = (app: App) => app.page.evaluate(() => document.documentElement.lang);
 
-async function chooseLanguage(app: App, name: "Français" | "English") {
-  await app.page.getByRole("button", { name: "Menu" }).click();
-  await app.page.getByRole("menuitemradio", { name }).click();
-}
+const choice = (app: App, name: string) => app.page.getByRole("radio", { name });
 
 test.describe("language", () => {
   test("is French on a French system", async ({ app }) => {
@@ -31,10 +28,10 @@ test.describe("language", () => {
     });
   });
 
-  test("switches from the menu, translating the dialogs and the tooltips, and remembers it", async ({
+  test("switches from the preferences bar, translating dialogs, and remembers it", async ({
     openApp,
   }) => {
-    await chooseLanguage(openApp, "English");
+    await choice(openApp, "English").click();
 
     expect(await html(openApp)).toBe("en");
     await expect(openApp.tab("Edit")).toBeVisible();
@@ -46,14 +43,58 @@ test.describe("language", () => {
     expect(await html(openApp)).toBe("en");
     await expect(openApp.page.getByRole("button", { name: "Open…" })).toBeVisible();
 
-    await chooseLanguage(openApp, "Français");
+    await choice(openApp, "Français").click();
     await expect(openApp.page.getByRole("button", { name: "Ouvrir…" })).toBeVisible();
   });
 
-  test("the menu shows the current language as checked", async ({ app }) => {
-    await app.page.getByRole("button", { name: "Menu" }).click();
+  test("shows the current language as checked", async ({ app }) => {
+    await expect(choice(app, "Français")).toBeChecked();
+    await expect(choice(app, "English")).not.toBeChecked();
+  });
+});
 
-    await expect(app.page.getByRole("menuitemradio", { name: "Français" })).toBeChecked();
-    await expect(app.page.getByRole("menuitemradio", { name: "English" })).not.toBeChecked();
+test.describe("preferences bar", () => {
+  const bar = (app: App) => app.page.getByRole("group", { name: "Préférences" });
+
+  test("is there before any photo, as compact icon and code buttons", async ({ app }) => {
+    await expect(bar(app)).toBeVisible();
+    await expect(app.page.getByRole("radio")).toHaveCount(4);
+    await expect(choice(app, "Français")).toHaveText("FR");
+    await expect(choice(app, "English")).toHaveText("EN");
+    await expect(choice(app, "Sombre")).toHaveText("");
+  });
+
+  test("the checked choice looks different from the others", async ({ app }) => {
+    const background = (name: string) =>
+      choice(app, name).evaluate((element) => getComputedStyle(element).backgroundColor);
+
+    expect(await background("Français")).not.toBe("rgba(0, 0, 0, 0)");
+    expect(await background("English")).toBe("rgba(0, 0, 0, 0)");
+  });
+
+  test("moves between the choices with the keyboard", async ({ app }) => {
+    await choice(app, "Français").focus();
+    await app.page.keyboard.press("ArrowRight");
+    await app.page.keyboard.press("Space");
+
+    await expect(choice(app, "English")).toBeChecked();
+  });
+
+  test("sits on the toolbar line without touching the photo", async ({ openApp }) => {
+    const box = (selector: string) =>
+      openApp.page
+        .locator(selector)
+        .first()
+        .evaluate((element) => {
+          const { top, bottom, left, right } = element.getBoundingClientRect();
+          return { top, bottom, left, right };
+        });
+    const preferences = await box('[role="group"][aria-label="Préférences"]');
+    const toolbar = await box('[role="toolbar"]');
+    const photo = await box("main img");
+
+    expect(Math.abs(preferences.bottom - toolbar.bottom)).toBeLessThanOrEqual(2);
+    expect(preferences.top).toBeGreaterThanOrEqual(photo.bottom);
+    expect(preferences.right).toBeLessThan(toolbar.left);
   });
 });
