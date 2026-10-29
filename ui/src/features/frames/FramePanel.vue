@@ -1,13 +1,11 @@
 <template>
   <div>
-    <div class="head">
-      <p>{{ t("tabs.frame") }}</p>
-      <UiButton variant="ghost" size="sm" :disabled="isPristine" @click="resetFrame">
-        {{ t("common.reset") }}
-      </UiButton>
-    </div>
-
     <UiCollapsible id="frame-shape" :title="t('frames.shape')">
+      <template #actions>
+        <UiButton variant="ghost" size="sm" :disabled="isPristine" @click="resetFrame">
+          {{ t("common.reset") }}
+        </UiButton>
+      </template>
       <div class="grid">
         <UiThumbnailButton
           v-for="info in frames"
@@ -115,14 +113,6 @@ function valueOf(def: ParamDef): ParamValue {
 </script>
 
 <style scoped>
-.head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--space-3);
-  font-weight: var(--weight-semibold);
-}
-
 .grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

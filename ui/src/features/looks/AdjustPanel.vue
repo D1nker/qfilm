@@ -1,14 +1,12 @@
 <template>
   <div>
-    <div class="head">
-      <p>{{ t("tabs.adjust") }}</p>
-      <UiButton variant="ghost" size="sm" @click="resetLook">
-        {{ t("common.reset") }}
-      </UiButton>
-    </div>
-
-    <section v-for="part in PARTS" :key="part.id" class="part">
-      <h3 class="part-title">{{ t(`adjust.parts.${part.id}`) }}</h3>
+    <section v-for="(part, index) in PARTS" :key="part.id" class="part">
+      <div class="part-head">
+        <h3 class="part-title">{{ t(`adjust.parts.${part.id}`) }}</h3>
+        <UiButton v-if="index === 0" variant="ghost" size="sm" @click="resetLook">
+          {{ t("common.reset") }}
+        </UiButton>
+      </div>
 
       <template v-for="id in part.sections" :key="id">
         <UiCollapsible
@@ -186,18 +184,18 @@ function resetCurves() {
   margin-top: var(--space-6);
 }
 
-.part-title {
-  margin: 0 0 var(--space-1);
-  color: var(--text);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-}
-
-.head {
+.part-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: var(--space-3);
+  min-height: 28px;
+  margin-bottom: var(--space-1);
+}
+
+.part-title {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
 }
 </style>
