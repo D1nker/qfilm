@@ -456,6 +456,18 @@ golden_look!(
     }
 );
 
+golden_look!(
+    look_color_grading,
+    RenderParams {
+        shadows_hue: 195.0,
+        shadows_saturation: 0.8,
+        highlights_hue: 35.0,
+        highlights_saturation: 0.7,
+        grading_balance: 0.1,
+        ..RenderParams::default()
+    }
+);
+
 /// La scène de test, avec un bruit déterministe par canal : de quoi voir ce que le lissage retire.
 fn noisy_landscape() -> ImageBuf {
     let mut img = landscape();

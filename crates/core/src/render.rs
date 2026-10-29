@@ -31,6 +31,15 @@ pub struct RenderParams {
     /// Lissage du bruit de couleur, qui épargne les contours.
     pub noise_color: f32,
     pub lift: f32,
+    /// Teinte (0 à 360°) et saturation de l'étalonnage des ombres.
+    pub shadows_hue: f32,
+    pub shadows_saturation: f32,
+    pub midtones_hue: f32,
+    pub midtones_saturation: f32,
+    pub highlights_hue: f32,
+    pub highlights_saturation: f32,
+    /// Fait pencher l'étalonnage vers les ombres (-1) ou les hautes lumières (+1).
+    pub grading_balance: f32,
     pub halation: f32,
     pub grain: f32,
     pub grain_size: f32,
@@ -62,6 +71,13 @@ impl Default for RenderParams {
             noise_luminance: 0.0,
             noise_color: 0.0,
             lift: 0.0,
+            shadows_hue: 0.0,
+            shadows_saturation: 0.0,
+            midtones_hue: 0.0,
+            midtones_saturation: 0.0,
+            highlights_hue: 0.0,
+            highlights_saturation: 0.0,
+            grading_balance: 0.0,
             halation: 0.0,
             grain: 0.0,
             grain_size: 2.0,
@@ -93,6 +109,13 @@ pub fn apply(source: &ImageBuf, params: &RenderParams) -> ImageBuf {
     }
 
     apply_tone_and_color(&mut img, params);
+
+    if params.shadows_saturation > 0.001
+        || params.midtones_saturation > 0.001
+        || params.highlights_saturation > 0.001
+    {
+        apply_color_grading(&mut img, params);
+    }
 
     if params.sharpening > 0.001 {
         apply_sharpening(&mut img, params.sharpening, params.sharpen_radius);
@@ -293,6 +316,61 @@ fn apply_noise_reduction(img: &mut ImageBuf, luminance: f32, color: f32) {
             let own_chroma = original[i * 3 + channel] - luma[i];
             let new_chroma = own_chroma + (chroma[channel][i] - own_chroma) * color * kept;
             *value = (new_luma + new_chroma).max(0.0);
+        }
+    });
+}
+
+/// La couleur pleine d'une teinte (0 à 360°), puis ce qu'elle a de coloré une fois sa luminosité
+/// retirée : un vecteur sans luminance, qui teinte sans éclaircir ni assombrir.
+fn tint_vector(hue: f32) -> [f32; 3] {
+    let sector = hue.rem_euclid(360.0) / 60.0;
+    let rise = 1.0 - (sector % 2.0 - 1.0).abs();
+    let rgb = match sector as u32 {
+        0 => [1.0, rise, 0.0],
+        1 => [rise, 1.0, 0.0],
+        2 => [0.0, 1.0, rise],
+        3 => [0.0, rise, 1.0],
+        4 => [rise, 0.0, 1.0],
+        _ => [1.0, 0.0, rise],
+    };
+    let luma = LUMA[0] * rgb[0] + LUMA[1] * rgb[1] + LUMA[2] * rgb[2];
+    rgb.map(|c| c - luma)
+}
+
+/// Étalonnage en trois zones. Les poids des ombres, des tons moyens et des hautes lumières suivent
+/// la luminosité perçue et font toujours 1 ; chaque zone pousse la couleur vers sa teinte.
+fn apply_color_grading(img: &mut ImageBuf, p: &RenderParams) {
+    const STRENGTH: f32 = 0.4;
+
+    let zones = [
+        (tint_vector(p.shadows_hue), p.shadows_saturation),
+        (tint_vector(p.midtones_hue), p.midtones_saturation),
+        (tint_vector(p.highlights_hue), p.highlights_saturation),
+    ];
+    let balance = p.grading_balance.clamp(-1.0, 1.0) * 0.25;
+
+    img.data.par_chunks_mut(3).for_each(|px| {
+        let encoded = [
+            linear_to_srgb(px[0].max(0.0)),
+            linear_to_srgb(px[1].max(0.0)),
+            linear_to_srgb(px[2].max(0.0)),
+        ];
+        let level = (LUMA[0] * encoded[0] + LUMA[1] * encoded[1] + LUMA[2] * encoded[2] + balance)
+            .clamp(0.0, 1.0);
+        let weights = [
+            (1.0 - level) * (1.0 - level),
+            2.0 * level * (1.0 - level),
+            level * level,
+        ];
+
+        let mut shift = [0.0f32; 3];
+        for ((vector, saturation), weight) in zones.iter().zip(weights) {
+            for (channel, offset) in shift.iter_mut().zip(vector) {
+                *channel += offset * saturation * weight * STRENGTH;
+            }
+        }
+        for (channel, (value, delta)) in px.iter_mut().zip(encoded.iter().zip(shift)) {
+            *channel = srgb_to_linear((value + delta).max(0.0));
         }
     });
 }
@@ -823,5 +901,126 @@ mod tests {
                 data.iter().copied().fold(f32::MAX, f32::min)
             );
         }
+    }
+
+    fn first_pixel(img: &ImageBuf) -> [f32; 3] {
+        [img.data[0], img.data[1], img.data[2]]
+    }
+
+    fn graded(level: f32, params: &RenderParams) -> ([f32; 3], [f32; 3]) {
+        let source = flat(4, level);
+        (
+            first_pixel(&apply(&source, params)),
+            first_pixel(&apply(&source, &RenderParams::default())),
+        )
+    }
+
+    fn colour_shift(level: f32, params: &RenderParams) -> f32 {
+        let (graded, plain) = graded(level, params);
+        (0..3)
+            .map(|c| (graded[c] - plain[c]).abs())
+            .fold(0.0, f32::max)
+    }
+
+    #[test]
+    fn a_tint_hue_has_no_luminance_and_points_the_right_way() {
+        for degrees in (0..360).step_by(15) {
+            let [r, g, b] = tint_vector(degrees as f32);
+            let luma = LUMA[0] * r + LUMA[1] * g + LUMA[2] * b;
+            assert!(luma.abs() < 1e-5, "{degrees}° : {luma}");
+        }
+        assert!(tint_vector(0.0)[0] > 0.0 && tint_vector(0.0)[2] < 0.0);
+        assert!(tint_vector(120.0)[1] > 0.0 && tint_vector(120.0)[0] < 0.0);
+        assert!(tint_vector(240.0)[2] > 0.0 && tint_vector(240.0)[0] < 0.0);
+        assert_eq!(tint_vector(360.0), tint_vector(0.0));
+        assert_eq!(tint_vector(-120.0), tint_vector(240.0));
+    }
+
+    #[test]
+    fn grading_without_saturation_changes_nothing() {
+        let params = RenderParams {
+            shadows_hue: 200.0,
+            midtones_hue: 90.0,
+            highlights_hue: 30.0,
+            grading_balance: 0.5,
+            ..RenderParams::default()
+        };
+        let source = noisy_gray(32, 0.3, 0.1, true);
+
+        assert_eq!(
+            apply(&source, &params).data,
+            apply(&source, &RenderParams::default()).data
+        );
+    }
+
+    #[test]
+    fn the_shadows_tint_reaches_dark_tones_far_more_than_bright_ones() {
+        let params = RenderParams {
+            shadows_hue: 240.0,
+            shadows_saturation: 1.0,
+            ..RenderParams::default()
+        };
+
+        let (dark, dark_plain) = graded(0.02, &params);
+        assert!(
+            dark[2] - dark[0] > dark_plain[2] - dark_plain[0] + 0.01,
+            "{dark:?}"
+        );
+        assert!(colour_shift(0.02, &params) > colour_shift(0.8, &params) * 3.0);
+    }
+
+    #[test]
+    fn the_highlights_tint_reaches_bright_tones_far_more_than_dark_ones() {
+        let params = RenderParams {
+            highlights_hue: 30.0,
+            highlights_saturation: 1.0,
+            ..RenderParams::default()
+        };
+
+        let (bright, bright_plain) = graded(0.6, &params);
+        assert!(
+            bright[0] - bright[2] > bright_plain[0] - bright_plain[2] + 0.02,
+            "{bright:?}"
+        );
+        assert!(colour_shift(0.6, &params) > colour_shift(0.02, &params) * 3.0);
+    }
+
+    #[test]
+    fn grading_changes_the_colour_without_changing_the_brightness() {
+        let params = RenderParams {
+            midtones_hue: 120.0,
+            midtones_saturation: 1.0,
+            ..RenderParams::default()
+        };
+
+        let (graded, plain) = graded(0.18, &params);
+
+        let luma = |px: [f32; 3]| LUMA[0] * px[0] + LUMA[1] * px[1] + LUMA[2] * px[2];
+        assert!(
+            (luma(graded) - luma(plain)).abs() < luma(plain) * 0.08,
+            "{graded:?}"
+        );
+        assert!(
+            graded[1] > graded[0] + 0.02,
+            "le vert doit dominer : {graded:?}"
+        );
+    }
+
+    #[test]
+    fn the_balance_moves_where_the_shadows_end() {
+        let with_balance = |balance| {
+            colour_shift(
+                0.18,
+                &RenderParams {
+                    shadows_hue: 240.0,
+                    shadows_saturation: 1.0,
+                    grading_balance: balance,
+                    ..RenderParams::default()
+                },
+            )
+        };
+
+        assert!(with_balance(-1.0) > with_balance(0.0));
+        assert!(with_balance(0.0) > with_balance(1.0));
     }
 }

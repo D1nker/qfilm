@@ -96,7 +96,7 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
   Imported frames are untrusted input: size caps, strict validation, dry-run render, no disk
   extraction, no file access from SVG. Keep those guarantees (and their tests) when touching it.
 - Render pipeline (`crates/core/src/render.rs`), all in linear light: exposure and white balance → noise
-  reduction → halation → clarity → tone and colour → sharpening → vignette → grain → highlight shoulder.
+  reduction → halation → clarity → tone and colour → colour grading → sharpening → vignette → grain → highlight shoulder.
   A new setting defaults to the old behaviour (a missing field deserialises to its default), so presets and
   golden images do not move. Every radius is proportional to the image size (or to a 1 800 px reference), so
   the 1 800 px preview matches the full-size export. Edge and sharpness maths use the sRGB-encoded luminance,

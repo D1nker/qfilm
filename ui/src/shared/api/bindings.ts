@@ -306,6 +306,15 @@ export type RenderParams_Deserialize = {
 	/**  Lissage du bruit de couleur, qui épargne les contours. */
 	noiseColor?: number,
 	lift?: number,
+	/**  Teinte (0 à 360°) et saturation de l'étalonnage des ombres. */
+	shadowsHue?: number,
+	shadowsSaturation?: number,
+	midtonesHue?: number,
+	midtonesSaturation?: number,
+	highlightsHue?: number,
+	highlightsSaturation?: number,
+	/**  Fait pencher l'étalonnage vers les ombres (-1) ou les hautes lumières (+1). */
+	gradingBalance?: number,
 	halation?: number,
 	grain?: number,
 	grainSize?: number,
@@ -344,6 +353,15 @@ export type RenderParams_Serialize = {
 	/**  Lissage du bruit de couleur, qui épargne les contours. */
 	noiseColor: number,
 	lift: number,
+	/**  Teinte (0 à 360°) et saturation de l'étalonnage des ombres. */
+	shadowsHue: number,
+	shadowsSaturation: number,
+	midtonesHue: number,
+	midtonesSaturation: number,
+	highlightsHue: number,
+	highlightsSaturation: number,
+	/**  Fait pencher l'étalonnage vers les ombres (-1) ou les hautes lumières (+1). */
+	gradingBalance: number,
 	halation: number,
 	grain: number,
 	grainSize: number,
