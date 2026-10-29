@@ -7,7 +7,8 @@ const curves = async (app: App) => (await app.lastRender()).params.curves;
 
 /// Où cliquer sur le graphique pour une entrée et une sortie (de 0 à 1, la sortie vers le haut).
 async function spot(app: App, x: number, y: number) {
-  await graph(app).scrollIntoViewIfNeeded();
+  // Centré : collé au bord du panneau, le point (0, 0) serait rogné par le bas de la carte.
+  await graph(app).evaluate((element) => element.scrollIntoView({ block: "center" }));
   const box = await graph(app).boundingBox();
   if (!box) throw new Error("graphique introuvable");
   return { x: box.x + x * box.width, y: box.y + (1 - y) * box.height };
