@@ -437,6 +437,25 @@ golden_look!(
     }
 );
 
+golden_look!(
+    look_vignette_midpoint_and_feather,
+    RenderParams {
+        vignette: 0.9,
+        vignette_midpoint: 0.45,
+        vignette_feather: 0.9,
+        ..RenderParams::default()
+    }
+);
+golden_look!(
+    look_smooth_grain,
+    RenderParams {
+        grain: 0.8,
+        grain_size: 3.0,
+        grain_roughness: 0.0,
+        ..RenderParams::default()
+    }
+);
+
 #[test]
 fn rendering_is_deterministic() {
     let params = RenderParams {

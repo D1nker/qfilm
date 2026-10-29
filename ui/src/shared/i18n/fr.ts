@@ -56,7 +56,10 @@ export const fr = {
       halation: "Halation",
       grain: "Grain",
       grainSize: "Taille du grain",
+      grainRoughness: "Rugosité du grain",
       vignette: "Vignettage",
+      vignetteMidpoint: "Étendue du vignettage",
+      vignetteFeather: "Progressivité du vignettage",
     },
   },
   frames: {

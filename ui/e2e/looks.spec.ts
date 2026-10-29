@@ -61,6 +61,46 @@ test.describe("looks", () => {
     await expect.poll(async () => (await openApp.lastRender()).params.exposure).toBe(0);
   });
 
+  test("double-clicking a slider whose default is not zero brings back that default", async ({
+    openApp,
+  }) => {
+    await openApp.tab("Retouche").click();
+    const reset = async (label: string, key: string, moved: number, back: number) => {
+      const slider = openApp.page.locator(".slider", { hasText: label });
+      await slider.getByRole("slider").focus();
+      await openApp.press("ArrowLeft", 3);
+      await expect
+        .poll(async () => (await openApp.lastRender()).params[key])
+        .not.toBeCloseTo(moved, 3);
+
+      await slider.locator(".root").dblclick();
+
+      await expect.poll(async () => (await openApp.lastRender()).params[key]).toBeCloseTo(back, 3);
+    };
+
+    await reset("Taille du grain", "grainSize", 2, 2);
+    await reset("Rugosité du grain", "grainRoughness", 1, 1);
+    await reset("Progressivité du vignettage", "vignetteFeather", 0.5, 0.5);
+  });
+
+  test("offers the vignette midpoint and feather and the grain roughness", async ({ openApp }) => {
+    await openApp.tab("Retouche").click();
+
+    for (const name of [
+      "Rugosité du grain",
+      "Étendue du vignettage",
+      "Progressivité du vignettage",
+    ]) {
+      await expect(openApp.page.getByRole("slider", { name })).toBeVisible();
+    }
+
+    await openApp.page.getByRole("slider", { name: "Étendue du vignettage" }).focus();
+    await openApp.press("ArrowRight", 40);
+    await expect
+      .poll(async () => (await openApp.lastRender()).params.vignetteMidpoint)
+      .toBeCloseTo(0.4);
+  });
+
   test("shows signed values with units on the sliders", async ({ openApp }) => {
     await openApp.tab("Retouche").click();
     const exposure = openApp.page.locator(".slider", { hasText: "Exposition" });

@@ -23,7 +23,10 @@
     halation: 0,
     grain: 0,
     grainSize: 2,
+    grainRoughness: 1,
     vignette: 0,
+    vignetteMidpoint: 0,
+    vignetteFeather: 0.5,
   };
   const inLanguage = (text, language) => (typeof text === "string" ? text : text[language]);
   const preset = (id, name, category, params = {}) => ({

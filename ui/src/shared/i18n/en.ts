@@ -58,7 +58,10 @@ export const en: Messages = {
       halation: "Halation",
       grain: "Grain",
       grainSize: "Grain size",
+      grainRoughness: "Grain roughness",
       vignette: "Vignette",
+      vignetteMidpoint: "Vignette midpoint",
+      vignetteFeather: "Vignette feather",
     },
   },
   frames: {

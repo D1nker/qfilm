@@ -21,6 +21,7 @@
         :min="control.min"
         :max="control.max"
         :step="control.step"
+        :reset-to="NEUTRAL[control.key]"
         :disabled="!image"
         @update:model-value="setParam(control.key, $event)"
       />
@@ -33,6 +34,7 @@ import { computed } from "vue";
 import { t } from "@/shared/i18n";
 
 import { controls, formatControlValue } from "@/features/looks/controls";
+import { NEUTRAL } from "@/features/looks/neutral";
 import { groupBy } from "@/shared/lib/groupBy";
 import { useEditor } from "@/features/photo";
 import { useLook } from "@/features/looks/useLook";

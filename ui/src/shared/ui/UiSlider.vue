@@ -35,9 +35,11 @@ const props = withDefaults(
     min: number;
     max: number;
     step: number;
+    /** Valeur retrouvée par un double-clic ; à défaut 0, ou le minimum si 0 est hors plage. */
+    resetTo?: number;
     disabled?: boolean;
   }>(),
-  { disabled: false },
+  { resetTo: undefined, disabled: false },
 );
 
 const emit = defineEmits<{
@@ -70,7 +72,7 @@ function onSlide(values: number[] | undefined) {
 function reset() {
   if (props.disabled) return;
 
-  model.value = origin.value;
+  model.value = props.resetTo ?? origin.value;
   emit("input");
   emit("change");
 }

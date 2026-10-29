@@ -301,7 +301,13 @@ export type RenderParams_Deserialize = {
 	halation?: number,
 	grain?: number,
 	grainSize?: number,
+	/**  Grain lisse (0) ou franc, cellule par cellule (1). */
+	grainRoughness?: number,
 	vignette?: number,
+	/**  Distance du centre, en fraction du coin, où l'assombrissement commence. */
+	vignetteMidpoint?: number,
+	/**  Transition large et douce (1) ou serrée sur les bords (0). */
+	vignetteFeather?: number,
 };
 
 export type RenderParams_Serialize = {
@@ -325,7 +331,13 @@ export type RenderParams_Serialize = {
 	halation: number,
 	grain: number,
 	grainSize: number,
+	/**  Grain lisse (0) ou franc, cellule par cellule (1). */
+	grainRoughness: number,
 	vignette: number,
+	/**  Distance du centre, en fraction du coin, où l'assombrissement commence. */
+	vignetteMidpoint: number,
+	/**  Transition large et douce (1) ou serrée sur les bords (0). */
+	vignetteFeather: number,
 };
 
 export type TextZone = {

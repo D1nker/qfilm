@@ -28,7 +28,10 @@ export const controls: Control[] = [
   { group: "effects", key: "halation", min: 0, max: 1, step: 0.01 },
   { group: "effects", key: "grain", min: 0, max: 1, step: 0.01 },
   { group: "effects", key: "grainSize", min: 1, max: 6, step: 0.1 },
+  { group: "effects", key: "grainRoughness", min: 0, max: 1, step: 0.01 },
   { group: "effects", key: "vignette", min: 0, max: 1, step: 0.01 },
+  { group: "effects", key: "vignetteMidpoint", min: 0, max: 0.95, step: 0.01 },
+  { group: "effects", key: "vignetteFeather", min: 0, max: 1, step: 0.01 },
 ];
 
 export function formatControlValue(key: keyof RenderParams, value: number) {
