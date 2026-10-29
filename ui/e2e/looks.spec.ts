@@ -11,6 +11,53 @@ test.describe("looks", () => {
     await expect(intensity).not.toHaveAttribute("data-disabled");
   });
 
+  test("the intensity slider sits below the categories, not above them", async ({ openApp }) => {
+    const intensity = await openApp.page.getByRole("slider", { name: "Intensité" }).boundingBox();
+    const lastCategory = await openApp.page.locator("button[aria-expanded]").last().boundingBox();
+
+    expect(intensity?.y ?? 0).toBeGreaterThan(lastCategory?.y ?? Infinity);
+  });
+
+  test.describe("reset", () => {
+    const reset = (app: { page: Page }) => app.page.getByRole("button", { name: "Réinitialiser" });
+
+    test("has nothing to do until a look is chosen", async ({ openApp }) => {
+      await expect(reset(openApp)).toBeDisabled();
+
+      await openApp.page.getByRole("button", { name: "Portrait 400" }).click();
+
+      await expect(reset(openApp)).toBeEnabled();
+    });
+
+    test("takes the look back to neutral, intensity included", async ({ openApp }) => {
+      await openApp.page.getByRole("button", { name: "Portrait 400" }).click();
+      await openApp.page.getByRole("slider", { name: "Intensité" }).focus();
+      await openApp.press("ArrowLeft", 20);
+
+      await reset(openApp).click();
+
+      await expect.poll(async () => (await openApp.lastRender()).params.exposure).toBe(0);
+      await expect(openApp.page.getByRole("slider", { name: "Intensité" })).toHaveAttribute(
+        "data-disabled",
+        "",
+      );
+      await expect(reset(openApp)).toBeDisabled();
+    });
+
+    test("also clears manual adjustments, like choosing the neutral look", async ({ openApp }) => {
+      await openApp.tab("Retouche").click();
+      await openApp.page.getByRole("slider", { name: "Exposition" }).focus();
+      await openApp.press("ArrowRight", 10);
+      await expect.poll(async () => (await openApp.lastRender()).params.exposure).toBeCloseTo(0.1);
+
+      await openApp.tab("Preset").click();
+      await expect(reset(openApp)).toBeEnabled();
+      await reset(openApp).click();
+
+      await expect.poll(async () => (await openApp.lastRender()).params.exposure).toBe(0);
+    });
+  });
+
   test("a look is rendered with its parameters", async ({ openApp }) => {
     await openApp.page.getByRole("button", { name: "Portrait 400" }).click();
 

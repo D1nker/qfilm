@@ -2,7 +2,13 @@ import { computed, reactive, ref } from "vue";
 
 import type { Preset, RenderParams } from "@/shared/api/api";
 import { controls } from "@/features/looks/controls";
-import { CURVE_IDS, scaleCurve, type CurveId, type CurvePoint } from "@/features/looks/curves";
+import {
+  CURVE_IDS,
+  isFlat,
+  scaleCurve,
+  type CurveId,
+  type CurvePoint,
+} from "@/features/looks/curves";
 import { gradingRanges } from "@/features/looks/grading";
 import { hslRanges } from "@/features/looks/hsl";
 import { NEUTRAL, type NumericParamKey } from "@/features/looks/neutral";
@@ -61,6 +67,14 @@ const params = computed<RenderParams>(() => {
   }
   return { ...out, curves: curves.value };
 });
+
+/// Rien n'est appliqué : ni preset, ni retouche, ni courbe. Le réglage « Réinitialiser » n'a alors rien à faire.
+const isPristine = computed(
+  () =>
+    activePreset.value === "neutral" &&
+    KEYS.every((key) => Math.abs(params.value[key] - NEUTRAL[key]) < 1e-6) &&
+    CURVE_IDS.every((id) => isFlat(params.value.curves[id])),
+);
 
 function applyPreset(preset: Preset) {
   activePreset.value = preset.id;
@@ -127,6 +141,7 @@ export function useLook() {
     activePreset,
     amount,
     params,
+    isPristine,
     applyPreset,
     setParam,
     setCurve,

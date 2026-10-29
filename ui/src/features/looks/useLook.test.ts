@@ -99,6 +99,43 @@ describe("useLook", () => {
     expect(look.amount.value).toBe(1);
   });
 
+  describe("isPristine", () => {
+    it("is true until something is applied", async () => {
+      const look = await setup();
+
+      expect(look.isPristine.value).toBe(true);
+    });
+
+    it("sees a preset, a manual adjustment and a curve, each on its own", async () => {
+      const preset = await setup();
+      preset.applyPreset(portrait);
+      expect(preset.isPristine.value).toBe(false);
+
+      const adjusted = await setup();
+      adjusted.setParam("exposure", 0.2);
+      expect(adjusted.isPristine.value).toBe(false);
+
+      const curved = await setup();
+      curved.setCurve("rgb", [
+        [0, 0],
+        [0.5, 0.6],
+        [1, 1],
+      ]);
+      expect(curved.isPristine.value).toBe(false);
+    });
+
+    it("comes back with a reset, and a flat curve edit does not count", async () => {
+      const look = await setup();
+      look.applyPreset(portrait);
+      look.setParam("contrast", 0.3);
+      look.resetLook();
+      expect(look.isPristine.value).toBe(true);
+
+      look.setCurve("red", []);
+      expect(look.isPristine.value).toBe(true);
+    });
+  });
+
   it("restores a snapshot exactly, adjustments and amount included", async () => {
     const look = await setup();
     look.applyPreset(portrait);

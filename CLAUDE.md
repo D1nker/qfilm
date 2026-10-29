@@ -161,6 +161,10 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
   panel that fits without scrolling is never "at the end". The rail costs 36 px, so the panel is 356 px wide
   (`App.vue`) to keep the controls as wide as before. The Preset tab has none (few categories). Rail
   labels and icons come from functions of `t` like every option table.
+- Each tab has its Reset on the line of its first heading (`UiCollapsible` actions slot, or the first group
+  title in Retouche). Preset and Retouche both call `resetLook` (back to Neutral, adjustments and curves
+  included, which is what choosing the Neutral preset does) and are disabled while `useLook().isPristine`;
+  the Preset tab's intensity slider comes after its categories.
 - Panel sections are `UiCollapsible`: with an `id` their open/closed state is remembered
   (`shared/lib/panelState`), a `modified` dot flags a section whose setting has moved, and the Retouche panel
   opens only Light and Color by default, with a reset button on each section that has changes. The e2e fixture

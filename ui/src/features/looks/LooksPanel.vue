@@ -1,23 +1,17 @@
 <template>
   <div>
-    <UiSlider
-      v-model="amount"
-      :label="t('looks.intensity')"
-      :display="`${Math.round(amount * 100)} %`"
-      :min="0"
-      :max="1"
-      :step="0.01"
-      :edit-scale="100"
-      :disabled="activePreset === 'neutral'"
-      class="amount"
-    />
-
     <UiCollapsible
-      v-for="group in groupedPresets"
+      v-for="(group, index) in groupedPresets"
       :id="`looks-${group.key}`"
       :key="group.key"
       :title="localized(group.title)"
     >
+      <template v-if="index === 0" #actions>
+        <UiButton variant="ghost" size="sm" :disabled="isPristine" @click="resetLook">
+          {{ t("common.reset") }}
+        </UiButton>
+      </template>
+
       <div class="grid">
         <UiTooltip
           v-for="preset in group.items"
@@ -34,6 +28,17 @@
         </UiTooltip>
       </div>
     </UiCollapsible>
+
+    <UiSlider
+      v-model="amount"
+      :label="t('looks.intensity')"
+      :display="`${Math.round(amount * 100)} %`"
+      :min="0"
+      :max="1"
+      :step="0.01"
+      :edit-scale="100"
+      :disabled="activePreset === 'neutral'"
+    />
   </div>
 </template>
 
@@ -42,6 +47,7 @@ import { localized, t } from "@/shared/i18n";
 import type { Preset } from "@/shared/api/api";
 import { useEditor } from "@/features/photo";
 import { useLook } from "@/features/looks/useLook";
+import UiButton from "@/shared/ui/UiButton.vue";
 import UiCollapsible from "@/shared/ui/UiCollapsible.vue";
 import UiSlider from "@/shared/ui/UiSlider.vue";
 import UiTooltip from "@/shared/ui/UiTooltip.vue";
@@ -50,7 +56,7 @@ import UiThumbnailButton from "@/shared/ui/UiThumbnailButton.vue";
 const emit = defineEmits<{ select: [preset: Preset] }>();
 
 const { groupedPresets, thumbnails } = useEditor();
-const { activePreset, amount, applyPreset } = useLook();
+const { activePreset, amount, isPristine, applyPreset, resetLook } = useLook();
 function select(preset: Preset) {
   applyPreset(preset);
   emit("select", preset);
@@ -58,10 +64,6 @@ function select(preset: Preset) {
 </script>
 
 <style scoped>
-.amount {
-  margin: 0 0 var(--space-4);
-}
-
 .grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

@@ -3,7 +3,13 @@
     <section v-for="(part, index) in PARTS" :key="part.id" class="part" :data-rail="part.id">
       <div class="part-head">
         <h3 class="part-title">{{ t(`adjust.parts.${part.id}`) }}</h3>
-        <UiButton v-if="index === 0" variant="ghost" size="sm" @click="resetLook">
+        <UiButton
+          v-if="index === 0"
+          variant="ghost"
+          size="sm"
+          :disabled="isPristine"
+          @click="resetLook"
+        >
           {{ t("common.reset") }}
         </UiButton>
       </div>
@@ -143,7 +149,7 @@ import UiSlider from "@/shared/ui/UiSlider.vue";
 import UiTooltip from "@/shared/ui/UiTooltip.vue";
 
 const { image } = useEditor();
-const { params, setParam, setCurve, resetLook } = useLook();
+const { params, isPristine, setParam, setCurve, resetLook } = useLook();
 
 type Section = ControlGroup | "curves" | "hsl" | "grading";
 
