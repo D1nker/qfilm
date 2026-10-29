@@ -225,7 +225,13 @@
       window.__calls.push({ cmd, args: JSON.parse(JSON.stringify(args ?? null)) });
       const handler = handlers[cmd];
       if (!handler) throw new Error(`mock : commande inconnue ${cmd}`);
-      return handler(args ?? {});
+      const result = handler(args ?? {});
+      if (cmd === "render_preview" && !args?.draft) {
+        // Un rendu complet lent (`__renderDelay`, en ms) ; un brouillon reste instantané, comme dans le moteur.
+        if (window.__renderDelay) await new Promise((r) => setTimeout(r, window.__renderDelay));
+        window.__renderDone = (window.__renderDone ?? 0) + 1;
+      }
+      return result;
     },
   };
 })();

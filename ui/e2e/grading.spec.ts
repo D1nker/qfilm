@@ -53,9 +53,10 @@ test.describe("colour grading wheel", () => {
     expect((await params(openApp)).midtonesSaturation).toBe(0);
   });
 
-  test("dragging follows the pointer, and the preview is a draft until it is released", async ({
+  test("dragging follows the pointer, and the preview is a draft until it is released when renders are slow", async ({
     openApp,
   }) => {
+    await openApp.slowRenders();
     const start = await spot(wheel(openApp), 0, 0.3);
     const end = await spot(wheel(openApp), 180, 0.8);
 

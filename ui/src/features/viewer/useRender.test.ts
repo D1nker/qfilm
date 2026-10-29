@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { nextTick } from "vue";
 
 import type { ImageMeta, PreviewResult } from "@/shared/api/api";
+import { DRAFT_THRESHOLD_MS } from "@/features/viewer/useRender";
 import { catalog } from "@/test/fixtures";
 import { fresh } from "@/test/fresh";
 
@@ -25,6 +26,10 @@ const result = (label: string): PreviewResult => ({
   zones: [{ field: "text", x: 1, y: 2, width: 3, height: 4 }],
   captionCenter: [0.25, 0.75],
 });
+
+const params = (api: Awaited<ReturnType<typeof setup>>["api"]) =>
+  (api.renderPreview.mock.calls.at(-1)?.[1] as { exposure: number } | undefined)?.exposure ??
+  Number.NaN;
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
@@ -156,27 +161,79 @@ describe("useRender", () => {
     await vi.waitFor(() => expect(editor.error.value).toBe("cadre « x » introuvable"));
   });
 
-  it("draws a quick draft while a slider is being dragged, then the full render on release", async () => {
+  /// Chaque rendu fait avancer une horloge fictive de `milliseconds` : la durée mesurée est exacte.
+  function withRenderTime(api: Awaited<ReturnType<typeof setup>>["api"]) {
+    let clock = 0;
+    vi.spyOn(performance, "now").mockImplementation(() => clock);
+    return (milliseconds: number) =>
+      api.renderPreview.mockImplementation(() => {
+        clock += milliseconds;
+        return Promise.resolve(result("timed"));
+      });
+  }
+
+  it("draws a quick draft while dragging once full renders have proved slow, then the full render on release", async () => {
     const { api, editor, look, render } = await setup();
     const { beginDrag } = await import("@/shared/lib/useInteraction");
+    const renderTakes = withRenderTime(api);
+    renderTakes(DRAFT_THRESHOLD_MS * 3);
     editor.image.value = image("a");
-    await vi.waitFor(() => expect(render.view.src).toBe("render-default"));
+    await vi.waitFor(() => expect(render.view.src).toBe("render-timed"));
     api.renderPreview.mockClear();
-    api.renderPreview.mockResolvedValue({ ...result("draft"), width: 300, height: 240 });
 
     const release = beginDrag();
     look.setParam("exposure", 0.4);
     await vi.waitFor(() => expect(api.renderPreview).toHaveBeenCalled());
     expect(api.renderPreview.mock.calls.at(-1)?.[3]).toBe(true);
     await vi.waitFor(() => expect(render.view.draft).toBe(true));
-    expect(render.view).toMatchObject({ src: "render-draft", width: 300, height: 240 });
 
-    api.renderPreview.mockResolvedValue(result("final"));
     release();
 
-    await vi.waitFor(() => expect(render.view.src).toBe("render-final"));
-    expect(api.renderPreview.mock.calls.at(-1)?.[3]).toBe(false);
+    await vi.waitFor(() => expect(api.renderPreview.mock.calls.at(-1)?.[3]).toBe(false));
+    await vi.waitFor(() => expect(render.view.draft).toBe(false));
+  });
+
+  it("never draws a draft while full renders keep up, so the image does not blur", async () => {
+    const { api, editor, look, render } = await setup();
+    const { beginDrag } = await import("@/shared/lib/useInteraction");
+    const renderTakes = withRenderTime(api);
+    renderTakes(DRAFT_THRESHOLD_MS / 2);
+    editor.image.value = image("a");
+    await vi.waitFor(() => expect(render.view.src).toBe("render-timed"));
+    api.renderPreview.mockClear();
+
+    const release = beginDrag();
+    for (const value of [0.1, 0.2, 0.3]) {
+      look.setParam("exposure", value);
+      await vi.waitFor(() => expect(params(api)).toBeCloseTo(value));
+    }
+    release();
+
+    for (const call of api.renderPreview.mock.calls) expect(call[3]).toBe(false);
     expect(render.view.draft).toBe(false);
+  });
+
+  it("goes back to full quality once renders are fast again", async () => {
+    const { api, editor, look, render } = await setup();
+    const { beginDrag } = await import("@/shared/lib/useInteraction");
+    const renderTakes = withRenderTime(api);
+    renderTakes(DRAFT_THRESHOLD_MS * 3);
+    editor.image.value = image("a");
+    await vi.waitFor(() => expect(render.view.src).toBe("render-timed"));
+
+    renderTakes(5);
+    for (const value of [0.1, 0.2, 0.3, 0.4]) {
+      look.setParam("exposure", value);
+      await vi.waitFor(() => expect(params(api)).toBeCloseTo(value));
+    }
+    api.renderPreview.mockClear();
+
+    const release = beginDrag();
+    look.setParam("exposure", 0.5);
+    await vi.waitFor(() => expect(api.renderPreview).toHaveBeenCalled());
+    release();
+
+    expect(api.renderPreview.mock.calls.at(-1)?.[3]).toBe(false);
   });
 
   it("renders in full quality when nothing is being dragged", async () => {
@@ -192,8 +249,10 @@ describe("useRender", () => {
   it("forgets the draft flag the moment another photo is opened", async () => {
     const { api, editor, look, render } = await setup();
     const { beginDrag } = await import("@/shared/lib/useInteraction");
+    const renderTakes = withRenderTime(api);
+    renderTakes(DRAFT_THRESHOLD_MS * 3);
     editor.image.value = image("a");
-    await vi.waitFor(() => expect(render.view.src).toBe("render-default"));
+    await vi.waitFor(() => expect(render.view.src).toBe("render-timed"));
     const release = beginDrag();
     look.setParam("exposure", 0.4);
     await vi.waitFor(() => expect(render.view.draft).toBe(true));

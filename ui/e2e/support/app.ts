@@ -127,6 +127,20 @@ export class App {
     );
   }
 
+  /// Le moteur rapide ne produit jamais de brouillon : pour en voir un, il faut que les rendus
+  /// complets aient prouvé qu'ils sont lents. Ici, un rendu de 400 ms, mesuré par un pas au clavier.
+  async slowRenders(milliseconds = 400) {
+    await this.page.evaluate((delay) => {
+      (window as unknown as { __renderDelay: number }).__renderDelay = delay;
+    }, milliseconds);
+    const done = () =>
+      this.page.evaluate(() => (window as unknown as { __renderDone?: number }).__renderDone ?? 0);
+    const before = await done();
+    await this.page.getByRole("slider", { name: "Exposition" }).focus();
+    await this.press("ArrowRight", 1);
+    await expect.poll(done).toBeGreaterThan(before);
+  }
+
   get photo() {
     return this.page.getByRole("img", { name: "IMG_0001.jpg" });
   }

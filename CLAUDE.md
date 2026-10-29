@@ -41,8 +41,11 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
 - Rendering is driven by one watcher in `useRender`: change state, never call the renderer by hand.
   Rust caches the photo render, so border-only changes are cheap.
   While a continuous control is dragged (`shared/lib/useInteraction`, set by `UiSlider` on pointer drags only,
-  never on keyboard steps), `useRender` asks Rust for a draft (`render_preview(…, draft: true)`, a 640 px proxy,
-  about 7× faster with every stage on) and renders in full on release. A draft announces the full render's
+  never on keyboard steps) **and full renders have proved slow** (running average over `DRAFT_THRESHOLD_MS`,
+  100 ms, measured by `useRender` itself), it asks Rust for a draft (`render_preview(…, draft: true)`, a 960 px
+  proxy, much cheaper) and renders in full on release. When full renders keep up there is no draft: a draft
+  blurs the photo until the release's full render arrives, so it must only exist when it buys smoothness.
+  E2E specs that want a draft call `App.slowRenders()` first (the mock delays full renders only). A draft announces the full render's
   size and text zones (`Rendered::size_at`/`zones_at`) and the viewport keeps that logical size, so nothing
   moves on screen. A new continuous control must use `UiSlider` or call `beginDrag()` itself.
 - Styles for content Reka teleports to `<body>` (select popup, tooltip) must be unscoped with a

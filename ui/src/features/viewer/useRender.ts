@@ -24,12 +24,20 @@ const view = reactive({
 });
 const rendering = ref(false);
 
+/// En dessous de ce temps (aller-retour complet : rendu, envoi, décodage), un rendu complet suit la
+/// main assez vite pour qu'un brouillon, qui floute l'image, soit inutile.
+export const DRAFT_THRESHOLD_MS = 100;
+
+/// Durée lissée des derniers rendus complets : c'est elle qui décide si un geste passe en brouillon.
+let fullRenderMs = 0;
+
 const refresh = coalescedRunner(
   async () => {
     const current = image.value;
     if (!current) return;
 
-    const draft = dragging.value;
+    const draft = dragging.value && fullRenderMs > DRAFT_THRESHOLD_MS;
+    const started = performance.now();
     try {
       const result = await renderPreview(
         current.id,
@@ -37,6 +45,10 @@ const refresh = coalescedRunner(
         { id: frame.id, params: { ...frame.params } },
         draft,
       );
+      if (!draft) {
+        const elapsed = performance.now() - started;
+        fullRenderMs = fullRenderMs === 0 ? elapsed : (fullRenderMs + elapsed) / 2;
+      }
       // La photo a pu changer pendant le rendu.
       if (image.value?.id !== current.id) return;
 

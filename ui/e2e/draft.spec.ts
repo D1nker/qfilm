@@ -17,9 +17,10 @@ test.describe("preview while dragging a slider", () => {
     await openApp.tab("Retouche").click();
   });
 
-  test("is a quick draft during the drag, and the full render after the release", async ({
+  test("is a quick draft during the drag when full renders are slow, and the full render after the release", async ({
     openApp,
   }) => {
+    await openApp.slowRenders();
     const before = await size(openApp);
     const thumb = await openApp.page.getByRole("slider", { name: "Exposition" }).boundingBox();
     if (!thumb) throw new Error("curseur introuvable");
@@ -45,6 +46,25 @@ test.describe("preview while dragging a slider", () => {
       .toBeGreaterThan(1000);
     const after = await size(openApp);
     expect(Math.abs(after.width - before.width)).toBeLessThan(1.5);
+  });
+
+  test("never blurs the photo while full renders keep up", async ({ openApp }) => {
+    const before = (await openApp.calls("render_preview")).length;
+    const thumb = await openApp.page.getByRole("slider", { name: "Exposition" }).boundingBox();
+    if (!thumb) throw new Error("curseur introuvable");
+    const [x, y] = [thumb.x + thumb.width / 2, thumb.y + thumb.height / 2];
+
+    await openApp.page.mouse.move(x, y);
+    await openApp.page.mouse.down();
+    await openApp.page.mouse.move(x + 40, y, { steps: 6 });
+    await expect.poll(async () => (await openApp.lastRender()).params.exposure).toBeGreaterThan(0);
+    await openApp.page.mouse.up();
+
+    await expect
+      .poll(async () => (await openApp.calls("render_preview")).length)
+      .toBeGreaterThan(before + 1);
+    const calls = (await openApp.calls("render_preview")).slice(before);
+    expect(calls.every((call) => call.args.draft === false)).toBe(true);
   });
 
   test("stays in full quality for a keyboard step", async ({ openApp }) => {
@@ -73,6 +93,7 @@ test.describe("preview while dragging a slider", () => {
   });
 
   test("applies to every slider, the look intensity included", async ({ openApp }) => {
+    await openApp.slowRenders();
     await openApp.tab("Preset").click();
     await openApp.page.getByRole("button", { name: "Portrait 400" }).click();
     const thumb = await openApp.page.getByRole("slider", { name: "Intensité" }).boundingBox();
@@ -91,6 +112,7 @@ test.describe("preview while dragging a slider", () => {
   test("does not stay in draft when the pointer is released away from the slider", async ({
     openApp,
   }) => {
+    await openApp.slowRenders();
     const thumb = await openApp.page.getByRole("slider", { name: "Exposition" }).boundingBox();
     if (!thumb) throw new Error("curseur introuvable");
     const [x, y] = [thumb.x + thumb.width / 2, thumb.y + thumb.height / 2];
