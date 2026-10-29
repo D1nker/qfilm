@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { controls, formatControlValue } from "@/features/looks/controls";
+import { gradingRanges } from "@/features/looks/grading";
 import { HSL_BANDS, HSL_CHANNELS, hslKey, hslRanges } from "@/features/looks/hsl";
 import { NEUTRAL } from "@/features/looks/neutral";
 
@@ -31,6 +32,7 @@ describe("the sliders", () => {
     const keys = [
       ...controls.map((control) => control.key),
       ...hslRanges.map((range) => range.key),
+      ...gradingRanges.map((range) => range.key),
     ];
 
     expect(new Set(keys).size).toBe(keys.length);

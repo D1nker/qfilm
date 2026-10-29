@@ -108,10 +108,14 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
   uncapped at 1 (a sun brighter than white must stay untouched). `box_blur` repeats the border pixels: keep it
   that way, a blur that assumes black outside makes halos along the image edges.
 - Settings are flat numeric fields of `RenderParams` (the colour mixer's 24 values too: `redHue`,
-  `redSaturation`… ), so presets, layering, undo and reset need no special case. Each one needs a slider:
-  `controls.ts` (or `hsl.ts` for the mixer) lists them and a test fails when a field has none or two. Adding a
+  `redSaturation`… ), so presets, layering, undo and reset need no special case. Each one needs a control:
+  `controls.ts` (or `hsl.ts` for the mixer, `grading.ts` for the grading wheel) lists them and a test fails when a field has none or two. Adding a
   setting means: the Rust field with its default, `neutral.ts`, `ui/e2e/support/tauri-mock.js`, `test/fixtures.ts`,
   the slider, both translations, `npm run rust:bindings`.
+- Colour grading is one wheel with a puck per zone (`ColorWheel`, geometry in `wheel.ts`: hue is the angle from
+  the top, saturation the distance from the centre, with a dead zone at the centre where the hue is kept), a
+  zone picker and precise sliders for the active zone. Dragging goes through `beginDrag()` so it previews as a
+  draft; the pucks are focusable buttons moved with the arrow keys (Shift for bigger steps).
 - Panel sections are `UiCollapsible`: with an `id` their open/closed state is remembered
   (`shared/lib/panelState`), a `modified` dot flags a section whose setting has moved, and the Retouche panel
   opens only Light and Color by default, with a reset button on each section that has changes. The e2e fixture

@@ -2,13 +2,16 @@ import { computed, reactive, ref } from "vue";
 
 import type { Preset, RenderParams } from "@/shared/api/api";
 import { controls } from "@/features/looks/controls";
+import { gradingRanges } from "@/features/looks/grading";
 import { hslRanges } from "@/features/looks/hsl";
 import { NEUTRAL } from "@/features/looks/neutral";
 
 type ParamKey = keyof RenderParams;
 
 const KEYS = Object.keys(NEUTRAL) as ParamKey[];
-const RANGES = new Map([...controls, ...hslRanges].map((control) => [control.key, control]));
+const RANGES = new Map(
+  [...controls, ...hslRanges, ...gradingRanges].map((control) => [control.key, control]),
+);
 
 function zeroed(): RenderParams {
   const out = { ...NEUTRAL };

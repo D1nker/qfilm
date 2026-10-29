@@ -1,10 +1,11 @@
+import type { GradingKey } from "@/features/looks/grading";
 import { HSL_HUE_REACH, isHslHueKey, type HslKey } from "@/features/looks/hsl";
 import type { RenderParams } from "@/shared/api/api";
 
-export type ControlGroup = "light" | "color" | "grading" | "detail" | "effects";
+export type ControlGroup = "light" | "color" | "detail" | "effects";
 
 export interface Control {
-  key: Exclude<keyof RenderParams, HslKey>;
+  key: Exclude<keyof RenderParams, HslKey | GradingKey>;
   min: number;
   max: number;
   step: number;
@@ -23,14 +24,6 @@ export const controls: Control[] = [
   { group: "color", key: "tint", min: -1, max: 1, step: 0.01 },
   { group: "color", key: "saturation", min: -1, max: 1, step: 0.01 },
   { group: "color", key: "vibrance", min: -1, max: 1, step: 0.01 },
-
-  { group: "grading", key: "shadowsHue", min: 0, max: 360, step: 1 },
-  { group: "grading", key: "shadowsSaturation", min: 0, max: 1, step: 0.01 },
-  { group: "grading", key: "midtonesHue", min: 0, max: 360, step: 1 },
-  { group: "grading", key: "midtonesSaturation", min: 0, max: 1, step: 0.01 },
-  { group: "grading", key: "highlightsHue", min: 0, max: 360, step: 1 },
-  { group: "grading", key: "highlightsSaturation", min: 0, max: 1, step: 0.01 },
-  { group: "grading", key: "gradingBalance", min: -1, max: 1, step: 0.01 },
 
   { group: "detail", key: "sharpening", min: 0, max: 1, step: 0.01 },
   { group: "detail", key: "sharpenRadius", min: 0.5, max: 3, step: 0.1 },

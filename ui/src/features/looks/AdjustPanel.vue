@@ -66,6 +66,29 @@
         </template>
         <HslMixer />
       </UiCollapsible>
+
+      <UiCollapsible
+        v-if="group === 'color'"
+        id="adjust-grading"
+        :title="t('adjust.groups.grading')"
+        :default-open="false"
+        :modified="changed(GRADING_KEYS)"
+      >
+        <template #actions>
+          <UiTooltip v-if="changed(GRADING_KEYS)" :text="t('adjust.resetGroup')">
+            <UiButton
+              variant="ghost"
+              size="sm"
+              icon
+              :aria-label="`${t('adjust.resetGroup')} : ${t('adjust.groups.grading')}`"
+              @click="reset(GRADING_KEYS)"
+            >
+              <RotateCcw :size="13" />
+            </UiButton>
+          </UiTooltip>
+        </template>
+        <GradingPanel />
+      </UiCollapsible>
     </template>
   </div>
 </template>
@@ -78,6 +101,8 @@ import { t } from "@/shared/i18n";
 import type { RenderParams } from "@/shared/api/api";
 
 import { controls, formatControlValue } from "@/features/looks/controls";
+import { gradingRanges } from "@/features/looks/grading";
+import GradingPanel from "@/features/looks/GradingPanel.vue";
 import HslMixer from "@/features/looks/HslMixer.vue";
 import { hslRanges } from "@/features/looks/hsl";
 import { NEUTRAL } from "@/features/looks/neutral";
@@ -98,6 +123,7 @@ const groupedControls = computed(() => groupBy(controls, (control) => control.gr
 /// Les bases d'abord : le reste s'ouvre à la demande, et un point signale ce qui a bougé.
 const OPEN_BY_DEFAULT = new Set(["light", "color"]);
 const HSL_KEYS = hslRanges.map((range) => range.key);
+const GRADING_KEYS = gradingRanges.map((range) => range.key);
 
 const keysOf = (items: { key: keyof RenderParams }[]) => items.map((item) => item.key);
 

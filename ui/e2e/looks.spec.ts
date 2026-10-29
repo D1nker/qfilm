@@ -85,38 +85,6 @@ test.describe("looks", () => {
     await reset("Rayon de la netteté", "sharpenRadius", 1, 1);
   });
 
-  test("offers a colour grading for shadows, midtones and highlights, hues in degrees", async ({
-    openApp,
-  }) => {
-    await openApp.tab("Retouche").click();
-    await expect(
-      openApp.page.getByRole("button", { name: "Étalonnage", exact: true }),
-    ).toBeVisible();
-
-    for (const name of [
-      "Teinte des ombres",
-      "Saturation des ombres",
-      "Teinte des tons moyens",
-      "Saturation des tons moyens",
-      "Teinte des hautes lumières",
-      "Saturation des hautes lumières",
-      "Équilibre de l'étalonnage",
-    ]) {
-      await expect(openApp.page.getByRole("slider", { name, exact: true })).toBeVisible();
-    }
-
-    const hue = openApp.page.locator(".slider", { hasText: "Teinte des ombres" });
-    await hue.getByRole("slider").focus();
-    await openApp.press("ArrowRight", 40);
-    await expect(hue).toContainText("40°");
-    await openApp.page.getByRole("slider", { name: "Saturation des ombres" }).focus();
-    await openApp.press("ArrowRight", 70);
-
-    await expect
-      .poll(async () => (await openApp.lastRender()).params)
-      .toMatchObject({ shadowsHue: 40, shadowsSaturation: 0.7, highlightsSaturation: 0 });
-  });
-
   test.describe("colour mixer", () => {
     test.beforeEach(async ({ openApp }) => {
       await openApp.tab("Retouche").click();
@@ -230,15 +198,26 @@ test.describe("looks", () => {
       await expect(track(openApp, "Exposition").locator(".fill")).toBeVisible();
     });
 
-    test("make a grading saturation follow its own zone's hue only", async ({ openApp }) => {
-      const shadows = await background(openApp, "Saturation des ombres");
-      const midtones = await background(openApp, "Saturation des tons moyens");
+    test("make the grading saturation follow the hue of the zone being graded", async ({
+      openApp,
+    }) => {
+      await openApp.openSection("Étalonnage");
+      const grading = openApp.page.locator(".grading");
+      const saturation = () =>
+        grading
+          .locator(".slider", { hasText: "Saturation" })
+          .locator(".track")
+          .evaluate((element) => getComputedStyle(element).backgroundImage);
+      const shadows = await saturation();
 
-      await openApp.page.getByRole("slider", { name: "Teinte des ombres" }).focus();
+      await grading.getByRole("slider", { name: "Teinte" }).focus();
       await openApp.press("ArrowRight", 120);
+      await expect.poll(saturation).not.toBe(shadows);
+      const warmed = await saturation();
 
-      await expect.poll(() => background(openApp, "Saturation des ombres")).not.toBe(shadows);
-      expect(await background(openApp, "Saturation des tons moyens")).toBe(midtones);
+      await grading.getByRole("radio", { name: "Tons moyens" }).click();
+
+      expect(await saturation()).not.toBe(warmed);
     });
 
     test("make the mixer tracks follow the colour being adjusted", async ({ openApp }) => {
