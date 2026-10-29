@@ -112,6 +112,9 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
   `controls.ts` (or `hsl.ts` for the mixer) lists them and a test fails when a field has none or two. Adding a
   setting means: the Rust field with its default, `neutral.ts`, `ui/e2e/support/tauri-mock.js`, `test/fixtures.ts`,
   the slider, both translations, `npm run rust:bindings`.
+- A setting whose value is a colour gets a gradient track (`features/looks/tracks.ts`, passed to `UiSlider` as
+  `track`): temperature, tint, hues; a saturation track follows the hue it belongs to. Tracks use illustration
+  hues, not interface colours, and replace the accent fill.
 - Photo fidelity (`decode.rs`, `color.rs`, `encode.rs`): a photo is turned upright from its EXIF orientation
   at decode time; any RGB ICC profile is converted to sRGB, the working space (wide-gamut colours are
   clipped, a known limit); the EXIF travels with the image (`Metadata`, orientation reset to upright so

@@ -203,6 +203,65 @@ test.describe("looks", () => {
     });
   });
 
+  test.describe("coloured tracks", () => {
+    const track = (app: { page: Page }, label: string) =>
+      app.page.locator(".slider", { hasText: label }).first().locator(".track");
+    const background = (app: { page: Page }, label: string) =>
+      track(app, label).evaluate((element) => getComputedStyle(element).backgroundImage);
+
+    test.beforeEach(async ({ openApp }) => {
+      await openApp.tab("Retouche").click();
+    });
+
+    test("show blue to yellow for the temperature and green to magenta for the tint", async ({
+      openApp,
+    }) => {
+      expect(await background(openApp, "Température")).toContain("linear-gradient");
+      expect(await background(openApp, "Teinte vert / magenta")).toContain("linear-gradient");
+
+      // Déplacé, pour que le remplissage aurait une largeur s'il était dessiné.
+      await openApp.page.getByRole("slider", { name: "Température" }).focus();
+      await openApp.press("ArrowRight", 40);
+      await expect(track(openApp, "Température").locator(".fill")).toBeHidden();
+    });
+
+    test("leave an ordinary slider with its plain track and its fill", async ({ openApp }) => {
+      expect(await background(openApp, "Exposition")).toBe("none");
+      await openApp.page.getByRole("slider", { name: "Exposition" }).focus();
+      await openApp.press("ArrowRight", 20);
+      await expect(track(openApp, "Exposition").locator(".fill")).toBeVisible();
+    });
+
+    test("make a grading saturation follow its own zone's hue only", async ({ openApp }) => {
+      const shadows = await background(openApp, "Saturation des ombres");
+      const midtones = await background(openApp, "Saturation des tons moyens");
+
+      await openApp.page.getByRole("slider", { name: "Teinte des ombres" }).focus();
+      await openApp.press("ArrowRight", 120);
+
+      await expect.poll(() => background(openApp, "Saturation des ombres")).not.toBe(shadows);
+      expect(await background(openApp, "Saturation des tons moyens")).toBe(midtones);
+    });
+
+    test("make the mixer tracks follow the colour being adjusted", async ({ openApp }) => {
+      await openApp.page
+        .getByRole("button", { name: "Mélangeur de couleurs", exact: true })
+        .click();
+      const mixer = openApp.page.locator(".mixer");
+      const saturation = () =>
+        mixer
+          .locator(".slider", { hasText: "Saturation" })
+          .locator(".track")
+          .evaluate((element) => getComputedStyle(element).backgroundImage);
+      const red = await saturation();
+
+      await mixer.getByRole("radio", { name: "Bleu" }).click();
+
+      expect(await saturation()).not.toBe(red);
+      expect(await saturation()).toContain("linear-gradient");
+    });
+  });
+
   test("groups sharpening and noise reduction under Detail", async ({ openApp }) => {
     await openApp.tab("Retouche").click();
     const detail = openApp.page.getByRole("button", { name: "Détail", exact: true });

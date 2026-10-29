@@ -12,6 +12,7 @@
       :max="1"
       :step="0.01"
       :reset-to="0"
+      :track="mixerTrack(channel)"
       :disabled="!image"
       @update:model-value="setParam(hslKey(band, channel), $event)"
     />
@@ -22,7 +23,15 @@
 import { computed, ref } from "vue";
 
 import { formatControlValue } from "@/features/looks/controls";
-import { HSL_BANDS, HSL_CHANNELS, hslKey, type HslBand } from "@/features/looks/hsl";
+import {
+  HSL_BANDS,
+  HSL_CHANNELS,
+  HSL_HUE_REACH,
+  hslKey,
+  type HslBand,
+  type HslChannel,
+} from "@/features/looks/hsl";
+import { lightnessTrack, saturationTrack, shiftTrack } from "@/features/looks/tracks";
 import { useLook } from "@/features/looks/useLook";
 import { useEditor } from "@/features/photo";
 import { t } from "@/shared/i18n";
@@ -33,6 +42,14 @@ const { image } = useEditor();
 const { params, setParam } = useLook();
 
 const band = ref<HslBand>("red");
+
+const bandHue = computed(() => HSL_BANDS.find((entry) => entry.id === band.value)?.hue ?? 0);
+
+function mixerTrack(channel: HslChannel) {
+  if (channel === "hue") return shiftTrack(bandHue.value, HSL_HUE_REACH);
+  if (channel === "saturation") return saturationTrack(bandHue.value);
+  return lightnessTrack(bandHue.value);
+}
 
 const bandOptions = computed(() =>
   HSL_BANDS.map(({ id, hue }) => ({

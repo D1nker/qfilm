@@ -19,6 +19,7 @@
           :max="control.max"
           :step="control.step"
           :reset-to="NEUTRAL[control.key]"
+          :track="trackFor(control.key, params)"
           :disabled="!image"
           @update:model-value="setParam(control.key, $event)"
         />
@@ -38,6 +39,7 @@ import { t } from "@/shared/i18n";
 import { controls, formatControlValue } from "@/features/looks/controls";
 import HslMixer from "@/features/looks/HslMixer.vue";
 import { NEUTRAL } from "@/features/looks/neutral";
+import { trackFor } from "@/features/looks/tracks";
 import { groupBy } from "@/shared/lib/groupBy";
 import { useEditor } from "@/features/photo";
 import { useLook } from "@/features/looks/useLook";

@@ -17,7 +17,11 @@
       @value-commit="finish"
       @dblclick="reset"
     >
-      <SliderTrack class="track">
+      <SliderTrack
+        class="track"
+        :class="{ colored: track }"
+        :style="track ? { background: track } : undefined"
+      >
         <span class="fill" :style="fillStyle" />
       </SliderTrack>
       <SliderThumb class="thumb" :aria-label="label" />
@@ -38,11 +42,13 @@ const props = withDefaults(
     min: number;
     max: number;
     step: number;
+    /** Un dégradé CSS qui remplace la piste : pour un réglage dont la valeur est une couleur. */
+    track?: string;
     /** Valeur retrouvée par un double-clic ; à défaut 0, ou le minimum si 0 est hors plage. */
     resetTo?: number;
     disabled?: boolean;
   }>(),
-  { resetTo: undefined, disabled: false },
+  { track: undefined, resetTo: undefined, disabled: false },
 );
 
 const emit = defineEmits<{
@@ -135,6 +141,14 @@ function reset() {
   height: 3px;
   border-radius: var(--radius-full);
   background: var(--surface-active);
+}
+
+.track.colored {
+  height: 5px;
+}
+
+.track.colored .fill {
+  display: none;
 }
 
 .fill {
