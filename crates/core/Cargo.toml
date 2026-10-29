@@ -18,6 +18,8 @@ specta.workspace = true
 # Formats restreints : évite de compiler les encodeurs AVIF/EXR inutiles ici
 image = { version = "0.25.6", default-features = false, features = ["jpeg", "png", "tiff"] }
 rayon = "1.10.0"
+# Même version que celle que `image` embarque déjà : une seule copie dans le binaire.
+moxcms = "0.8"
 base64 = "0.23.1"
 thiserror = "2.0.20"
 ab_glyph = "0.2.32"

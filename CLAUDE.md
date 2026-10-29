@@ -95,6 +95,13 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
 - Frames engine: `crates/core/src/frame/` (manifest validation → template → raster/compose → registry/store).
   Imported frames are untrusted input: size caps, strict validation, dry-run render, no disk
   extraction, no file access from SVG. Keep those guarantees (and their tests) when touching it.
+- Photo fidelity (`decode.rs`, `color.rs`, `encode.rs`): a photo is turned upright from its EXIF orientation
+  at decode time; any RGB ICC profile is converted to sRGB, the working space (wide-gamut colours are
+  clipped, a known limit); the EXIF travels with the image (`Metadata`, orientation reset to upright so
+  nothing is turned twice) and export embeds an sRGB profile, plus the EXIF for JPEG and PNG when
+  `keepMetadata` is on (TIFF carries the profile only). Tests build real files (`fixtures.rs`: a JPEG with a
+  hand-made EXIF block, a PNG or TIFF with a Display P3 profile) and compute the expected colour from
+  published matrices. `image` does not re-read the profile of a tiny TIFF: use realistic sizes in tests.
 - `qfilm-core` is UI-agnostic: no Tauri types in it. Tauri glue stays in `desktop/src/commands.rs`.
 - Errors: `thiserror` enums, serialized to the frontend as strings.
 - The Rust/UI contract is generated: `ui/src/shared/api/bindings.ts` comes from the commands and wire types

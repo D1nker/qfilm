@@ -5,6 +5,7 @@ use std::sync::{Arc, Mutex, RwLock};
 
 use qfilm_core::PhotoError;
 use qfilm_core::buffer::ImageBuf;
+use qfilm_core::decode::Metadata;
 use qfilm_core::frame::{FrameInfo, FrameRegistry, LoadIssue, UserFrames};
 use qfilm_core::render::RenderParams;
 use serde::Serialize;
@@ -13,6 +14,7 @@ pub struct LoadedImage {
     pub full: ImageBuf,
     pub proxy: ImageBuf,
     pub thumb: ImageBuf,
+    pub metadata: Metadata,
     pub cached: Option<(RenderParams, ImageBuf)>,
 }
 

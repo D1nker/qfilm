@@ -27,9 +27,41 @@ test.describe("export", () => {
 
     await expect.poll(() => openApp.count("export_image")).toBe(1);
     const exported = await openApp.lastExport();
-    expect(exported.options).toEqual({ format: "jpeg", quality: 92, maxEdge: 2048 });
+    expect(exported.options).toEqual({
+      format: "jpeg",
+      quality: 92,
+      maxEdge: 2048,
+      keepMetadata: true,
+    });
     expect(exported.destination).toBe("/fake/out/IMG_0001.jpg");
     await expect(openApp.page.getByRole("dialog")).toHaveCount(0);
+  });
+
+  test("keeps the metadata unless told otherwise", async ({ openApp }) => {
+    const keep = openApp.page.getByRole("switch", { name: "Conserver les métadonnées (EXIF)" });
+    await expect(keep).toBeChecked();
+
+    await keep.click();
+    await expect(keep).not.toBeChecked();
+    await openApp.page.getByRole("button", { name: "Enregistrer…" }).click();
+
+    await expect.poll(() => openApp.count("export_image")).toBe(1);
+    expect((await openApp.lastExport()).options).toMatchObject({ keepMetadata: false });
+  });
+
+  test("offers the metadata choice only for the formats that carry it", async ({ openApp }) => {
+    const keep = openApp.page.getByRole("switch", { name: "Conserver les métadonnées (EXIF)" });
+    const format = async (name: string) => {
+      await openApp.page.getByRole("combobox").first().click();
+      await openApp.page.getByRole("option", { name }).click();
+    };
+
+    await format("PNG");
+    await expect(keep).toBeVisible();
+    await format("TIFF 16 bits");
+    await expect(keep).toHaveCount(0);
+    await format("JPEG");
+    await expect(keep).toBeVisible();
   });
 
   test("exports the chosen look, frame and caption", async ({ openApp }) => {

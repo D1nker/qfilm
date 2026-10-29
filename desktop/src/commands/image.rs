@@ -51,7 +51,8 @@ pub async fn open_image(path: String, state: State<'_, AppState>) -> Result<Imag
         .unwrap_or("sans titre")
         .to_string();
 
-    let full = decode::decode_file(&path)?;
+    let decoded = decode::decode_file(&path)?;
+    let full = decoded.image;
     let proxy = full.downscale_to_fit(PREVIEW_MAX_EDGE);
     let thumb = proxy.downscale_to_fit(THUMB_MAX_EDGE);
     let preview = encode::to_data_url(&proxy, PREVIEW_JPEG_QUALITY)?;
@@ -75,6 +76,7 @@ pub async fn open_image(path: String, state: State<'_, AppState>) -> Result<Imag
                 full,
                 proxy,
                 thumb,
+                metadata: decoded.metadata,
                 cached: None,
             },
         );

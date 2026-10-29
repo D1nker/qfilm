@@ -106,6 +106,8 @@ export type ExportOptions_Deserialize = {
 	quality: number,
 	/**  Plus grand côté en pixels ; `None` = taille d'origine. */
 	maxEdge?: number | null,
+	/**  Reporter l'EXIF de la photo d'origine (JPEG et PNG ; le TIFF n'en porte pas ici). */
+	keepMetadata?: boolean,
 };
 
 export type ExportOptions_Serialize = {
@@ -114,6 +116,8 @@ export type ExportOptions_Serialize = {
 	quality: number,
 	/**  Plus grand côté en pixels ; `None` = taille d'origine. */
 	maxEdge: number | null,
+	/**  Reporter l'EXIF de la photo d'origine (JPEG et PNG ; le TIFF n'en porte pas ici). */
+	keepMetadata: boolean,
 };
 
 export type FontChoice = "condensed" | "typewriter" | "handwritten";

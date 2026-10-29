@@ -15,6 +15,7 @@
 
 pub mod buffer;
 pub mod caption;
+pub mod color;
 pub mod decode;
 pub mod encode;
 pub mod fonts;
@@ -23,6 +24,8 @@ pub mod preset;
 pub mod render;
 pub mod text;
 
+#[cfg(test)]
+mod fixtures;
 #[cfg(test)]
 mod golden;
 

@@ -23,6 +23,10 @@
       <UiSelect v-model="size" :options="sizeOptions()" />
     </UiField>
 
+    <UiField v-if="format !== 'tiff'" :label="t('export.keepMetadata')">
+      <UiSwitch v-model="keepMetadata" />
+    </UiField>
+
     <template #footer>
       <UiButton variant="ghost" @click="exportOpen = false">
         {{ t("common.cancel") }}
@@ -43,6 +47,7 @@ import UiDialog from "@/shared/ui/UiDialog.vue";
 import UiField from "@/shared/ui/UiField.vue";
 import UiSelect from "@/shared/ui/UiSelect.vue";
 import UiSlider from "@/shared/ui/UiSlider.vue";
+import UiSwitch from "@/shared/ui/UiSwitch.vue";
 
-const { exportOpen, exporting, format, quality, size, saveExport } = useExport();
+const { exportOpen, exporting, format, quality, size, keepMetadata, saveExport } = useExport();
 </script>

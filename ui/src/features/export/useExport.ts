@@ -18,6 +18,7 @@ const exporting = ref(false);
 const format = ref<ExportFormat>("jpeg");
 const quality = ref(92);
 const size = ref<ExportSize>("original");
+const keepMetadata = ref(true);
 
 function openExport() {
   if (image.value) exportOpen.value = true;
@@ -41,7 +42,12 @@ async function saveExport() {
       { id: frame.id, params: { ...frame.params } },
       { ...caption },
       destination,
-      { format: format.value, quality: quality.value, maxEdge: SIZE_EDGES[size.value] },
+      {
+        format: format.value,
+        quality: quality.value,
+        maxEdge: SIZE_EDGES[size.value],
+        keepMetadata: keepMetadata.value,
+      },
     );
     show(t("export.done"));
     exportOpen.value = false;
@@ -53,5 +59,5 @@ async function saveExport() {
 }
 
 export function useExport() {
-  return { exportOpen, exporting, format, quality, size, openExport, saveExport };
+  return { exportOpen, exporting, format, quality, size, keepMetadata, openExport, saveExport };
 }

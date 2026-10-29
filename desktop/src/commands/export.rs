@@ -20,7 +20,7 @@ pub async fn export_image(
     options: ExportOptions,
     state: State<'_, AppState>,
 ) -> Result<(), PhotoError> {
-    let rendered = {
+    let (rendered, metadata) = {
         let images = state
             .images
             .lock()
@@ -28,12 +28,13 @@ pub async fn export_image(
         let image = images.get(&id).ok_or(PhotoError::ImageNotLoaded)?;
 
         // Réduire avant le rendu : grain, halation et clarté coûtent par pixel.
-        match options.max_edge {
+        let rendered = match options.max_edge {
             Some(edge) if edge < image.full.width.max(image.full.height) => {
                 render::apply(&image.full.downscale_to_fit(edge), &params)
             }
             _ => render::apply(&image.full, &params),
-        }
+        };
+        (rendered, image.metadata.clone())
     };
 
     let framed = state
@@ -42,5 +43,10 @@ pub async fn export_image(
         .map_err(|_| poisoned())?
         .render_with_caption(&rendered, &frame, &caption)?;
 
-    encode::save_to_disk(&framed.image, &PathBuf::from(destination), options)
+    encode::save_to_disk(
+        &framed.image,
+        &PathBuf::from(destination),
+        options,
+        &metadata,
+    )
 }

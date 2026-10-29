@@ -122,6 +122,7 @@ export const fr = {
     quality: "Qualité",
     size: "Taille",
     sizeOriginal: "Taille d'origine",
+    keepMetadata: "Conserver les métadonnées (EXIF)",
     tiff: "TIFF 16 bits",
     save: "Enregistrer…",
     saving: "Export…",

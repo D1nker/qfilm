@@ -124,6 +124,7 @@ export const en: Messages = {
     quality: "Quality",
     size: "Size",
     sizeOriginal: "Original size",
+    keepMetadata: "Keep metadata (EXIF)",
     tiff: "16-bit TIFF",
     save: "Save…",
     saving: "Exporting…",

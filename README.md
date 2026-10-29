@@ -12,7 +12,8 @@ Early stage, personal project. Open a photo, pick a look, wrap it in a frame, ex
 - **Frames:** 35 mm and medium-format film strips, instant prints, letterbox, solid and padded borders. A frame is data (`frame.json` + `frame.svg`), so you can design your own in Figma and import it as a `.zip`, a folder or by drag and drop. See [docs/FRAMES.md](docs/FRAMES.md).
 - **Captions:** text on or around the photo, edited and moved directly on the preview.
 - **Editing comfort:** undo/redo, compare with the original (hold `C`), cursor-anchored zoom and pan, light and dark themes, French and English interface.
-- **Export:** JPEG, PNG or 16-bit TIFF, at the original size or resized.
+- **Export:** JPEG, PNG or 16-bit TIFF, at the original size or resized, with an embedded sRGB profile and, if you want, the original EXIF.
+- **Faithful opening:** photos are turned upright from their EXIF orientation, and wide-gamut files (Display P3, Adobe RGB…) are converted to sRGB instead of being misread.
 
 ## Getting started
 

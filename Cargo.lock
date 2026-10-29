@@ -3013,6 +3013,7 @@ dependencies = [
  "base64 0.23.1",
  "image",
  "minijinja",
+ "moxcms",
  "rayon",
  "resvg",
  "roxmltree",
