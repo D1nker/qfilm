@@ -40,6 +40,7 @@ export const en: Messages = {
   adjust: {
     groups: {
       light: "Light",
+      curves: "Tone curve",
       color: "Color",
       hsl: "Color mixer",
       grading: "Color grading",
@@ -47,6 +48,17 @@ export const en: Messages = {
       effects: "Effects",
     },
     resetGroup: "Reset this section",
+    curves: {
+      graph: "Tone curve",
+      channel: "Curve channel",
+      rgb: "RGB curve",
+      rgbShort: "RGB",
+      red: "Red curve",
+      green: "Green curve",
+      blue: "Blue curve",
+      point: "Point {n}: input {input}%, output {output}%",
+      hint: "Click to add a point, double-click to remove it.",
+    },
     hsl: {
       band: "Color to adjust",
       hue: "Hue",

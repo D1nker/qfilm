@@ -16,6 +16,7 @@
 pub mod buffer;
 pub mod caption;
 pub mod color;
+pub mod curve;
 pub mod decode;
 pub mod encode;
 pub mod fonts;

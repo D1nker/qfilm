@@ -2,47 +2,64 @@ import { computed, reactive, ref } from "vue";
 
 import type { Preset, RenderParams } from "@/shared/api/api";
 import { controls } from "@/features/looks/controls";
+import { CURVE_IDS, scaleCurve, type CurveId, type CurvePoint } from "@/features/looks/curves";
 import { gradingRanges } from "@/features/looks/grading";
 import { hslRanges } from "@/features/looks/hsl";
-import { NEUTRAL } from "@/features/looks/neutral";
+import { NEUTRAL, type NumericParamKey } from "@/features/looks/neutral";
 
-type ParamKey = keyof RenderParams;
+type Adjustments = Record<NumericParamKey, number>;
+type CurveEdits = Partial<Record<CurveId, CurvePoint[]>>;
 
-const KEYS = Object.keys(NEUTRAL) as ParamKey[];
+const KEYS = Object.keys(NEUTRAL).filter((key) => key !== "curves") as NumericParamKey[];
+
+const NUMERIC_NEUTRAL = Object.fromEntries(KEYS.map((key) => [key, NEUTRAL[key]])) as Adjustments;
 const RANGES = new Map(
   [...controls, ...hslRanges, ...gradingRanges].map((control) => [control.key, control]),
 );
 
-function zeroed(): RenderParams {
-  const out = { ...NEUTRAL };
-  for (const key of KEYS) out[key] = 0;
-  return out;
+function zeroed(): Adjustments {
+  return Object.fromEntries(KEYS.map((key) => [key, 0])) as Adjustments;
 }
+
+const copyCurve = (points: CurvePoint[]): CurvePoint[] => points.map(([x, y]) => [x, y]);
 
 /// Le rendu est la somme de trois couches, pour que l'intensité du preset et les
 /// retouches à la main restent indépendantes :
 ///   effectif = neutre + (preset − neutre) × intensité + retouches
+/// Une courbe n'est pas un nombre : l'intensité ramène celle du preset vers la diagonale, mais dès
+/// qu'on retouche une courbe, la liste de points modifiée la remplace (`curveEdits`, vide = diagonale).
 const activePreset = ref("neutral");
 const amount = ref(1);
 const presetParams = ref<RenderParams>({ ...NEUTRAL });
-const adjustments = reactive<RenderParams>(zeroed());
+const adjustments = reactive<Adjustments>(zeroed());
+const curveEdits = ref<CurveEdits>({});
 
 const base = computed(() => {
-  const out = { ...NEUTRAL };
+  const out = { ...NUMERIC_NEUTRAL };
   for (const key of KEYS) {
     out[key] = NEUTRAL[key] + (presetParams.value[key] - NEUTRAL[key]) * amount.value;
   }
   return out;
 });
 
-const params = computed(() => {
+const curves = computed(
+  () =>
+    Object.fromEntries(
+      CURVE_IDS.map((id) => [
+        id,
+        curveEdits.value[id] ?? scaleCurve(presetParams.value.curves[id], amount.value),
+      ]),
+    ) as RenderParams["curves"],
+);
+
+const params = computed<RenderParams>(() => {
   const out = { ...base.value };
   for (const key of KEYS) {
     const range = RANGES.get(key);
     const value = base.value[key] + adjustments[key];
     out[key] = range ? Math.min(Math.max(value, range.min), range.max) : value;
   }
-  return out;
+  return { ...out, curves: curves.value };
 });
 
 function applyPreset(preset: Preset) {
@@ -50,10 +67,16 @@ function applyPreset(preset: Preset) {
   presetParams.value = { ...preset.params };
   amount.value = 1;
   Object.assign(adjustments, zeroed());
+  curveEdits.value = {};
 }
 
-function setParam(key: ParamKey, value: number) {
+function setParam(key: NumericParamKey, value: number) {
   adjustments[key] = value - base.value[key];
+}
+
+/// Une liste vide remet la courbe à la diagonale.
+function setCurve(id: CurveId, points: CurvePoint[]) {
+  curveEdits.value = { ...curveEdits.value, [id]: copyCurve(points) };
 }
 
 function resetLook() {
@@ -61,14 +84,25 @@ function resetLook() {
   presetParams.value = { ...NEUTRAL };
   amount.value = 1;
   Object.assign(adjustments, zeroed());
+  curveEdits.value = {};
 }
 
 export interface LookSnapshot {
   activePreset: string;
   amount: number;
   presetParams: RenderParams;
-  adjustments: RenderParams;
+  adjustments: Adjustments;
+  curveEdits: CurveEdits;
 }
+
+const copyEdits = (edits: CurveEdits): CurveEdits => {
+  const out: CurveEdits = {};
+  for (const id of CURVE_IDS) {
+    const points = edits[id];
+    if (points) out[id] = copyCurve(points);
+  }
+  return out;
+};
 
 function snapshot(): LookSnapshot {
   return {
@@ -76,6 +110,7 @@ function snapshot(): LookSnapshot {
     amount: amount.value,
     presetParams: { ...presetParams.value },
     adjustments: { ...adjustments },
+    curveEdits: copyEdits(curveEdits.value),
   };
 }
 
@@ -84,8 +119,19 @@ function restore(state: LookSnapshot) {
   amount.value = state.amount;
   presetParams.value = { ...state.presetParams };
   Object.assign(adjustments, state.adjustments);
+  curveEdits.value = copyEdits(state.curveEdits);
 }
 
 export function useLook() {
-  return { activePreset, amount, params, applyPreset, setParam, resetLook, snapshot, restore };
+  return {
+    activePreset,
+    amount,
+    params,
+    applyPreset,
+    setParam,
+    setCurve,
+    resetLook,
+    snapshot,
+    restore,
+  };
 }

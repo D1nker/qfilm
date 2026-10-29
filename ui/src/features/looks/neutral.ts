@@ -1,6 +1,11 @@
+import { flatCurves } from "@/features/looks/curves";
 import type { RenderParams } from "@/shared/api/api";
 
+/// Les réglages qui sont un simple nombre : tout sauf les courbes, qui ont leur propre logique.
+export type NumericParamKey = Exclude<keyof RenderParams, "curves">;
+
 export const NEUTRAL: RenderParams = {
+  curves: flatCurves(),
   exposure: 0,
   contrast: 0,
   highlights: 0,

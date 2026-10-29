@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { Preset } from "@/shared/api/api";
 import { NEUTRAL_PARAMS } from "@/test/fixtures";
+import { isFlat } from "@/features/looks/curves";
 import { fresh } from "@/test/fresh";
 
 const portrait: Preset = {
@@ -120,5 +121,126 @@ describe("useLook", () => {
     look.setParam("exposure", 2);
 
     expect(snapshot.adjustments.exposure).toBe(0);
+  });
+
+  describe("tone curves", () => {
+    const filmic: Preset = {
+      ...portrait,
+      params: {
+        ...NEUTRAL_PARAMS,
+        curves: {
+          rgb: [
+            [0, 0.1],
+            [0.5, 0.7],
+            [1, 1],
+          ],
+          red: [],
+          green: [],
+          blue: [],
+        },
+      },
+    };
+
+    it("are neutral by default", async () => {
+      const look = await setup();
+
+      expect(look.params.value.curves).toEqual({ rgb: [], red: [], green: [], blue: [] });
+    });
+
+    it("come with a preset at full strength, and fade to neutral with its intensity", async () => {
+      const look = await setup();
+      look.applyPreset(filmic);
+      expect(look.params.value.curves.rgb).toEqual([
+        [0, 0.1],
+        [0.5, 0.7],
+        [1, 1],
+      ]);
+
+      look.amount.value = 0.5;
+      expect(look.params.value.curves.rgb[1]).toEqual([0.5, 0.6]);
+
+      look.amount.value = 0;
+      expect(isFlat(look.params.value.curves.rgb)).toBe(true);
+    });
+
+    it("are replaced, one channel at a time, by a manual edit", async () => {
+      const look = await setup();
+      look.applyPreset(filmic);
+      look.setCurve("red", [
+        [0, 0],
+        [0.5, 0.4],
+        [1, 1],
+      ]);
+
+      expect(look.params.value.curves.red).toEqual([
+        [0, 0],
+        [0.5, 0.4],
+        [1, 1],
+      ]);
+      expect(look.params.value.curves.rgb).toEqual(filmic.params.curves.rgb);
+      expect(look.params.value.curves.blue).toEqual([]);
+    });
+
+    it("an edit takes the curve over from the preset's intensity", async () => {
+      const look = await setup();
+      look.applyPreset(filmic);
+      look.setCurve("rgb", [
+        [0, 0],
+        [0.5, 0.55],
+        [1, 1],
+      ]);
+      look.amount.value = 0.2;
+
+      expect(look.params.value.curves.rgb[1]).toEqual([0.5, 0.55]);
+    });
+
+    it("an empty edit flattens the curve, even a preset's", async () => {
+      const look = await setup();
+      look.applyPreset(filmic);
+      look.setCurve("rgb", []);
+
+      expect(look.params.value.curves.rgb).toEqual([]);
+    });
+
+    it("a new preset or a reset drops the edits", async () => {
+      const look = await setup();
+      look.setCurve("blue", [
+        [0, 0.2],
+        [1, 1],
+      ]);
+      look.applyPreset(portrait);
+      expect(look.params.value.curves.blue).toEqual([]);
+
+      look.setCurve("blue", [
+        [0, 0.2],
+        [1, 1],
+      ]);
+      look.resetLook();
+      expect(look.params.value.curves.blue).toEqual([]);
+    });
+
+    it("travel with undo snapshots, as independent copies", async () => {
+      const look = await setup();
+      look.setCurve("green", [
+        [0, 0],
+        [0.5, 0.6],
+        [1, 1],
+      ]);
+      const snapshot = look.snapshot();
+
+      look.setCurve("green", [
+        [0, 0],
+        [0.5, 0.2],
+        [1, 1],
+      ]);
+      look.restore(snapshot);
+      expect(look.params.value.curves.green[1]).toEqual([0.5, 0.6]);
+
+      const kept = look.snapshot();
+      kept.curveEdits.green?.splice(1, 1);
+
+      expect(look.params.value.curves.green).toHaveLength(3);
+      expect(look.snapshot().curveEdits.green).toHaveLength(3);
+    });
   });
 });

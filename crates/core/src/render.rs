@@ -2,8 +2,9 @@ use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use super::buffer::{ImageBuf, linear_to_srgb, srgb_to_linear};
+use super::curve::{Lut, ToneCurves};
 
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, specta::Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, specta::Type)]
 #[serde(default, rename_all = "camelCase")]
 pub struct RenderParams {
     /// En diaphragmes (EV).
@@ -14,6 +15,8 @@ pub struct RenderParams {
     pub shadows: f32,
     pub whites: f32,
     pub blacks: f32,
+    /// Courbes de tons (RGB et par canal), après les réglages de tons ci-dessus.
+    pub curves: ToneCurves,
     pub saturation: f32,
     /// Saturation qui épargne les couleurs déjà vives.
     pub vibrance: f32,
@@ -119,6 +122,7 @@ impl Default for RenderParams {
             shadows: 0.0,
             whites: 0.0,
             blacks: 0.0,
+            curves: ToneCurves::default(),
             saturation: 0.0,
             vibrance: 0.0,
             temperature: 0.0,
@@ -196,6 +200,10 @@ pub fn apply(source: &ImageBuf, params: &RenderParams) -> ImageBuf {
     }
 
     apply_tone_and_color(&mut img, params);
+
+    if let Some(luts) = params.curves.luts() {
+        apply_curves(&mut img, &luts);
+    }
 
     if params.shadows_saturation > 0.001
         || params.midtones_saturation > 0.001
@@ -316,6 +324,14 @@ fn apply_tone_and_color(img: &mut ImageBuf, p: &RenderParams) {
 
         for channel in px.iter_mut() {
             *channel = luma + (*channel - luma) * amount;
+        }
+    });
+}
+
+fn apply_curves(img: &mut ImageBuf, luts: &[Lut; 3]) {
+    img.data.par_chunks_mut(3).for_each(|px| {
+        for (channel, lut) in px.iter_mut().zip(luts) {
+            *channel = lut.map(*channel);
         }
     });
 }
@@ -762,8 +778,66 @@ mod tests {
         at(img, offset, offset)
     }
 
-    fn vignetted(params: RenderParams) -> ImageBuf {
-        apply(&flat(201, 0.4), &params)
+    fn vignetted(params: &RenderParams) -> ImageBuf {
+        apply(&flat(201, 0.4), params)
+    }
+
+    #[test]
+    fn a_neutral_curve_leaves_the_image_exactly_as_it_was() {
+        let diagonal = RenderParams {
+            curves: ToneCurves {
+                rgb: vec![[0.0, 0.0], [0.5, 0.5], [1.0, 1.0]],
+                ..ToneCurves::default()
+            },
+            ..RenderParams::default()
+        };
+        let source = flat(8, 0.37);
+
+        assert_eq!(
+            apply(&source, &diagonal).data,
+            apply(&source, &RenderParams::default()).data
+        );
+    }
+
+    #[test]
+    fn a_curve_reshapes_the_tones_after_the_other_settings() {
+        let lifted = RenderParams {
+            curves: ToneCurves {
+                rgb: vec![[0.0, 0.0], [0.5, 0.7], [1.0, 1.0]],
+                ..ToneCurves::default()
+            },
+            ..RenderParams::default()
+        };
+        let source = flat(8, srgb_to_linear(0.5));
+
+        let out = at(&apply(&source, &lifted), 3, 3);
+
+        assert!((out - srgb_to_linear(0.7)).abs() < 0.01, "{out}");
+    }
+
+    #[test]
+    fn a_single_channel_curve_tints_the_image() {
+        let red_up = RenderParams {
+            curves: ToneCurves {
+                red: vec![[0.0, 0.0], [0.5, 0.75], [1.0, 1.0]],
+                ..ToneCurves::default()
+            },
+            ..RenderParams::default()
+        };
+        let out = apply(&flat(8, srgb_to_linear(0.5)), &red_up);
+
+        assert!(out.data[0] > out.data[1] + 0.1);
+        assert!((out.data[1] - out.data[2]).abs() < 1e-6);
+    }
+
+    #[test]
+    fn curves_missing_from_a_preset_are_neutral() {
+        let params: RenderParams =
+            serde_json::from_str(r#"{ "curves": { "rgb": [[0, 0.1], [1, 1]] } }"#)
+                .expect("réglages lisibles");
+
+        assert_eq!(params.curves.rgb.len(), 2);
+        assert_eq!(params.curves.red, Vec::<[f32; 2]>::new());
     }
 
     #[test]
@@ -781,8 +855,8 @@ mod tests {
             vignette: 0.8,
             ..RenderParams::default()
         };
-        let plain = vignetted(RenderParams::default());
-        let darkened = vignetted(params);
+        let plain = vignetted(&RenderParams::default());
+        let darkened = vignetted(&params);
 
         let fraction = 0.6;
         let expected = on_diagonal(&plain, fraction) * (1.0 - 0.8 * fraction * fraction);
@@ -791,17 +865,17 @@ mod tests {
 
     #[test]
     fn the_midpoint_keeps_the_centre_untouched() {
-        let reference = vignetted(RenderParams::default());
+        let reference = vignetted(&RenderParams::default());
         let params = RenderParams {
             vignette: 0.8,
             vignette_midpoint: 0.5,
             ..RenderParams::default()
         };
-        let darkened = vignetted(params);
+        let darkened = vignetted(&params);
 
         assert!((on_diagonal(&darkened, 0.3) - on_diagonal(&reference, 0.3)).abs() < 1e-6);
         assert!(on_diagonal(&darkened, 1.0) < on_diagonal(&reference, 1.0) * 0.5);
-        let no_midpoint = vignetted(RenderParams {
+        let no_midpoint = vignetted(&RenderParams {
             vignette: 0.8,
             ..RenderParams::default()
         });
@@ -812,7 +886,7 @@ mod tests {
     fn a_softer_feather_reaches_further_in() {
         let with_feather = |feather| {
             on_diagonal(
-                &vignetted(RenderParams {
+                &vignetted(&RenderParams {
                     vignette: 0.8,
                     vignette_feather: feather,
                     ..RenderParams::default()
@@ -1518,7 +1592,7 @@ mod tests {
         };
         let red_filter = RenderParams {
             red_luminance: -1.0,
-            ..mono
+            ..mono.clone()
         };
 
         let plain = luma(mixed(RED, &mono));

@@ -9,6 +9,7 @@ use serde_json::{Map, Value, json};
 
 use super::buffer::ImageBuf;
 use super::caption::Caption;
+use super::curve::ToneCurves;
 use super::encode;
 use super::fonts::FontChoice as CaptionFont;
 use super::frame::{FrameRegistry, FrameSelection, ParamKind};
@@ -452,6 +453,20 @@ golden_look!(
         grain: 0.8,
         grain_size: 3.0,
         grain_roughness: 0.0,
+        ..RenderParams::default()
+    }
+);
+
+golden_look!(
+    look_tone_curves,
+    RenderParams {
+        curves: ToneCurves {
+            // Un « cross-process » : S sur le RGB, rouge relevé dans les ombres, bleu écrasé en haut.
+            rgb: vec![[0.0, 0.04], [0.28, 0.2], [0.75, 0.83], [1.0, 0.97]],
+            red: vec![[0.0, 0.0], [0.3, 0.38], [1.0, 1.0]],
+            blue: vec![[0.0, 0.08], [0.7, 0.62], [1.0, 0.9]],
+            ..ToneCurves::default()
+        },
         ..RenderParams::default()
     }
 );

@@ -1,11 +1,11 @@
 import type { GradingKey } from "@/features/looks/grading";
 import { HSL_HUE_REACH, isHslHueKey, type HslKey } from "@/features/looks/hsl";
-import type { RenderParams } from "@/shared/api/api";
+import type { NumericParamKey } from "@/features/looks/neutral";
 
 export type ControlGroup = "light" | "color" | "detail" | "effects";
 
 export interface Control {
-  key: Exclude<keyof RenderParams, HslKey | GradingKey>;
+  key: Exclude<NumericParamKey, HslKey | GradingKey>;
   min: number;
   max: number;
   step: number;
@@ -41,7 +41,7 @@ export const controls: Control[] = [
   { group: "effects", key: "vignetteFeather", min: 0, max: 1, step: 0.01 },
 ];
 
-export function formatControlValue(key: keyof RenderParams, value: number) {
+export function formatControlValue(key: NumericParamKey, value: number) {
   if (key === "exposure") return `${value > 0 ? "+" : ""}${value.toFixed(2)} EV`;
   if (isHslHueKey(key)) {
     const degrees = Math.round(value * HSL_HUE_REACH);

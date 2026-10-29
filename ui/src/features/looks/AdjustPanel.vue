@@ -45,6 +45,29 @@
       </UiCollapsible>
 
       <UiCollapsible
+        v-if="group === 'light'"
+        id="adjust-curves"
+        :title="t('adjust.groups.curves')"
+        :default-open="false"
+        :modified="curvesChanged"
+      >
+        <template #actions>
+          <UiTooltip v-if="curvesChanged" :text="t('adjust.resetGroup')">
+            <UiButton
+              variant="ghost"
+              size="sm"
+              icon
+              :aria-label="`${t('adjust.resetGroup')} : ${t('adjust.groups.curves')}`"
+              @click="resetCurves"
+            >
+              <RotateCcw :size="13" />
+            </UiButton>
+          </UiTooltip>
+        </template>
+        <CurvesPanel />
+      </UiCollapsible>
+
+      <UiCollapsible
         v-if="group === 'color'"
         id="adjust-hsl"
         :title="t('adjust.groups.hsl')"
@@ -98,14 +121,15 @@ import { computed } from "vue";
 import { RotateCcw } from "lucide-vue-next";
 
 import { t } from "@/shared/i18n";
-import type { RenderParams } from "@/shared/api/api";
 
 import { controls, formatControlValue } from "@/features/looks/controls";
+import { CURVE_IDS, isFlat } from "@/features/looks/curves";
+import CurvesPanel from "@/features/looks/CurvesPanel.vue";
 import { gradingRanges } from "@/features/looks/grading";
 import GradingPanel from "@/features/looks/GradingPanel.vue";
 import HslMixer from "@/features/looks/HslMixer.vue";
 import { hslRanges } from "@/features/looks/hsl";
-import { NEUTRAL } from "@/features/looks/neutral";
+import { NEUTRAL, type NumericParamKey } from "@/features/looks/neutral";
 import { trackFor } from "@/features/looks/tracks";
 import { groupBy } from "@/shared/lib/groupBy";
 import { useEditor } from "@/features/photo";
@@ -116,7 +140,7 @@ import UiSlider from "@/shared/ui/UiSlider.vue";
 import UiTooltip from "@/shared/ui/UiTooltip.vue";
 
 const { image } = useEditor();
-const { params, setParam, resetLook } = useLook();
+const { params, setParam, setCurve, resetLook } = useLook();
 
 const groupedControls = computed(() => groupBy(controls, (control) => control.group));
 
@@ -125,13 +149,19 @@ const OPEN_BY_DEFAULT = new Set(["light", "color"]);
 const HSL_KEYS = hslRanges.map((range) => range.key);
 const GRADING_KEYS = gradingRanges.map((range) => range.key);
 
-const keysOf = (items: { key: keyof RenderParams }[]) => items.map((item) => item.key);
+const keysOf = (items: { key: NumericParamKey }[]) => items.map((item) => item.key);
 
-const changed = (keys: (keyof RenderParams)[]) =>
+const changed = (keys: NumericParamKey[]) =>
   keys.some((key) => Math.abs(params.value[key] - NEUTRAL[key]) > 1e-6);
 
-function reset(keys: (keyof RenderParams)[]) {
+function reset(keys: NumericParamKey[]) {
   for (const key of keys) setParam(key, NEUTRAL[key]);
+}
+
+const curvesChanged = computed(() => CURVE_IDS.some((id) => !isFlat(params.value.curves[id])));
+
+function resetCurves() {
+  for (const id of CURVE_IDS) setCurve(id, []);
 }
 </script>
 

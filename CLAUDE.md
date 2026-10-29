@@ -104,7 +104,7 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
   Imported frames are untrusted input: size caps, strict validation, dry-run render, no disk
   extraction, no file access from SVG. Keep those guarantees (and their tests) when touching it.
 - Render pipeline (`crates/core/src/render.rs`), all in linear light: exposure and white balance → noise
-  reduction → colour mixer (HSL) → halation → clarity → tone and colour → colour grading → sharpening → vignette → grain → highlight shoulder.
+  reduction → colour mixer (HSL) → halation → clarity → tone and colour → tone curves → colour grading → sharpening → vignette → grain → highlight shoulder.
   A new setting defaults to the old behaviour (a missing field deserialises to its default), so presets and
   golden images do not move. Every radius is proportional to the image size (or to a 1 800 px reference), so
   the 1 800 px preview matches the full-size export. Edge and sharpness maths use the sRGB-encoded luminance,
@@ -115,6 +115,22 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
   `controls.ts` (or `hsl.ts` for the mixer, `grading.ts` for the grading wheel) lists them and a test fails when a field has none or two. Adding a
   setting means: the Rust field with its default, `neutral.ts`, `ui/e2e/support/tauri-mock.js`, `test/fixtures.ts`,
   the slider, both translations, `npm run rust:bindings`.
+- Tone curves are the one setting that is not a flat number: `RenderParams.curves` (`ToneCurves` in
+  `crates/core/src/curve.rs`) holds four point lists (`rgb`, `red`, `green`, `blue`), each `[x, y]` in [0, 1] on
+  the encoded (on-screen) values; an empty list is the neutral curve, so presets and golden images do not move.
+  Rust sanitises every list (sorted, clamped, ends pinned at x = 0 and 1, at most 16 points, `None` when it
+  is the diagonal, which skips the stage) and draws a monotone cubic through them (Fritsch-Butland, no
+  overshoot) into one table per channel, indexed by the square root of the linear value (cheap, no `powf`
+  per pixel). `ui/src/features/looks/curves.ts` has the pure helpers (move, add, remove, nudge) and
+  `evalCurve`, a mirror of the Rust spline pinned by shared reference values in both test suites: change
+  one, change the other. Layering (`useLook`): a preset's curve fades to the diagonal with its intensity,
+  but once a channel is edited (`setCurve`, `curveEdits`) the edited list replaces it (empty = diagonal),
+  and edits travel in undo snapshots. `NumericParamKey` (in `neutral.ts`) is "every setting but the
+  curves": use it, not `keyof RenderParams`, for anything that does arithmetic on a setting. The editor is
+  `CurveEditor` (a click adds a point, a drag moves it, a double-click or Delete removes it, arrows nudge,
+  Shift for bigger steps; the ends only slide vertically) inside the collapsed "Courbe des tons" section.
+  The pointer is captured on pointerdown, so a double-click lands on the graph, not on the point: hit-test
+  by position.
 - Colour grading is one wheel with a puck per zone (`ColorWheel`, geometry in `wheel.ts`: hue is the angle from
   the top, saturation the distance from the centre, with a dead zone at the centre where the hue is kept), a
   zone picker and precise sliders for the active zone. Dragging goes through `beginDrag()` so it previews as a

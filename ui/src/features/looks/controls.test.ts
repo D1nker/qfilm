@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { controls, formatControlValue } from "@/features/looks/controls";
+import { CURVE_IDS } from "@/features/looks/curves";
 import { gradingRanges } from "@/features/looks/grading";
 import { HSL_BANDS, HSL_CHANNELS, hslKey, hslRanges } from "@/features/looks/hsl";
 import { NEUTRAL } from "@/features/looks/neutral";
@@ -36,7 +37,16 @@ describe("the sliders", () => {
     ];
 
     expect(new Set(keys).size).toBe(keys.length);
-    expect([...keys].sort()).toEqual(Object.keys(NEUTRAL).sort());
+    expect([...keys].sort()).toEqual(
+      Object.keys(NEUTRAL)
+        .filter((key) => key !== "curves")
+        .sort(),
+    );
+  });
+
+  it("leave the curves to their own editor, neutral by default", () => {
+    expect(Object.keys(NEUTRAL.curves).sort()).toEqual([...CURVE_IDS].sort());
+    for (const id of CURVE_IDS) expect(NEUTRAL.curves[id]).toEqual([]);
   });
 
   it("give the mixer 24 settings, all neutral at zero", () => {

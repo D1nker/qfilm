@@ -38,6 +38,7 @@ export const fr = {
   adjust: {
     groups: {
       light: "Lumière",
+      curves: "Courbe des tons",
       color: "Couleur",
       hsl: "Mélangeur de couleurs",
       grading: "Étalonnage",
@@ -45,6 +46,17 @@ export const fr = {
       effects: "Effets",
     },
     resetGroup: "Réinitialiser cette section",
+    curves: {
+      graph: "Courbe des tons",
+      channel: "Canal de la courbe",
+      rgb: "Courbe RVB",
+      rgbShort: "RVB",
+      red: "Courbe du rouge",
+      green: "Courbe du vert",
+      blue: "Courbe du bleu",
+      point: "Point {n} : entrée {input} %, sortie {output} %",
+      hint: "Clique pour ajouter un point, double-clique pour l'enlever.",
+    },
     hsl: {
       band: "Teinte à ajuster",
       hue: "Teinte",

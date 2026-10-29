@@ -289,6 +289,8 @@ export type RenderParams_Deserialize = {
 	shadows?: number,
 	whites?: number,
 	blacks?: number,
+	/**  Courbes de tons (RGB et par canal), après les réglages de tons ci-dessus. */
+	curves?: ToneCurves_Deserialize,
 	saturation?: number,
 	/**  Saturation qui épargne les couleurs déjà vives. */
 	vibrance?: number,
@@ -364,6 +366,8 @@ export type RenderParams_Serialize = {
 	shadows: number,
 	whites: number,
 	blacks: number,
+	/**  Courbes de tons (RGB et par canal), après les réglages de tons ci-dessus. */
+	curves: ToneCurves_Serialize,
 	saturation: number,
 	/**  Saturation qui épargne les couleurs déjà vives. */
 	vibrance: number,
@@ -436,5 +440,21 @@ export type TextZone = {
 	y: number,
 	width: number,
 	height: number,
+};
+
+export type ToneCurves = ToneCurves_Serialize | ToneCurves_Deserialize;
+
+export type ToneCurves_Deserialize = {
+	rgb?: ([number, number])[],
+	red?: ([number, number])[],
+	green?: ([number, number])[],
+	blue?: ([number, number])[],
+};
+
+export type ToneCurves_Serialize = {
+	rgb: ([number, number])[],
+	red: ([number, number])[],
+	green: ([number, number])[],
+	blue: ([number, number])[],
 };
 

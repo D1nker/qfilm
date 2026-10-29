@@ -42,6 +42,24 @@ describe("useHistory", () => {
     expect(history.canRedo.value).toBe(false);
   });
 
+  it("undoes and redoes a curve edit", async () => {
+    const { history, look } = await setup();
+
+    look.setCurve("rgb", [
+      [0, 0],
+      [0.5, 0.7],
+      [1, 1],
+    ]);
+    await settle();
+    history.undo();
+    await settle();
+    expect(look.params.value.curves.rgb).toEqual([]);
+
+    history.redo();
+    await settle();
+    expect(look.params.value.curves.rgb[1]).toEqual([0.5, 0.7]);
+  });
+
   it("collapses a continuous gesture into a single step", async () => {
     const { history, look } = await setup();
 

@@ -8,6 +8,7 @@
     );
 
   const neutral = {
+    curves: { rgb: [], red: [], green: [], blue: [] },
     exposure: 0,
     contrast: 0,
     highlights: 0,

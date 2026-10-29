@@ -1,3 +1,4 @@
+import type { NumericParamKey } from "@/features/looks/neutral";
 import type { RenderParams } from "@/shared/api/api";
 
 /// Les dégradés des curseurs dont la valeur est une couleur : le curseur montre ce qu'il fait.
@@ -30,14 +31,14 @@ export const shiftTrack = (hue: number, reach: number) =>
 export const lightnessTrack = (hue: number) =>
   gradient(hsl(hue, 70, 20), hsl(hue, 80, 55), hsl(hue, 85, 90));
 
-const GRADING_HUE: Partial<Record<keyof RenderParams, keyof RenderParams>> = {
+const GRADING_HUE: Partial<Record<NumericParamKey, NumericParamKey>> = {
   shadowsSaturation: "shadowsHue",
   midtonesSaturation: "midtonesHue",
   highlightsSaturation: "highlightsHue",
 };
 
 /// Le dégradé du curseur d'un réglage, s'il en a un.
-export function trackFor(key: keyof RenderParams, params: RenderParams): string | undefined {
+export function trackFor(key: NumericParamKey, params: RenderParams): string | undefined {
   if (key === "temperature") return temperatureTrack();
   if (key === "tint") return tintTrack();
   if (key === "shadowsHue" || key === "midtonesHue" || key === "highlightsHue") return hueTrack();

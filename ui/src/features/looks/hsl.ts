@@ -1,4 +1,4 @@
-import type { RenderParams } from "@/shared/api/api";
+import type { NumericParamKey } from "@/features/looks/neutral";
 
 /// Les huit teintes du mélangeur, avec leur teinte en degrés (qui sert à dessiner la pastille).
 export const HSL_BANDS = [
@@ -33,6 +33,6 @@ const RANGE = { min: -1, max: 1, step: 0.01 };
 
 /// Les 24 réglages du mélangeur sont des champs numériques ordinaires de `RenderParams` : couches,
 /// historique, remise à zéro et presets les gèrent sans cas particulier.
-export const hslRanges: { key: keyof RenderParams; min: number; max: number }[] = HSL_BANDS.flatMap(
+export const hslRanges: { key: NumericParamKey; min: number; max: number }[] = HSL_BANDS.flatMap(
   (band) => HSL_CHANNELS.map((channel) => ({ key: hslKey(band.id, channel), ...RANGE })),
 );
