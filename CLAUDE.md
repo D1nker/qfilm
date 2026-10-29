@@ -135,6 +135,9 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
   the top, saturation the distance from the centre, with a dead zone at the centre where the hue is kept), a
   zone picker and precise sliders for the active zone. Dragging goes through `beginDrag()` so it previews as a
   draft; the pucks are focusable buttons moved with the arrow keys (Shift for bigger steps).
+- The Retouche panel lists its sections under three plain headings (`PARTS` in `AdjustPanel`): Tons (Light, Tone
+  curve), Couleurs (Color, Color mixer, Color grading), Finition (Detail, Effects). A new section goes under the
+  heading that matches its intent; the headings are not collapsible.
 - Panel sections are `UiCollapsible`: with an `id` their open/closed state is remembered
   (`shared/lib/panelState`), a `modified` dot flags a section whose setting has moved, and the Retouche panel
   opens only Light and Color by default, with a reset button on each section that has changes. The e2e fixture

@@ -7,112 +7,117 @@
       </UiButton>
     </div>
 
-    <template v-for="[group, items] in groupedControls" :key="group">
-      <UiCollapsible
-        :id="`adjust-${group}`"
-        :title="t(`adjust.groups.${group}`)"
-        :default-open="OPEN_BY_DEFAULT.has(group)"
-        :modified="changed(keysOf(items))"
-      >
-        <template #actions>
-          <UiTooltip v-if="changed(keysOf(items))" :text="t('adjust.resetGroup')">
-            <UiButton
-              variant="ghost"
-              size="sm"
-              icon
-              :aria-label="`${t('adjust.resetGroup')} : ${t(`adjust.groups.${group}`)}`"
-              @click="reset(keysOf(items))"
-            >
-              <RotateCcw :size="13" />
-            </UiButton>
-          </UiTooltip>
-        </template>
+    <section v-for="part in PARTS" :key="part.id" class="part">
+      <h3 class="part-title">{{ t(`adjust.parts.${part.id}`) }}</h3>
 
-        <UiSlider
-          v-for="control in items"
-          :key="control.key"
-          :model-value="params[control.key]"
-          :label="t(`adjust.controls.${control.key}`)"
-          :display="formatControlValue(control.key, params[control.key])"
-          :min="control.min"
-          :max="control.max"
-          :step="control.step"
-          :reset-to="NEUTRAL[control.key]"
-          :track="trackFor(control.key, params)"
-          :disabled="!image"
-          @update:model-value="setParam(control.key, $event)"
-        />
-      </UiCollapsible>
+      <template v-for="id in part.sections" :key="id">
+        <UiCollapsible
+          v-if="isControlGroup(id)"
+          :id="`adjust-${id}`"
+          :title="t(`adjust.groups.${id}`)"
+          :default-open="OPEN_BY_DEFAULT.has(id)"
+          :modified="changed(keysOf(itemsOf(id)))"
+        >
+          <template #actions>
+            <UiTooltip v-if="changed(keysOf(itemsOf(id)))" :text="t('adjust.resetGroup')">
+              <UiButton
+                variant="ghost"
+                size="sm"
+                icon
+                :aria-label="`${t('adjust.resetGroup')} : ${t(`adjust.groups.${id}`)}`"
+                @click="reset(keysOf(itemsOf(id)))"
+              >
+                <RotateCcw :size="13" />
+              </UiButton>
+            </UiTooltip>
+          </template>
 
-      <UiCollapsible
-        v-if="group === 'color'"
-        id="adjust-curves"
-        :title="t('adjust.groups.curves')"
-        :default-open="false"
-        :modified="curvesChanged"
-      >
-        <template #actions>
-          <UiTooltip v-if="curvesChanged" :text="t('adjust.resetGroup')">
-            <UiButton
-              variant="ghost"
-              size="sm"
-              icon
-              :aria-label="`${t('adjust.resetGroup')} : ${t('adjust.groups.curves')}`"
-              @click="resetCurves"
-            >
-              <RotateCcw :size="13" />
-            </UiButton>
-          </UiTooltip>
-        </template>
-        <CurvesPanel />
-      </UiCollapsible>
+          <UiSlider
+            v-for="control in itemsOf(id)"
+            :key="control.key"
+            :model-value="params[control.key]"
+            :label="t(`adjust.controls.${control.key}`)"
+            :display="formatControlValue(control.key, params[control.key])"
+            :min="control.min"
+            :max="control.max"
+            :step="control.step"
+            :reset-to="NEUTRAL[control.key]"
+            :track="trackFor(control.key, params)"
+            :disabled="!image"
+            @update:model-value="setParam(control.key, $event)"
+          />
+        </UiCollapsible>
 
-      <UiCollapsible
-        v-if="group === 'color'"
-        id="adjust-hsl"
-        :title="t('adjust.groups.hsl')"
-        :default-open="false"
-        :modified="changed(HSL_KEYS)"
-      >
-        <template #actions>
-          <UiTooltip v-if="changed(HSL_KEYS)" :text="t('adjust.resetGroup')">
-            <UiButton
-              variant="ghost"
-              size="sm"
-              icon
-              :aria-label="`${t('adjust.resetGroup')} : ${t('adjust.groups.hsl')}`"
-              @click="reset(HSL_KEYS)"
-            >
-              <RotateCcw :size="13" />
-            </UiButton>
-          </UiTooltip>
-        </template>
-        <HslMixer />
-      </UiCollapsible>
+        <UiCollapsible
+          v-else-if="id === 'curves'"
+          id="adjust-curves"
+          :title="t('adjust.groups.curves')"
+          :default-open="false"
+          :modified="curvesChanged"
+        >
+          <template #actions>
+            <UiTooltip v-if="curvesChanged" :text="t('adjust.resetGroup')">
+              <UiButton
+                variant="ghost"
+                size="sm"
+                icon
+                :aria-label="`${t('adjust.resetGroup')} : ${t('adjust.groups.curves')}`"
+                @click="resetCurves"
+              >
+                <RotateCcw :size="13" />
+              </UiButton>
+            </UiTooltip>
+          </template>
+          <CurvesPanel />
+        </UiCollapsible>
 
-      <UiCollapsible
-        v-if="group === 'color'"
-        id="adjust-grading"
-        :title="t('adjust.groups.grading')"
-        :default-open="false"
-        :modified="changed(GRADING_KEYS)"
-      >
-        <template #actions>
-          <UiTooltip v-if="changed(GRADING_KEYS)" :text="t('adjust.resetGroup')">
-            <UiButton
-              variant="ghost"
-              size="sm"
-              icon
-              :aria-label="`${t('adjust.resetGroup')} : ${t('adjust.groups.grading')}`"
-              @click="reset(GRADING_KEYS)"
-            >
-              <RotateCcw :size="13" />
-            </UiButton>
-          </UiTooltip>
-        </template>
-        <GradingPanel />
-      </UiCollapsible>
-    </template>
+        <UiCollapsible
+          v-else-if="id === 'hsl'"
+          id="adjust-hsl"
+          :title="t('adjust.groups.hsl')"
+          :default-open="false"
+          :modified="changed(HSL_KEYS)"
+        >
+          <template #actions>
+            <UiTooltip v-if="changed(HSL_KEYS)" :text="t('adjust.resetGroup')">
+              <UiButton
+                variant="ghost"
+                size="sm"
+                icon
+                :aria-label="`${t('adjust.resetGroup')} : ${t('adjust.groups.hsl')}`"
+                @click="reset(HSL_KEYS)"
+              >
+                <RotateCcw :size="13" />
+              </UiButton>
+            </UiTooltip>
+          </template>
+          <HslMixer />
+        </UiCollapsible>
+
+        <UiCollapsible
+          v-else
+          id="adjust-grading"
+          :title="t('adjust.groups.grading')"
+          :default-open="false"
+          :modified="changed(GRADING_KEYS)"
+        >
+          <template #actions>
+            <UiTooltip v-if="changed(GRADING_KEYS)" :text="t('adjust.resetGroup')">
+              <UiButton
+                variant="ghost"
+                size="sm"
+                icon
+                :aria-label="`${t('adjust.resetGroup')} : ${t('adjust.groups.grading')}`"
+                @click="reset(GRADING_KEYS)"
+              >
+                <RotateCcw :size="13" />
+              </UiButton>
+            </UiTooltip>
+          </template>
+          <GradingPanel />
+        </UiCollapsible>
+      </template>
+    </section>
   </div>
 </template>
 
@@ -122,7 +127,7 @@ import { RotateCcw } from "lucide-vue-next";
 
 import { t } from "@/shared/i18n";
 
-import { controls, formatControlValue } from "@/features/looks/controls";
+import { controls, formatControlValue, type ControlGroup } from "@/features/looks/controls";
 import { CURVE_IDS, isFlat } from "@/features/looks/curves";
 import CurvesPanel from "@/features/looks/CurvesPanel.vue";
 import { gradingRanges } from "@/features/looks/grading";
@@ -131,7 +136,6 @@ import HslMixer from "@/features/looks/HslMixer.vue";
 import { hslRanges } from "@/features/looks/hsl";
 import { NEUTRAL, type NumericParamKey } from "@/features/looks/neutral";
 import { trackFor } from "@/features/looks/tracks";
-import { groupBy } from "@/shared/lib/groupBy";
 import { useEditor } from "@/features/photo";
 import { useLook } from "@/features/looks/useLook";
 import UiButton from "@/shared/ui/UiButton.vue";
@@ -142,7 +146,19 @@ import UiTooltip from "@/shared/ui/UiTooltip.vue";
 const { image } = useEditor();
 const { params, setParam, setCurve, resetLook } = useLook();
 
-const groupedControls = computed(() => groupBy(controls, (control) => control.group));
+type Section = ControlGroup | "curves" | "hsl" | "grading";
+
+/// L'ordre du panneau : des sections de réglages regroupées par intention, pour qu'on s'y repère.
+const PARTS: { id: "tone" | "color" | "finish"; sections: Section[] }[] = [
+  { id: "tone", sections: ["light", "curves"] },
+  { id: "color", sections: ["color", "hsl", "grading"] },
+  { id: "finish", sections: ["detail", "effects"] },
+];
+
+const isControlGroup = (section: Section): section is ControlGroup =>
+  !["curves", "hsl", "grading"].includes(section);
+
+const itemsOf = (group: ControlGroup) => controls.filter((control) => control.group === group);
 
 /// Les bases d'abord : le reste s'ouvre à la demande, et un point signale ce qui a bougé.
 const OPEN_BY_DEFAULT = new Set(["light", "color"]);
@@ -166,6 +182,17 @@ function resetCurves() {
 </script>
 
 <style scoped>
+.part + .part {
+  margin-top: var(--space-6);
+}
+
+.part-title {
+  margin: 0 0 var(--space-1);
+  color: var(--text);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
 .head {
   display: flex;
   align-items: center;

@@ -45,6 +45,11 @@ export const fr = {
       detail: "Détail",
       effects: "Effets",
     },
+    parts: {
+      tone: "Tons",
+      color: "Couleurs",
+      finish: "Finition",
+    },
     resetGroup: "Réinitialiser cette section",
     curves: {
       graph: "Courbe des tons",

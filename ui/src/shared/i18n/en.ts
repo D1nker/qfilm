@@ -47,6 +47,11 @@ export const en: Messages = {
       detail: "Detail",
       effects: "Effects",
     },
+    parts: {
+      tone: "Tone",
+      color: "Colors",
+      finish: "Finish",
+    },
     resetGroup: "Reset this section",
     curves: {
       graph: "Tone curve",

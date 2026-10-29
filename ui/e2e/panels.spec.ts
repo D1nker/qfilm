@@ -16,6 +16,23 @@ test.describe("the Retouche panel", () => {
     await openApp.tab("Retouche").click();
   });
 
+  test("lists its sections under three headings, colour tools together", async ({ openApp }) => {
+    const layout = await openApp.page.locator(".part").evaluateAll((parts) =>
+      parts.map((part) => ({
+        title: part.querySelector(".part-title")?.textContent,
+        sections: [...part.querySelectorAll("button[aria-expanded]")].map((button) =>
+          button.textContent?.trim(),
+        ),
+      })),
+    );
+
+    expect(layout).toEqual([
+      { title: "Tons", sections: ["Lumière", "Courbe des tons"] },
+      { title: "Couleurs", sections: ["Couleur", "Mélangeur de couleurs", "Étalonnage"] },
+      { title: "Finition", sections: ["Détail", "Effets"] },
+    ]);
+  });
+
   test("opens the basics and keeps the advanced sections closed", async ({ openApp }) => {
     expect(await expanded(openApp, "Lumière")).toBe(true);
     expect(await expanded(openApp, "Couleur")).toBe(true);
