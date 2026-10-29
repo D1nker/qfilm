@@ -30,7 +30,9 @@
           @load="onImageLoad"
         />
 
-        <template v-if="!comparing">
+        <CropOverlay v-if="cropping && !comparing" :style="captionCanvasStyle" />
+
+        <template v-if="!comparing && !cropping">
           <canvas ref="captionCanvas" class="caption-layer" :style="captionCanvasStyle" />
 
           <template v-if="editable">
@@ -96,6 +98,7 @@ import type { TextZone } from "@/shared/api/api";
 import { useCaptionLayer } from "@/features/viewer/useCaptionLayer";
 import { useEditor } from "@/features/photo";
 import { useFrame } from "@/features/frames";
+import { CropOverlay, useGeometry } from "@/features/geometry";
 import { useInspector, PanelHandle } from "@/features/inspector";
 import { useRender } from "@/features/viewer/useRender";
 import { useViewportNavigation } from "@/features/viewer/useViewportNavigation";
@@ -104,6 +107,7 @@ import CanvasToolbar from "@/features/viewer/CanvasToolbar.vue";
 const { image, loading, comparing, browse } = useEditor();
 const { frame, caption, current, setParam } = useFrame();
 const { tab } = useInspector();
+const { cropping } = useGeometry();
 const { view } = useRender();
 
 const stage = ref<HTMLElement | null>(null);

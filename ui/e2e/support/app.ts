@@ -8,6 +8,7 @@ const MOCK_SCRIPT = fileURLToPath(new URL("./tauri-mock.js", import.meta.url));
 
 const OPEN_PANEL_IDS = [
   "adjust-light",
+  "frame-geometry",
   "adjust-curves",
   "adjust-color",
   "adjust-grading",
@@ -62,6 +63,13 @@ export interface Call {
 
 export interface RenderCall {
   id: string;
+  geometry: {
+    quarterTurns: number;
+    flipHorizontal: boolean;
+    flipVertical: boolean;
+    angle: number;
+    crop: { x: number; y: number; width: number; height: number };
+  };
   params: Record<string, number> & { curves: Record<"rgb" | "red" | "green" | "blue", number[][]> };
   frame: { id: string; params: Record<string, string | number | boolean> };
 }

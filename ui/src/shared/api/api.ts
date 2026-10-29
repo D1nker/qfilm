@@ -21,6 +21,7 @@ export type {
   FrameCatalog_Serialize as FrameCatalog,
   FrameInfo_Serialize as FrameInfo,
   FrameSelection_Serialize as FrameSelection,
+  Geometry_Serialize as Geometry,
   LoadIssue as FrameIssue,
   ParamDef_Serialize as ParamDef,
   Preset_Serialize as Preset,

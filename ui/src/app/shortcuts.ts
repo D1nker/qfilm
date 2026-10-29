@@ -18,6 +18,9 @@ export const shortcutGroups = (): ShortcutGroup[] => [
     shortcuts: [
       { label: t("shortcuts.undo"), keys: [MOD, "Z"] },
       { label: t("shortcuts.redo"), keys: [MOD, "⇧", "Z"] },
+      { label: t("shortcuts.crop"), keys: ["R"] },
+      { label: t("shortcuts.cropDone"), keys: ["⏎"] },
+      { label: t("shortcuts.cropSwap"), keys: ["X"] },
     ],
   },
   {

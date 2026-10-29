@@ -216,7 +216,7 @@ test.describe("frame panel", () => {
     await shape(openApp, "Cinéma").click();
     await expect.poll(async () => frameParams(openApp)).toMatchObject({ ratio: "239" });
 
-    await openApp.page.getByRole("combobox").first().click();
+    await openApp.page.locator("label.field", { hasText: "Format" }).getByRole("combobox").click();
     await expect(openApp.page.getByRole("option")).toHaveCount(4);
     await openApp.page.getByRole("option", { name: "16:9" }).click();
 

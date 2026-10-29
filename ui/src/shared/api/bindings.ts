@@ -10,9 +10,9 @@ export const commands = {
 	closeImage: (id: string) => __TAURI_INVOKE<null>("close_image", { id }),
 	/**  Calculé sur un thread dédié : ne doit jamais retarder le rendu de l'aperçu. */
 	presetThumbnails: (id: string) => __TAURI_INVOKE<PresetThumbnail[]>("preset_thumbnails", { id }),
-	renderPreview: (id: string, params: RenderParams_Deserialize, frame: FrameSelection_Deserialize, draft: boolean) => __TAURI_INVOKE<PreviewResult>("render_preview", { id, params, frame, draft }),
+	renderPreview: (id: string, params: RenderParams_Deserialize, geometry: Geometry_Deserialize, frame: FrameSelection_Deserialize, draft: boolean) => __TAURI_INVOKE<PreviewResult>("render_preview", { id, params, geometry, frame, draft }),
 	frameThumbnails: (id: string, params: RenderParams_Deserialize, frames: FrameSelection_Deserialize[]) => __TAURI_INVOKE<string[]>("frame_thumbnails", { id, params, frames }),
-	exportImage: (id: string, params: RenderParams_Deserialize, frame: FrameSelection_Deserialize, caption: Caption_Deserialize, destination: string, options: ExportOptions_Deserialize) => __TAURI_INVOKE<null>("export_image", { id, params, frame, caption, destination, options }),
+	exportImage: (id: string, params: RenderParams_Deserialize, geometry: Geometry_Deserialize, frame: FrameSelection_Deserialize, caption: Caption_Deserialize, destination: string, options: ExportOptions_Deserialize) => __TAURI_INVOKE<null>("export_image", { id, params, geometry, frame, caption, destination, options }),
 	listFrames: () => __TAURI_INVOKE<FrameCatalog_Serialize>("list_frames"),
 	reloadFrames: () => __TAURI_INVOKE<FrameCatalog_Serialize>("reload_frames"),
 	importFrame: (path: string) => __TAURI_INVOKE<FrameCatalog_Serialize>("import_frame", { path }),
@@ -92,6 +92,22 @@ export type Condition_Serialize = {
 	param: string,
 	equals?: ParamValue,
 	notEquals?: ParamValue,
+};
+
+export type CropRect = CropRect_Serialize | CropRect_Deserialize;
+
+export type CropRect_Deserialize = {
+	x?: number,
+	y?: number,
+	width?: number,
+	height?: number,
+};
+
+export type CropRect_Serialize = {
+	x: number,
+	y: number,
+	width: number,
+	height: number,
 };
 
 export type ExportFormat = "jpeg" | "png" | 
@@ -188,6 +204,28 @@ export type FrameSelection_Deserialize = {
 export type FrameSelection_Serialize = {
 	id: string,
 	params: { [key in string]: ParamValue },
+};
+
+export type Geometry = Geometry_Serialize | Geometry_Deserialize;
+
+export type Geometry_Deserialize = {
+	/**  Quarts de tour dans le sens horaire (0 à 3). */
+	quarterTurns?: number,
+	flipHorizontal?: boolean,
+	flipVertical?: boolean,
+	/**  Redressement en degrés, positif = la photo tourne dans le sens horaire. */
+	angle?: number,
+	crop?: CropRect_Deserialize,
+};
+
+export type Geometry_Serialize = {
+	/**  Quarts de tour dans le sens horaire (0 à 3). */
+	quarterTurns: number,
+	flipHorizontal: boolean,
+	flipVertical: boolean,
+	/**  Redressement en degrés, positif = la photo tourne dans le sens horaire. */
+	angle: number,
+	crop: CropRect_Serialize,
 };
 
 export type ImageMeta = {

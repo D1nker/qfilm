@@ -5,11 +5,13 @@ import { coalescedRunner } from "@/shared/lib/coalescedRunner";
 import { useInteraction } from "@/shared/lib/useInteraction";
 import { useEditor } from "@/features/photo";
 import { useFrame } from "@/features/frames";
+import { useGeometry } from "@/features/geometry";
 import { useLook } from "@/features/looks";
 
 const { image, error } = useEditor();
 const { params } = useLook();
 const { frame } = useFrame();
+const { previewGeometry, cropping } = useGeometry();
 const { dragging } = useInteraction();
 
 const view = reactive({
@@ -42,7 +44,9 @@ const refresh = coalescedRunner(
       const result = await renderPreview(
         current.id,
         { ...params.value },
-        { id: frame.id, params: { ...frame.params } },
+        { ...previewGeometry.value, crop: { ...previewGeometry.value.crop } },
+        // Le cadre se règle sur la photo nue : pas de bordure autour pendant le recadrage.
+        cropping.value ? { id: "none", params: {} } : { id: frame.id, params: { ...frame.params } },
         draft,
       );
       if (!draft) {
@@ -75,7 +79,15 @@ watch(image, (current) => {
 // Rust met le rendu photo en cache : seuls le cadre et ses réglages demandent un nouveau
 // tracé. La légende n'y figure pas exprès, le webview la dessine lui-même.
 watch(
-  () => [image.value?.id, params.value, frame.id, JSON.stringify(frame.params), dragging.value],
+  () => [
+    image.value?.id,
+    params.value,
+    JSON.stringify(previewGeometry.value),
+    cropping.value,
+    frame.id,
+    JSON.stringify(frame.params),
+    dragging.value,
+  ],
   () => void refresh(),
 );
 

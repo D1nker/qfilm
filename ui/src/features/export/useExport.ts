@@ -6,12 +6,14 @@ import { FILE_EXTENSIONS, SIZE_EDGES, type ExportSize } from "@/features/export/
 import { useEditor } from "@/features/photo";
 import { useNotice } from "@/shared/lib/useNotice";
 import { useFrame } from "@/features/frames";
+import { useGeometry } from "@/features/geometry";
 import { useLook } from "@/features/looks";
 
 const { image, error } = useEditor();
 const { show } = useNotice();
 const { params, activePreset } = useLook();
 const { frame, caption } = useFrame();
+const { geometry } = useGeometry();
 
 const exportOpen = ref(false);
 const exporting = ref(false);
@@ -39,6 +41,7 @@ async function saveExport() {
     await exportImage(
       current.id,
       { ...params.value },
+      { ...geometry.value, crop: { ...geometry.value.crop } },
       { id: frame.id, params: { ...frame.params } },
       { ...caption },
       destination,

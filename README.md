@@ -11,6 +11,7 @@ Early stage, personal project. Open a photo, pick a look, wrap it in a frame, ex
 - **Looks:** film-inspired presets with an intensity slider, plus manual adjustments (exposure, contrast, highlights and shadows, colour, a colour mixer with eight hue bands that doubles as a black-and-white channel mixer, clarity, a tone curve (RGB and per channel), colour grading, sharpening, noise reduction, grain with its size and roughness, halation, vignette with its midpoint and feather).
 - **Frames:** 35 mm and medium-format film strips, instant prints, letterbox, solid and padded borders. A frame is data (`frame.json` + `frame.svg`), so you can design your own in Figma and import it as a `.zip`, a folder or by drag and drop. See [docs/FRAMES.md](docs/FRAMES.md).
 - **Captions:** text on or around the photo, edited and moved directly on the preview.
+- **Crop and geometry:** crop on the photo with handles and a thirds grid, fixed aspect ratios (1:1, 3:2, 16:9…), straighten, rotate by 90°, flip. The crop is taken from the original pixels, never from the preview.
 - **Editing comfort:** undo/redo, compare with the original (hold `C`), cursor-anchored zoom and pan, light and dark themes, French and English interface.
 - **Export:** JPEG, PNG or 16-bit TIFF, at the original size or resized, with an embedded sRGB profile and, if you want, the original EXIF.
 - **Faithful opening:** photos are turned upright from their EXIF orientation, and wide-gamut files (Display P3, Adobe RGB…) are converted to sRGB instead of being misread.

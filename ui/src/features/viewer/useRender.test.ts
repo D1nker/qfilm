@@ -42,13 +42,21 @@ async function setup() {
   const { useEditor } = await import("@/features/photo");
   const { useLook } = await import("@/features/looks");
   const { useFrame } = await import("@/features/frames");
+  const { useGeometry } = await import("@/features/geometry");
   const api = vi.mocked(await import("@/shared/api/api"));
   api.listFrames.mockResolvedValue(catalog);
   api.renderPreview.mockResolvedValue(result("default"));
 
   const frame = useFrame();
   await frame.init();
-  return { render: useRender(), editor: useEditor(), look: useLook(), frame, api };
+  return {
+    render: useRender(),
+    editor: useEditor(),
+    look: useLook(),
+    geometry: useGeometry(),
+    frame,
+    api,
+  };
 }
 
 describe("useRender", () => {
@@ -75,10 +83,59 @@ describe("useRender", () => {
 
     await vi.waitFor(() => expect(api.renderPreview).toHaveBeenCalled());
     await vi.waitFor(() => {
-      const [id, params, selection] = api.renderPreview.mock.calls.at(-1) ?? [];
+      const [id, params, , selection] = api.renderPreview.mock.calls.at(-1) ?? [];
       expect(id).toBe("a");
       expect((params as { exposure: number }).exposure).toBeCloseTo(1.5);
       expect(selection).toMatchObject({ id: "film35", params: { stock: "amber" } });
+    });
+  });
+
+  describe("geometry", () => {
+    const lastGeometry = (api: Awaited<ReturnType<typeof setup>>["api"]) =>
+      api.renderPreview.mock.calls.at(-1)?.[2] as
+        { quarterTurns: number; crop: { width: number } } | undefined;
+    const lastFrame = (api: Awaited<ReturnType<typeof setup>>["api"]) =>
+      api.renderPreview.mock.calls.at(-1)?.[3];
+
+    it("sends the crop, and renders again when it changes", async () => {
+      const { api, editor, geometry } = await setup();
+      editor.image.value = image("a");
+      await vi.waitFor(() => expect(api.renderPreview).toHaveBeenCalledTimes(1));
+
+      geometry.setCrop({ x: 0.1, y: 0.1, width: 0.5, height: 0.5 });
+      await vi.waitFor(() => expect(lastGeometry(api)?.crop.width).toBe(0.5));
+      expect(api.renderPreview.mock.calls.length).toBeGreaterThan(1);
+    });
+
+    it("shows the whole photo without a frame around it while the cadre is being set", async () => {
+      const { api, editor, geometry, frame } = await setup();
+      editor.image.value = image("a");
+      // Une nouvelle photo remet le cadrage à zéro : on règle le cadre une fois la photo ouverte.
+      await nextTick();
+      frame.applyFrame("film35");
+      geometry.setCrop({ x: 0.1, y: 0.1, width: 0.5, height: 0.5 });
+      await vi.waitFor(() => expect(lastGeometry(api)?.crop.width).toBe(0.5));
+      expect(lastFrame(api)?.id).toBe("film35");
+
+      geometry.startCropping();
+
+      await vi.waitFor(() => expect(lastGeometry(api)?.crop.width).toBe(1));
+      expect(lastFrame(api)?.id).toBe("none");
+
+      geometry.stopCropping();
+
+      await vi.waitFor(() => expect(lastGeometry(api)?.crop.width).toBe(0.5));
+      expect(lastFrame(api)?.id).toBe("film35");
+    });
+
+    it("renders again after a quarter turn", async () => {
+      const { api, editor, geometry } = await setup();
+      editor.image.value = image("a");
+      await vi.waitFor(() => expect(api.renderPreview).toHaveBeenCalledTimes(1));
+
+      geometry.rotate(true);
+
+      await vi.waitFor(() => expect(lastGeometry(api)?.quarterTurns).toBe(1));
     });
   });
 
@@ -184,12 +241,12 @@ describe("useRender", () => {
     const release = beginDrag();
     look.setParam("exposure", 0.4);
     await vi.waitFor(() => expect(api.renderPreview).toHaveBeenCalled());
-    expect(api.renderPreview.mock.calls.at(-1)?.[3]).toBe(true);
+    expect(api.renderPreview.mock.calls.at(-1)?.[4]).toBe(true);
     await vi.waitFor(() => expect(render.view.draft).toBe(true));
 
     release();
 
-    await vi.waitFor(() => expect(api.renderPreview.mock.calls.at(-1)?.[3]).toBe(false));
+    await vi.waitFor(() => expect(api.renderPreview.mock.calls.at(-1)?.[4]).toBe(false));
     await vi.waitFor(() => expect(render.view.draft).toBe(false));
   });
 
@@ -209,7 +266,7 @@ describe("useRender", () => {
     }
     release();
 
-    for (const call of api.renderPreview.mock.calls) expect(call[3]).toBe(false);
+    for (const call of api.renderPreview.mock.calls) expect(call[4]).toBe(false);
     expect(render.view.draft).toBe(false);
   });
 
@@ -233,7 +290,7 @@ describe("useRender", () => {
     await vi.waitFor(() => expect(api.renderPreview).toHaveBeenCalled());
     release();
 
-    expect(api.renderPreview.mock.calls.at(-1)?.[3]).toBe(false);
+    expect(api.renderPreview.mock.calls.at(-1)?.[4]).toBe(false);
   });
 
   it("renders in full quality when nothing is being dragged", async () => {
@@ -243,7 +300,7 @@ describe("useRender", () => {
 
     await vi.waitFor(() => expect(api.renderPreview).toHaveBeenCalled());
 
-    for (const call of api.renderPreview.mock.calls) expect(call[3]).toBe(false);
+    for (const call of api.renderPreview.mock.calls) expect(call[4]).toBe(false);
   });
 
   it("forgets the draft flag the moment another photo is opened", async () => {

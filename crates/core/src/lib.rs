@@ -21,6 +21,7 @@ pub mod decode;
 pub mod encode;
 pub mod fonts;
 pub mod frame;
+pub mod geometry;
 pub mod preset;
 pub mod render;
 pub mod text;

@@ -7,8 +7,19 @@ use qfilm_core::PhotoError;
 use qfilm_core::buffer::ImageBuf;
 use qfilm_core::decode::Metadata;
 use qfilm_core::frame::{FrameInfo, FrameRegistry, LoadIssue, UserFrames};
+use qfilm_core::geometry::Geometry;
 use qfilm_core::render::RenderParams;
 use serde::Serialize;
+
+/// Ce que le rendu mémorise : le résultat n'est valable que pour ces réglages et ce cadrage.
+pub type RenderKey = (RenderParams, Geometry);
+
+/// L'aperçu de la photo une fois cadrée (et sa version brouillon), refait quand le cadrage change.
+pub struct Prepared {
+    pub geometry: Geometry,
+    pub proxy: ImageBuf,
+    pub draft: ImageBuf,
+}
 
 pub struct LoadedImage {
     pub full: ImageBuf,
@@ -16,8 +27,9 @@ pub struct LoadedImage {
     pub thumb: ImageBuf,
     pub draft: ImageBuf,
     pub metadata: Metadata,
-    pub cached: Option<(RenderParams, ImageBuf)>,
-    pub draft_cached: Option<(RenderParams, ImageBuf)>,
+    pub prepared: Option<Prepared>,
+    pub cached: Option<(RenderKey, ImageBuf)>,
+    pub draft_cached: Option<(RenderKey, ImageBuf)>,
 }
 
 pub struct AppState {

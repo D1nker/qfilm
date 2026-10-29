@@ -13,6 +13,7 @@ use super::curve::ToneCurves;
 use super::encode;
 use super::fonts::FontChoice as CaptionFont;
 use super::frame::{FrameRegistry, FrameSelection, ParamKind};
+use super::geometry::{self, CropRect, Geometry};
 use super::render::{self, RenderParams};
 
 /// Deux machines n'arrondissent pas tout à fait pareil : on tolère quelques niveaux
@@ -557,4 +558,37 @@ fn rendering_is_deterministic() {
     let first = render::apply(&landscape(), &params);
     let second = render::apply(&landscape(), &params);
     assert_eq!(first.data, second.data);
+}
+
+#[test]
+fn geometry_straightened_and_cropped() {
+    let geometry = Geometry {
+        angle: 7.0,
+        crop: CropRect {
+            x: 0.12,
+            y: 0.14,
+            width: 0.74,
+            height: 0.7,
+        },
+        ..Geometry::default()
+    };
+
+    assert_golden(
+        "geometry_straightened_and_cropped",
+        &geometry::apply(&landscape(), &geometry),
+    );
+}
+
+#[test]
+fn geometry_turned_and_mirrored() {
+    let geometry = Geometry {
+        quarter_turns: 1,
+        flip_horizontal: true,
+        ..Geometry::default()
+    };
+
+    assert_golden(
+        "geometry_turned_and_mirrored",
+        &geometry::apply(&landscape(), &geometry),
+    );
 }

@@ -146,8 +146,12 @@
       frames.map((_, i) =>
         svg(260, 180, ["#556", "#a66", "#6a8", "#222", "#333", "#468", "#864"][i % 7], "#ddd"),
       ),
-    render_preview: ({ frame, draft }) => {
-      const [w, h] = window.__size ?? [1300, 900];
+    render_preview: ({ frame, draft, geometry }) => {
+      // Comme le moteur : un quart de tour échange les côtés, un cadre en garde une fraction.
+      let [w, h] = window.__size ?? [1300, 900];
+      if (geometry?.quarterTurns % 2 === 1) [w, h] = [h, w];
+      w = Math.round(w * (geometry?.crop?.width ?? 1));
+      h = Math.round(h * (geometry?.crop?.height ?? 1));
       const printed = frame.id.startsWith("film") && frame.params.stock !== "plain";
       return {
         // Comme le vrai moteur : un brouillon est plus petit mais annonce la taille du rendu final.

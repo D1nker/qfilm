@@ -131,6 +131,22 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
   Shift for bigger steps; the ends only slide vertically) inside the collapsed "Courbe des tons" section.
   The pointer is captured on pointerdown, so a double-click lands on the graph, not on the point: hit-test
   by position.
+- Geometry (`crates/core/src/geometry.rs`, UI in `features/geometry/`) is not a look: a preset never touches it
+  and the intensity does not scale it. `Geometry` = flips, quarter turns, straighten angle (±45°, positive =
+  clockwise) and a crop rect in fractions of the turned canvas, applied in that order, **before** the render
+  pipeline (vignette, grain and radii then follow the crop), then the frame. `render_preview` and
+  `export_image` take it after `params`. The crop is resampled from the original pixels (`geometry::prepare`
+  reduces the full image just enough, so a tight crop stays sharp) and the cropped preview is cached in
+  `LoadedImage.prepared`; the render cache key is `(RenderParams, Geometry)`. While the crop tool is open the
+  UI sends a whole-canvas crop (`previewGeometry`) and the frame `none`: the preview is the rotated photo from
+  the 1800 px proxy (instant) with a `CropOverlay` on top; closing it sends the real crop. Touching any
+  geometry control (`rotate`, `flip`, `setAngle`, `setAspect`) opens the tool, `R` toggles it (and goes to the
+  Frame tab), Enter/Escape/double-click close it, leaving the Frame tab closes it. `crop.ts` holds the pure
+  maths (`fits`, `resize`, `move`, `fitInside`, `largestRect`): the crop must always stay inside the rotated
+  photo, so no empty corner ever reaches the export; a drag goes as far as `fits` allows (bisection along
+  the drag, the valid set being convex). A screen mirror after an odd quarter turn is the _other_ flip of
+  the source (`useGeometry.flip`, pinned by a Rust test). Export order: geometry, resize, look.
+  Preset and frame thumbnails still show the uncropped photo.
 - Colour grading is one wheel with a puck per zone (`ColorWheel`, geometry in `wheel.ts`: hue is the angle from
   the top, saturation the distance from the centre, with a dead zone at the centre where the hue is kept), a
   zone picker and precise sliders for the active zone. Dragging goes through `beginDrag()` so it previews as a

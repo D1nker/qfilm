@@ -81,6 +81,7 @@ pub async fn open_image(path: String, state: State<'_, AppState>) -> Result<Imag
                 thumb,
                 draft,
                 metadata: decoded.metadata,
+                prepared: None,
                 cached: None,
                 draft_cached: None,
             },

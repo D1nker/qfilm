@@ -2,6 +2,7 @@ import { computed, ref, watch } from "vue";
 
 import { useEditor } from "@/features/photo";
 import { useFrame, type FrameSnapshot } from "@/features/frames";
+import { useGeometry, type GeometrySnapshot } from "@/features/geometry";
 import { useLook, type LookSnapshot } from "@/features/looks";
 
 const COMMIT_DELAY = 300;
@@ -10,13 +11,16 @@ const MAX_DEPTH = 100;
 interface Snapshot {
   look: LookSnapshot;
   frame: FrameSnapshot;
+  geometry: GeometrySnapshot;
 }
 
 const { image } = useEditor();
 const look = useLook();
 const frame = useFrame();
+const geometry = useGeometry();
 
-const serialize = () => JSON.stringify({ look: look.snapshot(), frame: frame.snapshot() });
+const serialize = () =>
+  JSON.stringify({ look: look.snapshot(), frame: frame.snapshot(), geometry: geometry.snapshot() });
 
 /// Lu dans un `computed` pour que Vue suive chacun des champs qu'il parcourt.
 const current = computed(serialize);
@@ -43,6 +47,7 @@ function restore(serialized: string) {
   const state = JSON.parse(serialized) as Snapshot;
   look.restore(state.look);
   frame.restore(state.frame);
+  geometry.restore(state.geometry);
 }
 
 function undo() {

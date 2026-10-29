@@ -1,14 +1,17 @@
 use std::sync::Arc;
 
 use qfilm_core::frame::{FrameSelection, TextZone};
+use qfilm_core::geometry::{self, Geometry};
 use qfilm_core::render::RenderParams;
 use qfilm_core::{PhotoError, encode, render};
 use rayon::prelude::*;
 use serde::Serialize;
 use tauri::State;
 
-use super::{DRAFT_JPEG_QUALITY, PREVIEW_JPEG_QUALITY, THUMB_JPEG_QUALITY};
-use crate::state::{AppState, LoadedImage, poisoned};
+use super::{
+    DRAFT_JPEG_QUALITY, DRAFT_MAX_EDGE, PREVIEW_JPEG_QUALITY, PREVIEW_MAX_EDGE, THUMB_JPEG_QUALITY,
+};
+use crate::state::{AppState, LoadedImage, Prepared, poisoned};
 
 #[derive(Serialize, specta::Type)]
 #[serde(rename_all = "camelCase")]
@@ -56,6 +59,7 @@ pub async fn frame_thumbnails(
 pub async fn render_preview(
     id: String,
     params: RenderParams,
+    geometry: Geometry,
     frame: FrameSelection,
     draft: bool,
     state: State<'_, AppState>,
@@ -68,25 +72,45 @@ pub async fn render_preview(
         let image = images.get_mut(&id).ok_or(PhotoError::ImageNotLoaded)?;
 
         let LoadedImage {
+            full,
             proxy,
             draft: draft_proxy,
+            prepared,
             cached,
             draft_cached,
             ..
         } = image;
-        let (source, cache, factor) = if draft {
-            (&*draft_proxy, draft_cached, proxy.scale_over(draft_proxy))
-        } else {
-            (&*proxy, cached, 1.0)
+
+        // Sans cadrage, on rend l'aperçu tel quel ; sinon, la photo cadrée, refaite si le cadrage a changé.
+        let framed = !geometry.is_identity();
+        if framed && prepared.as_ref().is_none_or(|p| p.geometry != geometry) {
+            let cropped = geometry::prepare(full, proxy, &geometry, PREVIEW_MAX_EDGE);
+            let draft = cropped.downscale_to_fit(DRAFT_MAX_EDGE);
+            *prepared = Some(Prepared {
+                geometry,
+                proxy: cropped,
+                draft,
+            });
+        }
+        let (full_size, draft_size) = match prepared.as_ref().filter(|_| framed) {
+            Some(p) => (&p.proxy, &p.draft),
+            None => (&*proxy, &*draft_proxy),
         };
 
+        let (source, cache, factor) = if draft {
+            (draft_size, draft_cached, full_size.scale_over(draft_size))
+        } else {
+            (full_size, cached, 1.0)
+        };
+
+        let key = (params, geometry);
         let needs_render = cache
             .as_ref()
-            .is_none_or(|(cached_params, _)| *cached_params != params);
+            .is_none_or(|(cached_key, _)| *cached_key != key);
 
         if needs_render {
-            let rendered = render::apply(source, &params);
-            *cache = Some((params, rendered));
+            let rendered = render::apply(source, &key.0);
+            *cache = Some((key, rendered));
         }
 
         let (_, rendered) = cache.as_ref().expect("rendu mis en cache juste avant");

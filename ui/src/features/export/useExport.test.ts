@@ -37,7 +37,7 @@ describe("useExport", () => {
     await exporter.saveExport();
 
     expect(api.exportImage).toHaveBeenCalledOnce();
-    expect(api.exportImage.mock.calls[0]?.[5]).toMatchObject({ keepMetadata: true });
+    expect(api.exportImage.mock.calls[0]?.[6]).toMatchObject({ keepMetadata: true });
   });
 
   it("drops the metadata when the user turns it off", async () => {
@@ -46,7 +46,7 @@ describe("useExport", () => {
 
     await exporter.saveExport();
 
-    expect(api.exportImage.mock.calls[0]?.[5]).toMatchObject({
+    expect(api.exportImage.mock.calls[0]?.[6]).toMatchObject({
       keepMetadata: false,
       format: "jpeg",
       maxEdge: null,

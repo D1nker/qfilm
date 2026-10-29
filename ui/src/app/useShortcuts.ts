@@ -1,5 +1,6 @@
 import { onMounted, onUnmounted } from "vue";
 
+import { useGeometry } from "@/features/geometry";
 import { useEditor } from "@/features/photo";
 import { useHistory } from "@/features/history";
 import { useInspector } from "@/features/inspector";
@@ -12,8 +13,9 @@ function isTyping(target: EventTarget | null) {
 }
 
 export function useShortcuts() {
-  const { comparing } = useEditor();
-  const { toggle } = useInspector();
+  const { comparing, image } = useEditor();
+  const { toggle, tab } = useInspector();
+  const { cropping, toggleCropping, stopCropping, swapOrientation } = useGeometry();
   const { undo, redo } = useHistory();
 
   function onKeydown(event: KeyboardEvent) {
@@ -40,6 +42,12 @@ export function useShortcuts() {
     const key = event.key.toLowerCase();
     if (key === "c" && !event.repeat) comparing.value = true;
     else if (key === "f" && !event.repeat) toggle();
+    else if (key === "r" && !event.repeat && image.value) {
+      // Le recadrage est dans l'onglet Cadre : on y va, comme le fait Lightroom pour son module.
+      tab.value = "frame";
+      toggleCropping();
+    } else if (cropping.value && key === "x" && !event.repeat) swapOrientation();
+    else if (cropping.value && (key === "enter" || key === "escape")) stopCropping();
   }
 
   function onKeyup(event: KeyboardEvent) {

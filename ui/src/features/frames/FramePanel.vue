@@ -1,5 +1,7 @@
 <template>
   <div>
+    <GeometryPanel />
+
     <UiCollapsible id="frame-shape" :title="t('frames.shape')">
       <template #actions>
         <UiButton variant="ghost" size="sm" :disabled="isPristine" @click="resetFrame">
@@ -78,6 +80,7 @@ import { computed } from "vue";
 
 import type { ParamDef, ParamValue } from "@/shared/api/api";
 import { fontOptions } from "@/features/frames/fonts";
+import { GeometryPanel } from "@/features/geometry";
 import { sectionsOf } from "@/features/frames/frameParams";
 import { useFrame } from "@/features/frames/useFrame";
 import { useFrameThumbnails } from "@/features/frames/useFrameThumbnails";
