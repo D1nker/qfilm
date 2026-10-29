@@ -27,6 +27,7 @@ export const fr = {
     goTo: "Aller à {group}",
   },
   panel: {
+    resize: "Largeur du panneau",
     hide: "Masquer le panneau (F)",
     show: "Afficher le panneau (F)",
   },

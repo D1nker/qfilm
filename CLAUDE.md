@@ -162,8 +162,12 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
   (`openPanels`, even if they had been folded: pages are small, we want to see the content). Every section
   is open by default. The selected page of each tab lives in `useInspector().group` (the host, `InspectorPanel`,
   passes it down with `v-model:group` because `looks` may not import `inspector`), so the crop shortcut can
-  say `group.frame = "crop"`. The panel is 30 % of the window, between 356 and 520 px (`clamp` in `App.vue`; the
-  rail alone costs 36 px). The Preset tab has one too, one icon per look category (`categoryIcons.ts`, a
+  say `group.frame = "crop"`. The panel is 30 % of the window, between 356 and 520 px, until the user drags its left
+  edge (`PanelResizer`, a `role="separator"` strip; `inspector/panelWidth.ts` holds the pure bounds: 320 px
+  minimum, 720 px maximum, and the canvas always keeps 440 px). The width is remembered
+  (`qfilm-panel-width`), double-click or Home gives the automatic one back, the arrows resize
+  (Shift for bigger steps). `App.vue` reads it through `--inspector-width`, and turns the grid transition
+  off while dragging. The rail alone costs 36 px. The Preset tab has one too, one icon per look category (`categoryIcons.ts`, a
   fallback icon for a category the table does not know): it opens on the applied look's category, or the first
   one offering more than "Neutral", then keeps the last one viewed; the intensity slider is the rail panel's
   `footer` slot, one slider under whichever page is shown. Labels and icons come from functions of `t`, and the buttons are named "Aller à X" so

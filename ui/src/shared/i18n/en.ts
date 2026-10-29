@@ -29,6 +29,7 @@ export const en: Messages = {
     goTo: "Go to {group}",
   },
   panel: {
+    resize: "Panel width",
     hide: "Hide the panel (F)",
     show: "Show the panel (F)",
   },

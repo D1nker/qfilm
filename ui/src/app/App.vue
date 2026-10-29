@@ -1,6 +1,10 @@
 <template>
   <TooltipProvider :delay-duration="400">
-    <div class="layout" :class="{ collapsed: !open }">
+    <div
+      class="layout"
+      :class="{ collapsed: !open, resizing }"
+      :style="{ '--inspector-width': cssWidth }"
+    >
       <AppHeader class="area-header" />
       <ImageViewport class="area-main" />
       <PreferencesButton class="area-preferences" />
@@ -23,7 +27,7 @@ import { TooltipProvider } from "reka-ui";
 
 import { useEditor } from "@/features/photo";
 import { useFrame } from "@/features/frames";
-import { useInspector } from "@/features/inspector";
+import { useInspector, usePanelWidth } from "@/features/inspector";
 import { useNotice } from "@/shared/lib/useNotice";
 import { useShortcuts } from "@/app/useShortcuts";
 import AppHeader from "@/app/AppHeader.vue";
@@ -36,6 +40,7 @@ import PreferencesButton from "@/app/PreferencesButton.vue";
 const { error, init } = useEditor();
 const { init: initFrames } = useFrame();
 const { open } = useInspector();
+const { cssWidth, resizing } = usePanelWidth();
 const { notice } = useNotice();
 
 useShortcuts();
@@ -46,11 +51,17 @@ onMounted(() => void Promise.all([init(), initFrames()]));
 <style scoped>
 .layout {
   display: grid;
-  grid-template-columns: 1fr calc(clamp(356px, 30vw, 520px) + var(--space-3));
+  grid-template-columns: 1fr calc(var(--inspector-width) + var(--space-3));
   grid-template-rows: 52px minmax(0, 1fr);
   grid-template-areas: "header header" "main inspector";
   height: 100%;
   transition: grid-template-columns var(--duration) var(--ease);
+}
+
+/* Pendant qu'on tire le bord, le panneau suit le pointeur sans retard. */
+.layout.resizing {
+  transition: none;
+  user-select: none;
 }
 
 .layout.collapsed {

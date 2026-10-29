@@ -1,5 +1,6 @@
 <template>
   <aside>
+    <PanelResizer />
     <div class="card">
       <UiTabs v-model="tab" :tabs="tabs">
         <template #looks>
@@ -18,7 +19,7 @@ import { computed } from "vue";
 import { localized, t } from "@/shared/i18n";
 import type { Preset } from "@/shared/api/api";
 import { useFrame, FramePanel } from "@/features/frames";
-import { useInspector, type InspectorTab } from "@/features/inspector";
+import { PanelResizer, useInspector, type InspectorTab } from "@/features/inspector";
 import UiTabs from "@/shared/ui/UiTabs.vue";
 import { AdjustPanel, LooksPanel } from "@/features/looks";
 
@@ -38,6 +39,7 @@ function labelFrameFromLook(preset: Preset) {
 
 <style scoped>
 aside {
+  position: relative;
   min-width: 0;
   min-height: 0;
   padding: var(--space-3) var(--space-3) var(--space-3) 0;
