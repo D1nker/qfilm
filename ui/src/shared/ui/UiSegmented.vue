@@ -1,8 +1,14 @@
 <template>
   <RadioGroupRoot v-model="model" class="segments" :aria-label="label">
     <UiTooltip v-for="option in options" :key="option.value" :text="option.label">
-      <RadioGroupItem :value="option.value" :aria-label="option.label" class="segment">
+      <RadioGroupItem
+        :value="option.value"
+        :aria-label="option.label"
+        class="segment"
+        :class="{ swatch: option.color, marked: option.marked }"
+      >
         <component :is="option.icon" v-if="option.icon" :size="14" />
+        <span v-else-if="option.color" class="dot" :style="{ background: option.color }" />
         <template v-else>{{ option.text }}</template>
       </RadioGroupItem>
     </UiTooltip>
@@ -18,7 +24,15 @@ import UiTooltip from "@/shared/ui/UiTooltip.vue";
 defineProps<{
   label: string;
   /// `label` nomme l'option pour les lecteurs d'écran et l'infobulle ; `icon` ou `text` la dessine.
-  options: { value: T; label: string; icon?: Component; text?: string }[];
+  /// `color` dessine une pastille ; `marked` signale qu'un réglage est en cours sur cette option.
+  options: {
+    value: T;
+    label: string;
+    icon?: Component;
+    text?: string;
+    color?: string;
+    marked?: boolean;
+  }[];
 }>();
 
 const model = defineModel<T>({ required: true });
@@ -49,6 +63,30 @@ const model = defineModel<T>({ required: true });
   font-weight: var(--weight-medium);
   cursor: pointer;
   transition: color var(--duration-fast) var(--ease);
+}
+
+.segment.swatch {
+  position: relative;
+  min-width: 26px;
+  padding: 0;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-full);
+}
+
+.segment.marked::after {
+  content: "";
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  transform: translateX(-50%);
+  border-radius: var(--radius-full);
+  background: var(--accent);
 }
 
 .segment:hover {

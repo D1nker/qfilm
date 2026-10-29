@@ -1,9 +1,10 @@
+import { HSL_HUE_REACH, isHslHueKey, type HslKey } from "@/features/looks/hsl";
 import type { RenderParams } from "@/shared/api/api";
 
 export type ControlGroup = "light" | "color" | "grading" | "detail" | "effects";
 
 export interface Control {
-  key: keyof RenderParams;
+  key: Exclude<keyof RenderParams, HslKey>;
   min: number;
   max: number;
   step: number;
@@ -49,6 +50,10 @@ export const controls: Control[] = [
 
 export function formatControlValue(key: keyof RenderParams, value: number) {
   if (key === "exposure") return `${value > 0 ? "+" : ""}${value.toFixed(2)} EV`;
+  if (isHslHueKey(key)) {
+    const degrees = Math.round(value * HSL_HUE_REACH);
+    return `${degrees > 0 ? "+" : ""}${degrees}°`;
+  }
   if (key.endsWith("Hue")) return `${Math.round(value)}°`;
   if (key === "grainSize" || key === "sharpenRadius") return value.toFixed(1);
   return value.toFixed(2);

@@ -96,12 +96,17 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
   Imported frames are untrusted input: size caps, strict validation, dry-run render, no disk
   extraction, no file access from SVG. Keep those guarantees (and their tests) when touching it.
 - Render pipeline (`crates/core/src/render.rs`), all in linear light: exposure and white balance → noise
-  reduction → halation → clarity → tone and colour → colour grading → sharpening → vignette → grain → highlight shoulder.
+  reduction → colour mixer (HSL) → halation → clarity → tone and colour → colour grading → sharpening → vignette → grain → highlight shoulder.
   A new setting defaults to the old behaviour (a missing field deserialises to its default), so presets and
   golden images do not move. Every radius is proportional to the image size (or to a 1 800 px reference), so
   the 1 800 px preview matches the full-size export. Edge and sharpness maths use the sRGB-encoded luminance,
   uncapped at 1 (a sun brighter than white must stay untouched). `box_blur` repeats the border pixels: keep it
   that way, a blur that assumes black outside makes halos along the image edges.
+- Settings are flat numeric fields of `RenderParams` (the colour mixer's 24 values too: `redHue`,
+  `redSaturation`… ), so presets, layering, undo and reset need no special case. Each one needs a slider:
+  `controls.ts` (or `hsl.ts` for the mixer) lists them and a test fails when a field has none or two. Adding a
+  setting means: the Rust field with its default, `neutral.ts`, `ui/e2e/support/tauri-mock.js`, `test/fixtures.ts`,
+  the slider, both translations, `npm run rust:bindings`.
 - Photo fidelity (`decode.rs`, `color.rs`, `encode.rs`): a photo is turned upright from its EXIF orientation
   at decode time; any RGB ICC profile is converted to sRGB, the working space (wide-gamut colours are
   clipped, a known limit); the EXIF travels with the image (`Metadata`, orientation reset to upright so

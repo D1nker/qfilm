@@ -7,25 +7,27 @@
       </UiButton>
     </div>
 
-    <UiCollapsible
-      v-for="[group, items] in groupedControls"
-      :key="group"
-      :title="t(`adjust.groups.${group}`)"
-    >
-      <UiSlider
-        v-for="control in items"
-        :key="control.key"
-        :model-value="params[control.key]"
-        :label="t(`adjust.controls.${control.key}`)"
-        :display="formatControlValue(control.key, params[control.key])"
-        :min="control.min"
-        :max="control.max"
-        :step="control.step"
-        :reset-to="NEUTRAL[control.key]"
-        :disabled="!image"
-        @update:model-value="setParam(control.key, $event)"
-      />
-    </UiCollapsible>
+    <template v-for="[group, items] in groupedControls" :key="group">
+      <UiCollapsible :title="t(`adjust.groups.${group}`)">
+        <UiSlider
+          v-for="control in items"
+          :key="control.key"
+          :model-value="params[control.key]"
+          :label="t(`adjust.controls.${control.key}`)"
+          :display="formatControlValue(control.key, params[control.key])"
+          :min="control.min"
+          :max="control.max"
+          :step="control.step"
+          :reset-to="NEUTRAL[control.key]"
+          :disabled="!image"
+          @update:model-value="setParam(control.key, $event)"
+        />
+      </UiCollapsible>
+
+      <UiCollapsible v-if="group === 'color'" :title="t('adjust.groups.hsl')" :default-open="false">
+        <HslMixer />
+      </UiCollapsible>
+    </template>
   </div>
 </template>
 
@@ -34,6 +36,7 @@ import { computed } from "vue";
 import { t } from "@/shared/i18n";
 
 import { controls, formatControlValue } from "@/features/looks/controls";
+import HslMixer from "@/features/looks/HslMixer.vue";
 import { NEUTRAL } from "@/features/looks/neutral";
 import { groupBy } from "@/shared/lib/groupBy";
 import { useEditor } from "@/features/photo";

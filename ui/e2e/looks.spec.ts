@@ -1,3 +1,4 @@
+import type { Page } from "@playwright/test";
 import { expect, test } from "./support/app";
 
 test.describe("looks", () => {
@@ -114,6 +115,92 @@ test.describe("looks", () => {
     await expect
       .poll(async () => (await openApp.lastRender()).params)
       .toMatchObject({ shadowsHue: 40, shadowsSaturation: 0.7, highlightsSaturation: 0 });
+  });
+
+  test.describe("colour mixer", () => {
+    test.beforeEach(async ({ openApp }) => {
+      await openApp.tab("Retouche").click();
+      await openApp.page
+        .getByRole("button", { name: "Mélangeur de couleurs", exact: true })
+        .click();
+    });
+
+    const mixer = (app: { page: Page }) => app.page.locator(".mixer");
+
+    test("offers the eight colours, with hue, saturation and luminance for the chosen one", async ({
+      openApp,
+    }) => {
+      for (const name of [
+        "Rouge",
+        "Orange",
+        "Jaune",
+        "Vert",
+        "Cyan",
+        "Bleu",
+        "Violet",
+        "Magenta",
+      ]) {
+        await expect(mixer(openApp).getByRole("radio", { name })).toBeVisible();
+      }
+      await expect(mixer(openApp).getByRole("radio", { name: "Rouge" })).toBeChecked();
+      for (const name of ["Teinte", "Saturation", "Luminosité"]) {
+        await expect(mixer(openApp).getByRole("slider", { name })).toBeVisible();
+      }
+    });
+
+    test("adjusts the chosen colour only, and remembers each colour's settings", async ({
+      openApp,
+    }) => {
+      await mixer(openApp).getByRole("radio", { name: "Vert" }).click();
+      await mixer(openApp).getByRole("slider", { name: "Saturation" }).focus();
+      await openApp.press("ArrowRight", 40);
+      await mixer(openApp).getByRole("radio", { name: "Bleu" }).click();
+      await mixer(openApp).getByRole("slider", { name: "Luminosité" }).focus();
+      await openApp.press("ArrowLeft", 30);
+
+      await expect
+        .poll(async () => (await openApp.lastRender()).params)
+        .toMatchObject({ greenSaturation: 0.4, blueLuminance: -0.3, redHue: 0, redSaturation: 0 });
+
+      await mixer(openApp).getByRole("radio", { name: "Bleu" }).click();
+      await mixer(openApp).getByRole("slider", { name: "Teinte" }).focus();
+      await openApp.press("ArrowRight", 40);
+      await expect(mixer(openApp).locator(".slider", { hasText: "Teinte" })).toContainText("+12°");
+
+      await mixer(openApp).getByRole("radio", { name: "Vert" }).click();
+      await expect(mixer(openApp).locator(".slider", { hasText: "Saturation" })).toContainText(
+        "0.40",
+      );
+    });
+
+    test("marks the colours that have a setting, and a double-click clears it", async ({
+      openApp,
+    }) => {
+      const green = mixer(openApp).getByRole("radio", { name: "Vert" });
+      await expect(green).not.toHaveClass(/marked/);
+
+      await green.click();
+      await mixer(openApp).getByRole("slider", { name: "Teinte" }).focus();
+      await openApp.press("ArrowRight", 20);
+      await expect(green).toHaveClass(/marked/);
+
+      await mixer(openApp).locator(".slider", { hasText: "Teinte" }).locator(".root").dblclick();
+      await expect(green).not.toHaveClass(/marked/);
+      await expect.poll(async () => (await openApp.lastRender()).params.greenHue).toBe(0);
+    });
+
+    test("the reset button clears the mixer too", async ({ openApp }) => {
+      await mixer(openApp).getByRole("radio", { name: "Jaune" }).click();
+      await mixer(openApp).getByRole("slider", { name: "Luminosité" }).focus();
+      await openApp.press("ArrowRight", 50);
+      await expect
+        .poll(async () => (await openApp.lastRender()).params.yellowLuminance)
+        .toBeCloseTo(0.5);
+
+      await openApp.page.getByRole("button", { name: "Réinitialiser" }).click();
+
+      await expect.poll(async () => (await openApp.lastRender()).params.yellowLuminance).toBe(0);
+    });
   });
 
   test("groups sharpening and noise reduction under Detail", async ({ openApp }) => {

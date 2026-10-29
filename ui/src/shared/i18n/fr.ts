@@ -38,9 +38,26 @@ export const fr = {
     groups: {
       light: "Lumière",
       color: "Couleur",
+      hsl: "Mélangeur de couleurs",
       grading: "Étalonnage",
       detail: "Détail",
       effects: "Effets",
+    },
+    hsl: {
+      band: "Teinte à ajuster",
+      hue: "Teinte",
+      saturation: "Saturation",
+      luminance: "Luminosité",
+    },
+    bands: {
+      red: "Rouge",
+      orange: "Orange",
+      yellow: "Jaune",
+      green: "Vert",
+      aqua: "Cyan",
+      blue: "Bleu",
+      purple: "Violet",
+      magenta: "Magenta",
     },
     controls: {
       exposure: "Exposition",

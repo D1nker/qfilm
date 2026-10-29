@@ -40,9 +40,26 @@ export const en: Messages = {
     groups: {
       light: "Light",
       color: "Color",
+      hsl: "Color mixer",
       grading: "Color grading",
       detail: "Detail",
       effects: "Effects",
+    },
+    hsl: {
+      band: "Color to adjust",
+      hue: "Hue",
+      saturation: "Saturation",
+      luminance: "Luminance",
+    },
+    bands: {
+      red: "Red",
+      orange: "Orange",
+      yellow: "Yellow",
+      green: "Green",
+      aqua: "Aqua",
+      blue: "Blue",
+      purple: "Purple",
+      magenta: "Magenta",
     },
     controls: {
       exposure: "Exposure",

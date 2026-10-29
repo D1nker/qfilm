@@ -296,6 +296,34 @@ export type RenderParams_Deserialize = {
 	temperature?: number,
 	/**  Vert (-1) vers magenta (+1). */
 	tint?: number,
+	/**
+	 *  Mélangeur de couleurs : pour chacune des huit teintes, un décalage de teinte, de saturation
+	 *  et de luminosité (-1 à 1). Saturation globale à -1 + luminosités = mélangeur noir et blanc.
+	 */
+	redHue?: number,
+	redSaturation?: number,
+	redLuminance?: number,
+	orangeHue?: number,
+	orangeSaturation?: number,
+	orangeLuminance?: number,
+	yellowHue?: number,
+	yellowSaturation?: number,
+	yellowLuminance?: number,
+	greenHue?: number,
+	greenSaturation?: number,
+	greenLuminance?: number,
+	aquaHue?: number,
+	aquaSaturation?: number,
+	aquaLuminance?: number,
+	blueHue?: number,
+	blueSaturation?: number,
+	blueLuminance?: number,
+	purpleHue?: number,
+	purpleSaturation?: number,
+	purpleLuminance?: number,
+	magentaHue?: number,
+	magentaSaturation?: number,
+	magentaLuminance?: number,
 	clarity?: number,
 	/**  Netteté (accentuation locale de la luminance). */
 	sharpening?: number,
@@ -343,6 +371,34 @@ export type RenderParams_Serialize = {
 	temperature: number,
 	/**  Vert (-1) vers magenta (+1). */
 	tint: number,
+	/**
+	 *  Mélangeur de couleurs : pour chacune des huit teintes, un décalage de teinte, de saturation
+	 *  et de luminosité (-1 à 1). Saturation globale à -1 + luminosités = mélangeur noir et blanc.
+	 */
+	redHue: number,
+	redSaturation: number,
+	redLuminance: number,
+	orangeHue: number,
+	orangeSaturation: number,
+	orangeLuminance: number,
+	yellowHue: number,
+	yellowSaturation: number,
+	yellowLuminance: number,
+	greenHue: number,
+	greenSaturation: number,
+	greenLuminance: number,
+	aquaHue: number,
+	aquaSaturation: number,
+	aquaLuminance: number,
+	blueHue: number,
+	blueSaturation: number,
+	blueLuminance: number,
+	purpleHue: number,
+	purpleSaturation: number,
+	purpleLuminance: number,
+	magentaHue: number,
+	magentaSaturation: number,
+	magentaLuminance: number,
 	clarity: number,
 	/**  Netteté (accentuation locale de la luminance). */
 	sharpening: number,

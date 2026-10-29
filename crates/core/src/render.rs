@@ -21,6 +21,32 @@ pub struct RenderParams {
     pub temperature: f32,
     /// Vert (-1) vers magenta (+1).
     pub tint: f32,
+    /// Mélangeur de couleurs : pour chacune des huit teintes, un décalage de teinte, de saturation
+    /// et de luminosité (-1 à 1). Saturation globale à -1 + luminosités = mélangeur noir et blanc.
+    pub red_hue: f32,
+    pub red_saturation: f32,
+    pub red_luminance: f32,
+    pub orange_hue: f32,
+    pub orange_saturation: f32,
+    pub orange_luminance: f32,
+    pub yellow_hue: f32,
+    pub yellow_saturation: f32,
+    pub yellow_luminance: f32,
+    pub green_hue: f32,
+    pub green_saturation: f32,
+    pub green_luminance: f32,
+    pub aqua_hue: f32,
+    pub aqua_saturation: f32,
+    pub aqua_luminance: f32,
+    pub blue_hue: f32,
+    pub blue_saturation: f32,
+    pub blue_luminance: f32,
+    pub purple_hue: f32,
+    pub purple_saturation: f32,
+    pub purple_luminance: f32,
+    pub magenta_hue: f32,
+    pub magenta_saturation: f32,
+    pub magenta_luminance: f32,
     pub clarity: f32,
     /// Netteté (accentuation locale de la luminance).
     pub sharpening: f32,
@@ -52,6 +78,38 @@ pub struct RenderParams {
     pub vignette_feather: f32,
 }
 
+impl RenderParams {
+    /// Les réglages du mélangeur, par teinte : [teinte, saturation, luminosité].
+    fn hsl_bands(&self) -> [[f32; 3]; 8] {
+        [
+            [self.red_hue, self.red_saturation, self.red_luminance],
+            [
+                self.orange_hue,
+                self.orange_saturation,
+                self.orange_luminance,
+            ],
+            [
+                self.yellow_hue,
+                self.yellow_saturation,
+                self.yellow_luminance,
+            ],
+            [self.green_hue, self.green_saturation, self.green_luminance],
+            [self.aqua_hue, self.aqua_saturation, self.aqua_luminance],
+            [self.blue_hue, self.blue_saturation, self.blue_luminance],
+            [
+                self.purple_hue,
+                self.purple_saturation,
+                self.purple_luminance,
+            ],
+            [
+                self.magenta_hue,
+                self.magenta_saturation,
+                self.magenta_luminance,
+            ],
+        ]
+    }
+}
+
 impl Default for RenderParams {
     fn default() -> Self {
         Self {
@@ -65,6 +123,30 @@ impl Default for RenderParams {
             vibrance: 0.0,
             temperature: 0.0,
             tint: 0.0,
+            red_hue: 0.0,
+            red_saturation: 0.0,
+            red_luminance: 0.0,
+            orange_hue: 0.0,
+            orange_saturation: 0.0,
+            orange_luminance: 0.0,
+            yellow_hue: 0.0,
+            yellow_saturation: 0.0,
+            yellow_luminance: 0.0,
+            green_hue: 0.0,
+            green_saturation: 0.0,
+            green_luminance: 0.0,
+            aqua_hue: 0.0,
+            aqua_saturation: 0.0,
+            aqua_luminance: 0.0,
+            blue_hue: 0.0,
+            blue_saturation: 0.0,
+            blue_luminance: 0.0,
+            purple_hue: 0.0,
+            purple_saturation: 0.0,
+            purple_luminance: 0.0,
+            magenta_hue: 0.0,
+            magenta_saturation: 0.0,
+            magenta_luminance: 0.0,
             clarity: 0.0,
             sharpening: 0.0,
             sharpen_radius: 1.0,
@@ -98,6 +180,11 @@ pub fn apply(source: &ImageBuf, params: &RenderParams) -> ImageBuf {
 
     if params.noise_luminance > 0.001 || params.noise_color > 0.001 {
         apply_noise_reduction(&mut img, params.noise_luminance, params.noise_color);
+    }
+
+    let bands = params.hsl_bands();
+    if bands.iter().flatten().any(|v| v.abs() > 0.001) {
+        apply_hsl(&mut img, &bands);
     }
 
     if params.halation > 0.001 {
@@ -371,6 +458,117 @@ fn apply_color_grading(img: &mut ImageBuf, p: &RenderParams) {
         }
         for (channel, (value, delta)) in px.iter_mut().zip(encoded.iter().zip(shift)) {
             *channel = srgb_to_linear((value + delta).max(0.0));
+        }
+    });
+}
+
+/// Les teintes (degrés) que le mélangeur sait cibler : rouge, orange, jaune, vert, cyan, bleu,
+/// violet, magenta. Entre deux, le réglage se partage.
+const BAND_CENTERS: [f32; 8] = [0.0, 30.0, 60.0, 120.0, 180.0, 240.0, 270.0, 300.0];
+/// Un réglage de teinte à 1 déplace la couleur de ce nombre de degrés.
+const HUE_REACH: f32 = 30.0;
+
+fn rgb_to_hsl(rgb: [f32; 3]) -> (f32, f32, f32) {
+    let [r, g, b] = rgb;
+    let (high, low) = (r.max(g).max(b), r.min(g).min(b));
+    let light = f32::midpoint(high, low);
+    let span = high - low;
+    if span < 1e-6 {
+        return (0.0, 0.0, light);
+    }
+    let saturation = span / (1.0 - (2.0 * light - 1.0).abs()).max(1e-6);
+    let hue = if (high - r).abs() < 1e-6 {
+        ((g - b) / span).rem_euclid(6.0)
+    } else if (high - g).abs() < 1e-6 {
+        (b - r) / span + 2.0
+    } else {
+        (r - g) / span + 4.0
+    };
+    (hue * 60.0, saturation.clamp(0.0, 1.0), light)
+}
+
+fn hsl_to_rgb(hue: f32, saturation: f32, light: f32) -> [f32; 3] {
+    let chroma = (1.0 - (2.0 * light - 1.0).abs()) * saturation;
+    let sector = hue.rem_euclid(360.0) / 60.0;
+    let second = chroma * (1.0 - (sector % 2.0 - 1.0).abs());
+    let (r, g, b) = match sector as u32 {
+        0 => (chroma, second, 0.0),
+        1 => (second, chroma, 0.0),
+        2 => (0.0, chroma, second),
+        3 => (0.0, second, chroma),
+        4 => (second, 0.0, chroma),
+        _ => (chroma, 0.0, second),
+    };
+    let offset = light - chroma / 2.0;
+    [r + offset, g + offset, b + offset]
+}
+
+/// Part de chaque teinte du mélangeur pour une teinte donnée : deux voisines au plus, dont les
+/// parts font 1 et passent en douceur de l'une à l'autre.
+fn band_weights(hue: f32) -> [f32; 8] {
+    let hue = hue.rem_euclid(360.0);
+    let mut weights = [0.0; 8];
+    for (i, &start) in BAND_CENTERS.iter().enumerate() {
+        let next = (i + 1) % BAND_CENTERS.len();
+        let end = if next == 0 { 360.0 } else { BAND_CENTERS[next] };
+        let wrapped = if hue < BAND_CENTERS[0] {
+            hue + 360.0
+        } else {
+            hue
+        };
+        if wrapped >= start && wrapped < end {
+            let t = (wrapped - start) / (end - start);
+            let eased = t * t * (3.0 - 2.0 * t);
+            weights[i] = 1.0 - eased;
+            weights[next] = eased;
+            break;
+        }
+    }
+    weights
+}
+
+/// Mélangeur de couleurs, dans l'espace perceptuel. Une couleur grise n'a pas de teinte et n'est
+/// jamais touchée ; une couleur faiblement saturée l'est peu.
+fn apply_hsl(img: &mut ImageBuf, bands: &[[f32; 3]; 8]) {
+    img.data.par_chunks_mut(3).for_each(|px| {
+        let mut encoded = [
+            linear_to_srgb(px[0].max(0.0)),
+            linear_to_srgb(px[1].max(0.0)),
+            linear_to_srgb(px[2].max(0.0)),
+        ];
+        // Plus clair que le blanc (après une exposition poussée) : on travaille sur la couleur
+        // ramenée à 1 et on remet l'excédent ensuite, ce qui garde la teinte.
+        let peak = encoded[0].max(encoded[1]).max(encoded[2]);
+        let excess = peak.max(1.0);
+        for channel in &mut encoded {
+            *channel /= excess;
+        }
+
+        let (hue, saturation, light) = rgb_to_hsl(encoded);
+        if saturation < 1e-4 {
+            return;
+        }
+
+        let weights = band_weights(hue);
+        let mut shift = [0.0f32; 3];
+        for (weight, band) in weights.iter().zip(bands) {
+            for (total, value) in shift.iter_mut().zip(band) {
+                *total += weight * value;
+            }
+        }
+
+        let new_hue = hue + shift[0] * HUE_REACH * saturation;
+        let new_saturation = (saturation * (1.0 + shift[1])).clamp(0.0, 1.0);
+        let lift = shift[2] * saturation;
+        let new_light = if lift >= 0.0 {
+            light + (1.0 - light) * lift * 0.6
+        } else {
+            light + light * lift * 0.6
+        };
+
+        let rgb = hsl_to_rgb(new_hue, new_saturation, new_light.clamp(0.0, 1.0));
+        for (channel, value) in px.iter_mut().zip(rgb) {
+            *channel = srgb_to_linear((value * excess).max(0.0));
         }
     });
 }
@@ -1022,5 +1220,317 @@ mod tests {
 
         assert!(with_balance(-1.0) > with_balance(0.0));
         assert!(with_balance(0.0) > with_balance(1.0));
+    }
+
+    fn solid(px: [f32; 3]) -> ImageBuf {
+        let mut img = ImageBuf::new(4, 4);
+        for chunk in img.data.chunks_mut(3) {
+            chunk.copy_from_slice(&px);
+        }
+        img
+    }
+
+    fn mixed(px: [f32; 3], params: &RenderParams) -> [f32; 3] {
+        first_pixel(&apply(&solid(px), params))
+    }
+
+    fn hsl_of(px: [f32; 3]) -> (f32, f32, f32) {
+        rgb_to_hsl(px.map(linear_to_srgb))
+    }
+
+    const RED: [f32; 3] = [0.6, 0.04, 0.04];
+    const GREEN: [f32; 3] = [0.04, 0.5, 0.06];
+    const BLUE: [f32; 3] = [0.05, 0.08, 0.6];
+
+    #[test]
+    fn hsl_conversion_round_trips() {
+        for rgb in [
+            [0.8, 0.3, 0.1],
+            [0.1, 0.9, 0.4],
+            [0.2, 0.3, 0.95],
+            [0.5, 0.5, 0.5],
+            [0.0, 0.0, 0.0],
+        ] {
+            let (h, s, l) = rgb_to_hsl(rgb);
+            let back = hsl_to_rgb(h, s, l);
+            assert!(
+                (0..3).all(|c| (back[c] - rgb[c]).abs() < 1e-4),
+                "{rgb:?} → {back:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn the_band_shares_always_make_one_and_move_smoothly() {
+        let mut last = band_weights(0.0);
+        for degrees in 0..=360 {
+            let weights = band_weights(degrees as f32);
+            assert!(
+                (weights.iter().sum::<f32>() - 1.0).abs() < 1e-5,
+                "{degrees}°"
+            );
+            assert!(
+                weights.iter().zip(last).all(|(a, b)| (a - b).abs() < 0.12),
+                "saut à {degrees}°"
+            );
+            last = weights;
+        }
+        assert!((band_weights(120.0)[3] - 1.0).abs() < 1e-5);
+        assert!((band_weights(30.0)[1] - 1.0).abs() < 1e-5);
+        assert!((band_weights(330.0)[7] + band_weights(330.0)[0] - 1.0).abs() < 1e-5);
+    }
+
+    #[test]
+    fn the_mixer_at_zero_changes_nothing() {
+        let source = noisy_gray(32, 0.3, 0.1, true);
+
+        assert_eq!(
+            apply(&source, &RenderParams::default()).data,
+            apply(
+                &source,
+                &RenderParams {
+                    red_hue: 0.0,
+                    blue_saturation: 0.0,
+                    ..RenderParams::default()
+                }
+            )
+            .data
+        );
+    }
+
+    #[test]
+    fn a_hue_shift_turns_only_its_own_colour() {
+        let params = RenderParams {
+            red_hue: 1.0,
+            ..RenderParams::default()
+        };
+
+        let red_before = hsl_of(mixed(RED, &RenderParams::default())).0;
+        let red_after = hsl_of(mixed(RED, &params)).0;
+        // Écart signé le plus court, sinon le passage par 0°/360° fausse la comparaison.
+        let turned = (red_after - red_before + 540.0).rem_euclid(360.0) - 180.0;
+        assert!(
+            turned > 15.0,
+            "{red_before}° → {red_after}° : vers l'orange attendu"
+        );
+
+        let green_before = mixed(GREEN, &RenderParams::default());
+        let green_after = mixed(GREEN, &params);
+        assert!(
+            (0..3).all(|c| (green_before[c] - green_after[c]).abs() < 1e-3),
+            "le vert ne bouge pas"
+        );
+    }
+
+    #[test]
+    fn a_saturation_setting_drains_or_boosts_its_own_colour() {
+        let drained = mixed(
+            BLUE,
+            &RenderParams {
+                blue_saturation: -1.0,
+                ..RenderParams::default()
+            },
+        );
+        let plain = mixed(BLUE, &RenderParams::default());
+        let boosted = mixed(
+            [0.3, 0.32, 0.55],
+            &RenderParams {
+                blue_saturation: 1.0,
+                ..RenderParams::default()
+            },
+        );
+        let boosted_plain = mixed([0.3, 0.32, 0.55], &RenderParams::default());
+
+        assert!(hsl_of(drained).1 < hsl_of(plain).1 * 0.2, "vidé");
+        assert!(
+            hsl_of(boosted).1 > hsl_of(boosted_plain).1 * 1.2,
+            "renforcé"
+        );
+        let red = mixed(
+            RED,
+            &RenderParams {
+                blue_saturation: -1.0,
+                ..RenderParams::default()
+            },
+        );
+        assert!(
+            (red[0] - mixed(RED, &RenderParams::default())[0]).abs() < 1e-3,
+            "le rouge ne bouge pas"
+        );
+    }
+
+    fn luma(px: [f32; 3]) -> f32 {
+        LUMA[0] * px[0] + LUMA[1] * px[1] + LUMA[2] * px[2]
+    }
+
+    #[test]
+    fn a_luminance_setting_darkens_or_lightens_its_own_colour() {
+        let plain = luma(mixed(GREEN, &RenderParams::default()));
+
+        let darker = luma(mixed(
+            GREEN,
+            &RenderParams {
+                green_luminance: -1.0,
+                ..RenderParams::default()
+            },
+        ));
+        let lighter = luma(mixed(
+            GREEN,
+            &RenderParams {
+                green_luminance: 1.0,
+                ..RenderParams::default()
+            },
+        ));
+
+        assert!(darker < plain * 0.8, "{darker} contre {plain}");
+        assert!(lighter > plain * 1.2, "{lighter} contre {plain}");
+        let red = luma(mixed(
+            RED,
+            &RenderParams {
+                green_luminance: -1.0,
+                ..RenderParams::default()
+            },
+        ));
+        assert!((red - luma(mixed(RED, &RenderParams::default()))).abs() < 1e-3);
+    }
+
+    #[test]
+    fn a_weakly_coloured_pixel_moves_far_less_than_a_vivid_one() {
+        let params = RenderParams {
+            red_luminance: 1.0,
+            ..RenderParams::default()
+        };
+        let lift =
+            |px: [f32; 3]| luma(mixed(px, &params)) - luma(mixed(px, &RenderParams::default()));
+
+        let vivid = lift([0.6, 0.04, 0.04]);
+        let faint = lift([0.32, 0.30, 0.30]);
+
+        assert!(vivid > 0.01, "{vivid}");
+        assert!(faint < vivid * 0.2, "{faint} contre {vivid}");
+    }
+
+    #[test]
+    fn greys_are_never_touched_whatever_the_settings() {
+        let loud = RenderParams {
+            red_hue: 1.0,
+            green_saturation: 1.0,
+            blue_luminance: -1.0,
+            orange_hue: -1.0,
+            magenta_saturation: -1.0,
+            red_luminance: 1.0,
+            red_saturation: 1.0,
+            ..RenderParams::default()
+        };
+
+        for level in [0.02, 0.18, 0.5, 0.9] {
+            let source = solid([level; 3]);
+            assert_eq!(
+                apply(&source, &loud).data,
+                apply(&source, &RenderParams::default()).data,
+                "{level}"
+            );
+        }
+    }
+
+    #[test]
+    fn a_colour_in_between_two_bands_is_shared_between_them() {
+        let orange_red = [0.6, 0.12, 0.04];
+        let effect = |params: RenderParams| {
+            let after = mixed(orange_red, &params);
+            let before = mixed(orange_red, &RenderParams::default());
+            (hsl_of(after).1 - hsl_of(before).1).abs()
+        };
+
+        let red_only = effect(RenderParams {
+            red_saturation: -1.0,
+            ..RenderParams::default()
+        });
+        let orange_only = effect(RenderParams {
+            orange_saturation: -1.0,
+            ..RenderParams::default()
+        });
+        let both = effect(RenderParams {
+            red_saturation: -1.0,
+            orange_saturation: -1.0,
+            ..RenderParams::default()
+        });
+
+        assert!(
+            red_only > 0.01 && orange_only > 0.01,
+            "chaque bande agit : {red_only} et {orange_only}"
+        );
+        assert!(
+            both > red_only.max(orange_only),
+            "ensemble, elles agissent davantage"
+        );
+    }
+
+    #[test]
+    fn lightening_a_colour_brighter_than_white_stays_sensible() {
+        let bright = [1.8, 0.2, 0.2];
+        let params = RenderParams {
+            red_luminance: 1.0,
+            ..RenderParams::default()
+        };
+
+        let after = mixed(bright, &params);
+        let before = mixed(bright, &RenderParams::default());
+
+        assert!(
+            after.iter().all(|c| c.is_finite() && *c >= 0.0),
+            "{after:?}"
+        );
+        assert!(luma(after) > luma(before), "{after:?} contre {before:?}");
+        assert!(
+            after[0] > after[1] && after[0] > after[2],
+            "toujours rouge : {after:?}"
+        );
+        assert!(
+            after.iter().all(|c| *c <= 1.0 + 1e-4),
+            "jamais au-delà du blanc : {after:?}"
+        );
+    }
+
+    #[test]
+    fn a_colour_brighter_than_white_is_left_alone_by_an_unrelated_band() {
+        let bright = [1.8, 0.2, 0.2];
+        let params = RenderParams {
+            green_luminance: 1.0,
+            blue_saturation: -1.0,
+            ..RenderParams::default()
+        };
+
+        let after = mixed(bright, &params);
+        let before = mixed(bright, &RenderParams::default());
+
+        assert!(
+            (0..3).all(|c| (after[c] - before[c]).abs() < 1e-3),
+            "{after:?} contre {before:?}"
+        );
+    }
+
+    #[test]
+    fn with_the_colour_drained_the_luminance_settings_act_as_a_black_and_white_filter() {
+        let mono = RenderParams {
+            saturation: -1.0,
+            ..RenderParams::default()
+        };
+        let red_filter = RenderParams {
+            red_luminance: -1.0,
+            ..mono
+        };
+
+        let plain = luma(mixed(RED, &mono));
+        let filtered = luma(mixed(RED, &red_filter));
+
+        assert!(filtered < plain * 0.8, "{filtered} contre {plain}");
+        let sky = luma(mixed(BLUE, &mono));
+        assert!(
+            (luma(mixed(BLUE, &red_filter)) - sky).abs() < 1e-3,
+            "le bleu ne bouge pas"
+        );
+        let (_, saturation, _) = hsl_of(mixed(RED, &red_filter));
+        assert!(saturation < 0.05, "toujours en noir et blanc");
     }
 }
