@@ -10,7 +10,7 @@ export const commands = {
 	closeImage: (id: string) => __TAURI_INVOKE<null>("close_image", { id }),
 	/**  Calculé sur un thread dédié : ne doit jamais retarder le rendu de l'aperçu. */
 	presetThumbnails: (id: string) => __TAURI_INVOKE<PresetThumbnail[]>("preset_thumbnails", { id }),
-	renderPreview: (id: string, params: RenderParams_Deserialize, frame: FrameSelection_Deserialize) => __TAURI_INVOKE<PreviewResult>("render_preview", { id, params, frame }),
+	renderPreview: (id: string, params: RenderParams_Deserialize, frame: FrameSelection_Deserialize, draft: boolean) => __TAURI_INVOKE<PreviewResult>("render_preview", { id, params, frame, draft }),
 	frameThumbnails: (id: string, params: RenderParams_Deserialize, frames: FrameSelection_Deserialize[]) => __TAURI_INVOKE<string[]>("frame_thumbnails", { id, params, frames }),
 	exportImage: (id: string, params: RenderParams_Deserialize, frame: FrameSelection_Deserialize, caption: Caption_Deserialize, destination: string, options: ExportOptions_Deserialize) => __TAURI_INVOKE<null>("export_image", { id, params, frame, caption, destination, options }),
 	listFrames: () => __TAURI_INVOKE<FrameCatalog_Serialize>("list_frames"),

@@ -7,8 +7,8 @@ use rayon::prelude::*;
 use serde::Serialize;
 use tauri::State;
 
-use super::{PREVIEW_JPEG_QUALITY, THUMB_JPEG_QUALITY};
-use crate::state::{AppState, poisoned};
+use super::{DRAFT_JPEG_QUALITY, PREVIEW_JPEG_QUALITY, THUMB_JPEG_QUALITY};
+use crate::state::{AppState, LoadedImage, poisoned};
 
 #[derive(Serialize, specta::Type)]
 #[serde(rename_all = "camelCase")]
@@ -57,44 +57,63 @@ pub async fn render_preview(
     id: String,
     params: RenderParams,
     frame: FrameSelection,
+    draft: bool,
     state: State<'_, AppState>,
 ) -> Result<PreviewResult, PhotoError> {
-    let bordered = {
+    let (bordered, factor) = {
         let mut images = state
             .images
             .lock()
             .map_err(|_| PhotoError::ImageNotLoaded)?;
         let image = images.get_mut(&id).ok_or(PhotoError::ImageNotLoaded)?;
 
-        let needs_render = image
-            .cached
+        let LoadedImage {
+            proxy,
+            draft: draft_proxy,
+            cached,
+            draft_cached,
+            ..
+        } = image;
+        let (source, cache, factor) = if draft {
+            (&*draft_proxy, draft_cached, proxy.scale_over(draft_proxy))
+        } else {
+            (&*proxy, cached, 1.0)
+        };
+
+        let needs_render = cache
             .as_ref()
-            .is_none_or(|(cached, _)| *cached != params);
+            .is_none_or(|(cached_params, _)| *cached_params != params);
 
         if needs_render {
-            let rendered = render::apply(&image.proxy, &params);
-            image.cached = Some((params, rendered));
+            let rendered = render::apply(source, &params);
+            *cache = Some((params, rendered));
         }
 
-        let (_, rendered) = image
-            .cached
-            .as_ref()
-            .expect("rendu mis en cache juste avant");
+        let (_, rendered) = cache.as_ref().expect("rendu mis en cache juste avant");
 
         // La légende n'est pas incrustée ici : le webview la dessine par-dessus
         // l'aperçu, ce qui la rend modifiable sans relancer de rendu.
-        state
+        let bordered = state
             .frames
             .read()
             .map_err(|_| poisoned())?
-            .render(rendered, &frame)?
+            .render(rendered, &frame)?;
+        (bordered, factor)
+    };
+
+    // Un brouillon annonce la taille et les zones du rendu final : l'affichage ne bouge pas.
+    let (width, height) = bordered.size_at(factor);
+    let quality = if draft {
+        DRAFT_JPEG_QUALITY
+    } else {
+        PREVIEW_JPEG_QUALITY
     };
 
     Ok(PreviewResult {
-        image: encode::to_data_url(&bordered.image, PREVIEW_JPEG_QUALITY)?,
-        width: bordered.image.width,
-        height: bordered.image.height,
-        zones: bordered.zones,
+        image: encode::to_data_url(&bordered.image, quality)?,
+        width,
+        height,
+        zones: bordered.zones_at(factor),
         caption_center: [bordered.caption_center.0, bordered.caption_center.1],
     })
 }

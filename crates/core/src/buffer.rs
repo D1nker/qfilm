@@ -41,6 +41,11 @@ impl ImageBuf {
         }
     }
 
+    /// De combien cette image est plus grande que `smaller`, sa version réduite.
+    pub fn scale_over(&self, smaller: &ImageBuf) -> f32 {
+        self.width as f32 / smaller.width as f32
+    }
+
     pub fn downscale_to_fit(&self, max_edge: u32) -> ImageBuf {
         let longest = self.width.max(self.height);
         if longest <= max_edge {

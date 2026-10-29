@@ -7,7 +7,9 @@ use rayon::prelude::*;
 use serde::Serialize;
 use tauri::State;
 
-use super::{PREVIEW_JPEG_QUALITY, PREVIEW_MAX_EDGE, THUMB_JPEG_QUALITY, THUMB_MAX_EDGE};
+use super::{
+    DRAFT_MAX_EDGE, PREVIEW_JPEG_QUALITY, PREVIEW_MAX_EDGE, THUMB_JPEG_QUALITY, THUMB_MAX_EDGE,
+};
 use crate::state::{AppState, LoadedImage};
 
 #[derive(Serialize, specta::Type)]
@@ -55,6 +57,7 @@ pub async fn open_image(path: String, state: State<'_, AppState>) -> Result<Imag
     let full = decoded.image;
     let proxy = full.downscale_to_fit(PREVIEW_MAX_EDGE);
     let thumb = proxy.downscale_to_fit(THUMB_MAX_EDGE);
+    let draft = proxy.downscale_to_fit(DRAFT_MAX_EDGE);
     let preview = encode::to_data_url(&proxy, PREVIEW_JPEG_QUALITY)?;
 
     let id = format!("img-{}", state.next_id.fetch_add(1, Ordering::Relaxed));
@@ -76,8 +79,10 @@ pub async fn open_image(path: String, state: State<'_, AppState>) -> Result<Imag
                 full,
                 proxy,
                 thumb,
+                draft,
                 metadata: decoded.metadata,
                 cached: None,
+                draft_cached: None,
             },
         );
 

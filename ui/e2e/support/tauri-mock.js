@@ -145,11 +145,12 @@
       frames.map((_, i) =>
         svg(260, 180, ["#556", "#a66", "#6a8", "#222", "#333", "#468", "#864"][i % 7], "#ddd"),
       ),
-    render_preview: ({ frame }) => {
+    render_preview: ({ frame, draft }) => {
       const [w, h] = window.__size ?? [1300, 900];
       const printed = frame.id.startsWith("film") && frame.params.stock !== "plain";
       return {
-        image: svg(w, h),
+        // Comme le vrai moteur : un brouillon est plus petit mais annonce la taille du rendu final.
+        image: draft ? svg(Math.round(w / 3), Math.round(h / 3)) : svg(w, h),
         width: w,
         height: h,
         zones: printed

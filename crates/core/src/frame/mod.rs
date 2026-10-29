@@ -72,6 +72,17 @@ pub struct TextZone {
 }
 
 impl TextZone {
+    /// La même zone, comme elle serait à `factor` fois la résolution.
+    pub fn scaled(&self, factor: f32) -> Self {
+        Self {
+            field: self.field.clone(),
+            x: self.x * factor,
+            y: self.y * factor,
+            width: self.width * factor,
+            height: self.height * factor,
+        }
+    }
+
     fn rotated_270(&self, canvas_width: f32) -> Self {
         Self {
             field: self.field.clone(),
@@ -87,6 +98,19 @@ pub struct Rendered {
     pub image: ImageBuf,
     pub zones: Vec<TextZone>,
     pub caption_center: (f32, f32),
+}
+
+impl Rendered {
+    /// Les dimensions qu'aurait ce rendu à `factor` fois la résolution : un brouillon, tracé sur
+    /// une photo réduite, annonce la taille du rendu final pour que l'affichage ne bouge pas.
+    pub fn size_at(&self, factor: f32) -> (u32, u32) {
+        let scaled = |pixels: u32| ((pixels as f32 * factor).round() as u32).max(1);
+        (scaled(self.image.width), scaled(self.image.height))
+    }
+
+    pub fn zones_at(&self, factor: f32) -> Vec<TextZone> {
+        self.zones.iter().map(|zone| zone.scaled(factor)).collect()
+    }
 }
 
 pub struct Frame {

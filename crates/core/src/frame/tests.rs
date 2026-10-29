@@ -764,3 +764,58 @@ fn the_35mm_strip_hides_its_sprocket_holes_until_asked() {
         assert_eq!(defaults.get("sprockets"), Some(&json!(expected)), "{id}");
     }
 }
+
+#[test]
+fn a_draft_reports_the_size_and_text_zones_of_the_full_render() {
+    let registry = FrameRegistry::builtin();
+    let selection = FrameSelection {
+        id: "film35".into(),
+        params: json!({ "text": "PORTRAIT 400" })
+            .as_object()
+            .cloned()
+            .expect("objet JSON"),
+    };
+    let photo = |width: u32, height: u32| {
+        let mut image = ImageBuf::new(width, height);
+        image.data.fill(0.3);
+        image
+    };
+
+    let draft = registry
+        .render(&photo(300, 200), &selection)
+        .expect("brouillon");
+    let full = registry
+        .render(&photo(900, 600), &selection)
+        .expect("rendu final");
+
+    let (width, height) = draft.size_at(3.0);
+    assert!(
+        width.abs_diff(full.image.width) <= 4,
+        "{width} contre {}",
+        full.image.width
+    );
+    assert!(
+        height.abs_diff(full.image.height) <= 4,
+        "{height} contre {}",
+        full.image.height
+    );
+
+    assert_eq!(draft.zones.len(), full.zones.len());
+    for (small, large) in draft.zones_at(3.0).iter().zip(&full.zones) {
+        assert_eq!(small.field, large.field);
+        assert!((small.x - large.x).abs() < 8.0 && (small.y - large.y).abs() < 8.0);
+        assert!((small.width - large.width).abs() < 8.0);
+    }
+}
+
+#[test]
+fn the_size_at_full_resolution_never_collapses_to_zero() {
+    let rendered = Rendered {
+        image: ImageBuf::new(1, 1),
+        zones: Vec::new(),
+        caption_center: (0.5, 0.5),
+    };
+
+    assert_eq!(rendered.size_at(0.1), (1, 1));
+    assert_eq!(rendered.size_at(1.0), (1, 1));
+}

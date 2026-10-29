@@ -40,6 +40,11 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
   (shortcuts dialog), `shared/lib/useNotice` (passing messages).
 - Rendering is driven by one watcher in `useRender`: change state, never call the renderer by hand.
   Rust caches the photo render, so border-only changes are cheap.
+  While a continuous control is dragged (`shared/lib/useInteraction`, set by `UiSlider` on pointer drags only,
+  never on keyboard steps), `useRender` asks Rust for a draft (`render_preview(…, draft: true)`, a 640 px proxy,
+  about 7× faster with every stage on) and renders in full on release. A draft announces the full render's
+  size and text zones (`Rendered::size_at`/`zones_at`) and the viewport keeps that logical size, so nothing
+  moves on screen. A new continuous control must use `UiSlider` or call `beginDrag()` itself.
 - Styles for content Reka teleports to `<body>` (select popup, tooltip) must be unscoped with a
   namespaced class (`.ui-select-content`): scoped CSS does not reach it.
 - Styling goes through design tokens in `ui/src/styles/tokens.css` (light + dark, neutral grays,

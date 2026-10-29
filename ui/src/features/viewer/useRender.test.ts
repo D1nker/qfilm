@@ -155,4 +155,54 @@ describe("useRender", () => {
 
     await vi.waitFor(() => expect(editor.error.value).toBe("cadre « x » introuvable"));
   });
+
+  it("draws a quick draft while a slider is being dragged, then the full render on release", async () => {
+    const { api, editor, look, render } = await setup();
+    const { beginDrag } = await import("@/shared/lib/useInteraction");
+    editor.image.value = image("a");
+    await vi.waitFor(() => expect(render.view.src).toBe("render-default"));
+    api.renderPreview.mockClear();
+    api.renderPreview.mockResolvedValue({ ...result("draft"), width: 300, height: 240 });
+
+    const release = beginDrag();
+    look.setParam("exposure", 0.4);
+    await vi.waitFor(() => expect(api.renderPreview).toHaveBeenCalled());
+    expect(api.renderPreview.mock.calls.at(-1)?.[3]).toBe(true);
+    await vi.waitFor(() => expect(render.view.draft).toBe(true));
+    expect(render.view).toMatchObject({ src: "render-draft", width: 300, height: 240 });
+
+    api.renderPreview.mockResolvedValue(result("final"));
+    release();
+
+    await vi.waitFor(() => expect(render.view.src).toBe("render-final"));
+    expect(api.renderPreview.mock.calls.at(-1)?.[3]).toBe(false);
+    expect(render.view.draft).toBe(false);
+  });
+
+  it("renders in full quality when nothing is being dragged", async () => {
+    const { api, editor, look } = await setup();
+    editor.image.value = image("a");
+    look.setParam("exposure", 0.4);
+
+    await vi.waitFor(() => expect(api.renderPreview).toHaveBeenCalled());
+
+    for (const call of api.renderPreview.mock.calls) expect(call[3]).toBe(false);
+  });
+
+  it("forgets the draft flag the moment another photo is opened", async () => {
+    const { api, editor, look, render } = await setup();
+    const { beginDrag } = await import("@/shared/lib/useInteraction");
+    editor.image.value = image("a");
+    await vi.waitFor(() => expect(render.view.src).toBe("render-default"));
+    const release = beginDrag();
+    look.setParam("exposure", 0.4);
+    await vi.waitFor(() => expect(render.view.draft).toBe(true));
+
+    api.renderPreview.mockReturnValue(deferred<PreviewResult>().promise);
+    editor.image.value = image("b");
+    await nextTick();
+
+    expect(render.view).toMatchObject({ src: "raw-b", draft: false });
+    release();
+  });
 });

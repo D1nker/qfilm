@@ -123,7 +123,12 @@ const {
   endCaptionDrag,
 } = useCaptionLayer({ previewImage, captionCanvas, onCaptionClick: editCaption });
 
-const navigation = useViewportNavigation({ stage, scroller, previewImage });
+const navigation = useViewportNavigation({
+  stage,
+  scroller,
+  previewImage,
+  logicalSize: () => (view.draft ? { width: view.width, height: view.height } : null),
+});
 const {
   zoomPercent,
   atFit,

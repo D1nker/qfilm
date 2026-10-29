@@ -13,7 +13,8 @@
       :step="step"
       :disabled="disabled"
       @update:model-value="onSlide"
-      @value-commit="emit('change')"
+      @pointerdown="startDrag"
+      @value-commit="finish"
       @dblclick="reset"
     >
       <SliderTrack class="track">
@@ -27,6 +28,8 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { SliderRoot, SliderThumb, SliderTrack } from "reka-ui";
+
+import { beginDrag } from "@/shared/lib/useInteraction";
 
 const props = withDefaults(
   defineProps<{
@@ -67,6 +70,24 @@ function onSlide(values: number[] | undefined) {
 
   model.value = value;
   emit("input");
+}
+
+// Seuls les gestes à la souris passent en brouillon : un pas au clavier ne change qu'une valeur.
+let endDrag: (() => void) | null = null;
+
+function startDrag() {
+  if (props.disabled || endDrag) return;
+
+  endDrag = beginDrag();
+  const stop = () => finish();
+  window.addEventListener("pointerup", stop, { once: true });
+  window.addEventListener("pointercancel", stop, { once: true });
+}
+
+function finish() {
+  endDrag?.();
+  endDrag = null;
+  emit("change");
 }
 
 function reset() {

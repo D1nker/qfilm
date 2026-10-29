@@ -15,6 +15,8 @@ interface Options {
   stage: Ref<HTMLElement | null>;
   scroller: Ref<HTMLElement | null>;
   previewImage: Ref<HTMLImageElement | null>;
+  /** La taille que l'image aura une fois le rendu complet, quand ce qu'on voit est un brouillon. */
+  logicalSize?: () => { width: number; height: number } | null;
 }
 
 interface Point {
@@ -36,7 +38,7 @@ function isTyping(target: EventTarget | null) {
   );
 }
 
-export function useViewportNavigation({ stage, scroller, previewImage }: Options) {
+export function useViewportNavigation({ stage, scroller, previewImage, logicalSize }: Options) {
   const { image } = useEditor();
 
   const zoom = ref(1);
@@ -164,8 +166,11 @@ export function useViewportNavigation({ stage, scroller, previewImage }: Options
     const element = previewImage.value;
     if (!element) return;
 
-    natural.width = element.naturalWidth;
-    natural.height = element.naturalHeight;
+    // Un brouillon est plus petit que le rendu final : on garde la taille de ce dernier pour que
+    // l'affichage ne bouge pas quand on passe de l'un à l'autre.
+    const logical = logicalSize?.();
+    natural.width = logical?.width ?? element.naturalWidth;
+    natural.height = logical?.height ?? element.naturalHeight;
   }
 
   let lastInput: "pointer" | "keyboard" = "pointer";

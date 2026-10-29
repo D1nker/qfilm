@@ -14,8 +14,10 @@ pub struct LoadedImage {
     pub full: ImageBuf,
     pub proxy: ImageBuf,
     pub thumb: ImageBuf,
+    pub draft: ImageBuf,
     pub metadata: Metadata,
     pub cached: Option<(RenderParams, ImageBuf)>,
+    pub draft_cached: Option<(RenderParams, ImageBuf)>,
 }
 
 pub struct AppState {
