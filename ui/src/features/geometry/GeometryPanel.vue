@@ -1,18 +1,16 @@
 <template>
-  <UiCollapsible id="frame-geometry" :title="t('geometry.title')" :modified="modified">
-    <template #actions>
-      <UiTooltip v-if="modified" :text="t('adjust.resetGroup')">
-        <UiButton
-          variant="ghost"
-          size="sm"
-          icon
-          :aria-label="`${t('adjust.resetGroup')} : ${t('geometry.title')}`"
-          @click="reset"
-        >
-          <RotateCcw :size="13" />
-        </UiButton>
-      </UiTooltip>
-    </template>
+  <div>
+    <UiPageHead :title="t('geometry.title')">
+      <UiButton
+        variant="ghost"
+        size="sm"
+        :disabled="!modified"
+        :aria-label="`${t('adjust.resetGroup')} : ${t('geometry.title')}`"
+        @click="reset"
+      >
+        {{ t("common.reset") }}
+      </UiButton>
+    </UiPageHead>
 
     <div class="geometry">
       <UiButton
@@ -64,7 +62,7 @@
         @update:model-value="setAngle"
       />
     </div>
-  </UiCollapsible>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -83,8 +81,8 @@ import { MAX_ANGLE, useGeometry } from "@/features/geometry/useGeometry";
 import { useEditor } from "@/features/photo";
 import { t } from "@/shared/i18n";
 import UiButton from "@/shared/ui/UiButton.vue";
-import UiCollapsible from "@/shared/ui/UiCollapsible.vue";
 import UiField from "@/shared/ui/UiField.vue";
+import UiPageHead from "@/shared/ui/UiPageHead.vue";
 import UiSelect from "@/shared/ui/UiSelect.vue";
 import UiSlider from "@/shared/ui/UiSlider.vue";
 import UiTooltip from "@/shared/ui/UiTooltip.vue";
@@ -133,7 +131,7 @@ const tools = () => [
 .geometry {
   display: grid;
   gap: var(--space-3);
-  margin-top: var(--space-4);
+  margin-top: var(--space-2);
 }
 
 .aspect {

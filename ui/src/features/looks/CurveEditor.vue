@@ -150,7 +150,7 @@ const pointLabel = ([x, y]: CurvePoint, index: number) =>
 <style scoped>
 .graph {
   position: relative;
-  width: min(100%, 240px);
+  width: min(100%, 340px);
   aspect-ratio: 1;
   margin: var(--space-4) auto 0;
   border-radius: var(--radius-md);

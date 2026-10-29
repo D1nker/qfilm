@@ -31,9 +31,9 @@ test.describe("frame panel", () => {
   }) => {
     await expect(section(openApp, "Forme")).toBeVisible();
     await openApp.group("Légende");
-    await expect(section(openApp, "Légende")).toBeVisible();
+    await expect(openApp.page.getByRole("heading", { name: "Légende" })).toBeVisible();
     await openApp.group("Mes cadres");
-    await expect(section(openApp, "Mes cadres")).toBeVisible();
+    await expect(openApp.page.getByRole("heading", { name: "Mes cadres" })).toBeVisible();
     await expect(section(openApp, "Pellicule")).toHaveCount(0);
     await expect(section(openApp, "Réglages")).toHaveCount(0);
   });

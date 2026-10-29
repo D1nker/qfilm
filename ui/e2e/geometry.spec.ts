@@ -208,21 +208,25 @@ test.describe("crop and rotate", () => {
     await expect(overlay(openApp)).toHaveCount(0);
   });
 
-  test("the section is flagged when modified, and its reset gives the whole photo back", async ({
+  test("the page is flagged when modified, and its reset gives the whole photo back", async ({
     openApp,
   }) => {
-    const modified = openApp.page.getByRole("button", { name: "Recadrage Modifié" });
-    await expect(modified).toHaveCount(0);
+    const reset = openApp.page.getByRole("button", {
+      name: "Réinitialiser cette section : Recadrage",
+    });
+    const icon = openApp.page.getByRole("button", { name: "Aller à Recadrage" });
+    await expect(reset).toBeDisabled();
+    await expect(icon).not.toHaveAccessibleDescription("Modifié");
 
     await tool(openApp, "Pivoter à gauche").click();
-    await expect(modified).toBeVisible();
+    await expect(reset).toBeEnabled();
+    await expect(icon).toHaveAccessibleDescription("Modifié");
 
-    await openApp.page
-      .getByRole("button", { name: "Réinitialiser cette section : Recadrage" })
-      .click();
+    await reset.click();
 
     await expect.poll(async () => (await geometry(openApp)).quarterTurns).toBe(0);
-    await expect(modified).toHaveCount(0);
+    await expect(reset).toBeDisabled();
+    await expect(icon).not.toHaveAccessibleDescription("Modifié");
   });
 
   test("a crop can be undone", async ({ openApp }) => {

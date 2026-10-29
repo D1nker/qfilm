@@ -44,6 +44,7 @@
         :style="track ? { background: track } : undefined"
       >
         <span class="fill" :style="fillStyle" />
+        <span v-if="bipolar && !track" class="zero" :style="{ left: `${percent(0)}%` }" />
       </SliderTrack>
       <SliderThumb class="thumb" :aria-label="label" @keydown.enter.prevent="startEdit" />
     </SliderRoot>
@@ -86,6 +87,9 @@ const emit = defineEmits<{
 const model = defineModel<number>({ required: true });
 
 const origin = computed(() => (props.min < 0 ? 0 : props.min));
+
+/// Un curseur qui va de part et d'autre de zéro : une marque dit où est le zéro, et le remplissage part de là.
+const bipolar = computed(() => props.min < 0 && props.max > 0);
 
 const percent = (value: number) => ((value - props.min) / (props.max - props.min)) * 100;
 
@@ -232,6 +236,16 @@ button.value:hover:not(:disabled) {
 
 .track.colored .fill {
   display: none;
+}
+
+.zero {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 1px;
+  transform: translateX(-0.5px);
+  background: var(--text-muted);
+  pointer-events: none;
 }
 
 .fill {

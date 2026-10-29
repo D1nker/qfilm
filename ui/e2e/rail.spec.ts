@@ -131,4 +131,69 @@ test.describe("the group rail", () => {
       await expect(openApp.page.getByRole("button", { name: "Classique 400" })).toBeVisible();
     });
   });
+
+  test.describe("the dot on an icon", () => {
+    const marked = (app: App, name: string) =>
+      expect(item(app, name)).toHaveAccessibleDescription(/Modifié|Look appliqué/);
+    const unmarked = (app: App, name: string) =>
+      expect(item(app, name)).not.toHaveAccessibleDescription(/Modifié|Look appliqué/);
+
+    test("tells which Retouche page has moved, from any page", async ({ openApp }) => {
+      await openApp.tab("Retouche").click();
+      for (const name of ["Tons", "Couleurs", "Finition"]) await unmarked(openApp, name);
+
+      await item(openApp, "Finition").click();
+      await openApp.page.getByRole("slider", { name: "Grain", exact: true }).focus();
+      await openApp.press("ArrowRight", 10);
+      await item(openApp, "Tons").click();
+
+      await marked(openApp, "Finition");
+      await unmarked(openApp, "Tons");
+      await unmarked(openApp, "Couleurs");
+
+      await item(openApp, "Finition").click();
+      await openApp.page
+        .getByRole("button", { name: "Réinitialiser ce groupe : Finition" })
+        .click();
+      await unmarked(openApp, "Finition");
+    });
+
+    test("a curve counts for the Tons page", async ({ openApp }) => {
+      await openApp.tab("Retouche").click();
+      const box = await openApp.page.locator(".graph").boundingBox();
+      if (!box) throw new Error("graphique introuvable");
+
+      await openApp.page.mouse.click(box.x + box.width / 2, box.y + box.height * 0.3);
+
+      await marked(openApp, "Tons");
+    });
+
+    test("tells what the Frame tab holds: a crop, a frame, a caption", async ({ openApp }) => {
+      await openApp.tab("Cadre").click();
+      for (const name of ["Recadrage", "Cadre", "Légende"]) await unmarked(openApp, name);
+
+      await openApp.page.locator(".grid .thumb", { hasText: "35 mm" }).click();
+      await marked(openApp, "Cadre");
+
+      await item(openApp, "Légende").click();
+      await openApp.page.getByPlaceholder("Biarritz, août 2026").fill("Salut");
+      await marked(openApp, "Légende");
+
+      await item(openApp, "Recadrage").click();
+      await openApp.page.getByRole("button", { name: "Pivoter à droite" }).click();
+      await marked(openApp, "Recadrage");
+    });
+
+    test("shows, in the Preset tab, which category the applied look is in", async ({ openApp }) => {
+      await openApp.tab("Preset").click();
+      for (const name of ["Négatif couleur", "Noir & blanc"]) await unmarked(openApp, name);
+
+      await item(openApp, "Noir & blanc").click();
+      await openApp.page.getByRole("button", { name: "Classique 400" }).click();
+      await item(openApp, "Négatif couleur").click();
+
+      await marked(openApp, "Noir & blanc");
+      await unmarked(openApp, "Négatif couleur");
+    });
+  });
 });

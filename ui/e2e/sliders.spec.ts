@@ -204,3 +204,31 @@ test.describe("slider layout", () => {
     });
   });
 });
+
+test.describe("the zero tick", () => {
+  const tick = (app: App, label: string) =>
+    app.page.locator(".slider", { hasText: label }).first().locator(".zero");
+
+  test("marks the middle of a slider that goes both ways", async ({ openApp }) => {
+    await openApp.tab("Retouche").click();
+
+    await expect(tick(openApp, "Exposition")).toHaveCount(1);
+    const track = await openApp.page
+      .locator(".slider", { hasText: "Exposition" })
+      .locator(".track")
+      .boundingBox();
+    const mark = await tick(openApp, "Exposition").boundingBox();
+    expect((mark?.x ?? 0) - ((track?.x ?? 0) + (track?.width ?? 0) / 2)).toBeLessThan(2);
+  });
+
+  test("is absent from a slider that starts at zero, and from a coloured one", async ({
+    openApp,
+  }) => {
+    await openApp.tab("Retouche").click();
+    await openApp.group("Finition");
+    await expect(tick(openApp, "Netteté")).toHaveCount(0);
+
+    await openApp.group("Couleurs");
+    await expect(tick(openApp, "Température")).toHaveCount(0);
+  });
+});

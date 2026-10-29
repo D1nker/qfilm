@@ -1,8 +1,7 @@
 <template>
   <UiRailPanel v-model="group" :label="t('adjust.rail')" :items="railItems()" @pick="unfold">
     <template v-for="part in PARTS" :key="part.id" #[part.id]>
-      <div class="part-head">
-        <h3 class="part-title">{{ t(`adjust.parts.${part.id}`) }}</h3>
+      <UiPageHead :title="t(`adjust.parts.${part.id}`)">
         <UiButton
           variant="ghost"
           size="sm"
@@ -12,7 +11,7 @@
         >
           {{ t("common.reset") }}
         </UiButton>
-      </div>
+      </UiPageHead>
 
       <template v-for="id in part.sections" :key="id">
         <UiCollapsible
@@ -141,6 +140,7 @@ import { useEditor } from "@/features/photo";
 import { useLook } from "@/features/looks/useLook";
 import UiButton from "@/shared/ui/UiButton.vue";
 import UiCollapsible from "@/shared/ui/UiCollapsible.vue";
+import UiPageHead from "@/shared/ui/UiPageHead.vue";
 import UiRailPanel from "@/shared/ui/UiRailPanel.vue";
 import UiSlider from "@/shared/ui/UiSlider.vue";
 import UiTooltip from "@/shared/ui/UiTooltip.vue";
@@ -163,7 +163,12 @@ const PARTS: { id: "tone" | "color" | "finish"; sections: Section[] }[] = [
 const RAIL_ICONS = { tone: SunMedium, color: Palette, finish: Sparkles };
 
 const railItems = () =>
-  PARTS.map(({ id }) => ({ id, label: t(`adjust.parts.${id}`), icon: RAIL_ICONS[id] }));
+  PARTS.map((part) => ({
+    id: part.id,
+    label: t(`adjust.parts.${part.id}`),
+    icon: RAIL_ICONS[part.id],
+    mark: partChanged(part) ? t("common.modified") : undefined,
+  }));
 
 const isControlGroup = (section: Section): section is ControlGroup =>
   !["curves", "hsl", "grading"].includes(section);
@@ -216,22 +221,3 @@ function resetCurves() {
   for (const id of CURVE_IDS) setCurve(id, []);
 }
 </script>
-
-<style scoped>
-.part-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 28px;
-  margin-bottom: var(--space-2);
-}
-
-.part-title {
-  margin: 0;
-  color: var(--text);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-</style>

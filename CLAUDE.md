@@ -183,6 +183,12 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
   must stay **last** in the stylesheet, a container query adds no specificity), below that two lines. Dialogs
   have no such container, so their sliders stay stacked. "Neutral" is not offered in the Preset list
   (`groupedPresets` filters it, it stays the starting state): Reset is the way back.
+- A page with a single section (a Preset category, Recadrage, Légende, Mes cadres) has no collapsible: it has
+  a `UiPageHead` (uppercase title, its Reset on the right) like the Retouche pages. A rail icon can carry a
+  dot (`items[].mark`: "Modifié", or "Look appliqué" in the Preset tab) so a change on a page you are not
+  looking at stays visible; its text reaches screen readers through `aria-describedby` (ids built from the
+  position, never the key: keys may contain spaces). A slider that goes both ways has a tick at zero and
+  fills from there. The tone-curve graph scales up to 340 px.
 - Panel sections are `UiCollapsible`: with an `id` their open/closed state is remembered
   (`shared/lib/panelState`), a `modified` dot flags a section whose setting has moved, and the Retouche panel
   opens only Light and Color by default, with a reset button on each section that has changes. The e2e fixture

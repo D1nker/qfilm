@@ -158,3 +158,16 @@ test.describe("tone curve", () => {
     await expect(points(openApp)).toHaveCount(2);
   });
 });
+
+test.describe("tone curve graph in a wide panel", () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+
+  test("uses the width it is given, and stays square", async ({ openApp }) => {
+    await openApp.tab("Retouche").click();
+
+    const box = await openApp.page.locator(".graph").boundingBox();
+
+    expect(box?.width ?? 0).toBeGreaterThan(300);
+    expect(Math.abs((box?.width ?? 0) - (box?.height ?? 0))).toBeLessThan(2);
+  });
+});

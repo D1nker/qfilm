@@ -1,29 +1,27 @@
 <template>
-  <UiRailPanel v-model="page" :label="t('looks.rail')" :items="railItems()" @pick="unfold">
+  <UiRailPanel v-model="page" :label="t('looks.rail')" :items="railItems()">
     <template v-for="group in groupedPresets" :key="group.key" #[group.key]>
-      <UiCollapsible :id="`looks-${group.key}`" :title="localized(group.title)">
-        <template #actions>
-          <UiButton variant="ghost" size="sm" :disabled="isPristine" @click="resetLook">
-            {{ t("common.reset") }}
-          </UiButton>
-        </template>
+      <UiPageHead :title="localized(group.title)">
+        <UiButton variant="ghost" size="sm" :disabled="isPristine" @click="resetLook">
+          {{ t("common.reset") }}
+        </UiButton>
+      </UiPageHead>
 
-        <div class="grid">
-          <UiTooltip
-            v-for="preset in group.items"
-            :key="preset.id"
-            :text="localized(preset.description)"
-            side="left"
-          >
-            <UiThumbnailButton
-              :name="localized(preset.name)"
-              :src="thumbnails[preset.id]"
-              :active="preset.id === activePreset"
-              @click="select(preset)"
-            />
-          </UiTooltip>
-        </div>
-      </UiCollapsible>
+      <div class="grid">
+        <UiTooltip
+          v-for="preset in group.items"
+          :key="preset.id"
+          :text="localized(preset.description)"
+          side="left"
+        >
+          <UiThumbnailButton
+            :name="localized(preset.name)"
+            :src="thumbnails[preset.id]"
+            :active="preset.id === activePreset"
+            @click="select(preset)"
+          />
+        </UiTooltip>
+      </div>
     </template>
 
     <template #footer>
@@ -49,9 +47,8 @@ import type { Preset } from "@/shared/api/api";
 import { useEditor } from "@/features/photo";
 import { categoryIcon } from "@/features/looks/categoryIcons";
 import { useLook } from "@/features/looks/useLook";
-import { openPanels } from "@/shared/lib/panelState";
 import UiButton from "@/shared/ui/UiButton.vue";
-import UiCollapsible from "@/shared/ui/UiCollapsible.vue";
+import UiPageHead from "@/shared/ui/UiPageHead.vue";
 import UiRailPanel from "@/shared/ui/UiRailPanel.vue";
 import UiSlider from "@/shared/ui/UiSlider.vue";
 import UiTooltip from "@/shared/ui/UiTooltip.vue";
@@ -85,14 +82,14 @@ const page = computed({
 });
 
 const railItems = () =>
-  groupedPresets.value.map(({ key, title }) => ({
+  groupedPresets.value.map(({ key, title, items }) => ({
     id: key,
     label: localized(title),
     icon: categoryIcon(key),
+    // Le look appliqué vit dans cette catégorie : un point le dit, même depuis une autre page.
+    mark: items.some((preset) => preset.id === activePreset.value) ? t("looks.applied") : undefined,
   }));
 
-/// Choisir une catégorie déplie sa section : elles sont peu nombreuses, on veut voir les vignettes.
-const unfold = (key: string) => openPanels([`looks-${key}`]);
 function select(preset: Preset) {
   applyPreset(preset);
   emit("select", preset);
@@ -104,6 +101,6 @@ function select(preset: Preset) {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-3);
-  padding: var(--space-2) var(--space-1) var(--space-1);
+  padding: var(--space-1);
 }
 </style>

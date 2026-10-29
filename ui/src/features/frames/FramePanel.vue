@@ -40,44 +40,43 @@
     </template>
 
     <template #caption>
-      <UiCollapsible id="frame-caption" :title="t('frames.caption')">
-        <UiField :label="t('caption.text')" stacked>
-          <UiInput v-model="caption.text" :placeholder="t('caption.placeholder')" />
-        </UiField>
+      <UiPageHead :title="t('frames.caption')" />
 
-        <UiField :label="t('caption.font')">
-          <UiSelect v-model="caption.font" :options="fontOptions()" />
-        </UiField>
+      <UiField :label="t('caption.text')" stacked>
+        <UiInput v-model="caption.text" :placeholder="t('caption.placeholder')" />
+      </UiField>
 
-        <UiSlider
-          v-model="caption.size"
-          :label="t('caption.size')"
-          :display="`${caption.size.toFixed(1)} %`"
-          :min="1"
-          :max="20"
-          :step="0.5"
-        />
+      <UiField :label="t('caption.font')">
+        <UiSelect v-model="caption.font" :options="fontOptions()" />
+      </UiField>
 
-        <UiField :label="t('caption.color')">
-          <UiColorInput v-model="caption.color" />
-        </UiField>
+      <UiSlider
+        v-model="caption.size"
+        :label="t('caption.size')"
+        :display="`${caption.size.toFixed(1)} %`"
+        :min="1"
+        :max="20"
+        :step="0.5"
+      />
 
-        <UiField :label="t('caption.position')" as="div">
-          <UiButton size="sm" :disabled="caption.x === null" @click="recenterCaption">
-            {{ t("caption.recenter") }}
-          </UiButton>
-        </UiField>
+      <UiField :label="t('caption.color')">
+        <UiColorInput v-model="caption.color" />
+      </UiField>
 
-        <p class="note">
-          {{ t("caption.hint") }}
-        </p>
-      </UiCollapsible>
+      <UiField :label="t('caption.position')" as="div">
+        <UiButton size="sm" :disabled="caption.x === null" @click="recenterCaption">
+          {{ t("caption.recenter") }}
+        </UiButton>
+      </UiField>
+
+      <p class="note">
+        {{ t("caption.hint") }}
+      </p>
     </template>
 
     <template #library>
-      <UiCollapsible id="frame-mine" :title="t('frames.myFrames')">
-        <FrameLibrary />
-      </UiCollapsible>
+      <UiPageHead :title="t('frames.myFrames')" />
+      <FrameLibrary />
     </template>
   </UiRailPanel>
 </template>
@@ -89,12 +88,13 @@ import { computed } from "vue";
 
 import type { ParamDef, ParamValue } from "@/shared/api/api";
 import { fontOptions } from "@/features/frames/fonts";
-import { GeometryPanel } from "@/features/geometry";
+import { GeometryPanel, useGeometry } from "@/features/geometry";
 import { sectionsOf } from "@/features/frames/frameParams";
 import { useFrame } from "@/features/frames/useFrame";
 import { useFrameThumbnails } from "@/features/frames/useFrameThumbnails";
 import UiButton from "@/shared/ui/UiButton.vue";
 import UiCollapsible from "@/shared/ui/UiCollapsible.vue";
+import UiPageHead from "@/shared/ui/UiPageHead.vue";
 import UiRailPanel from "@/shared/ui/UiRailPanel.vue";
 import { openPanels } from "@/shared/lib/panelState";
 import UiColorInput from "@/shared/ui/UiColorInput.vue";
@@ -118,27 +118,35 @@ const {
   recenterCaption,
 } = useFrame();
 const { thumbnails } = useFrameThumbnails();
+const { modified: cropped } = useGeometry();
 
 /// La page affichée, tenue par le panneau d'à côté (voir `AdjustPanel`).
 const group = defineModel<string>("group", { required: true });
 
-const PANELS: Record<string, string> = {
-  crop: "frame-geometry",
-  frame: "frame-shape",
-  caption: "frame-caption",
-  library: "frame-mine",
-};
-
-/// Choisir une page déplie sa section : elles sont peu nombreuses, on veut voir leur contenu.
+/// Choisir la page du cadre déplie ses sections : on veut voir leur contenu. Les autres pages n'en ont pas.
 function unfold(id: string) {
-  const panel = PANELS[id];
-  if (panel) openPanels([panel]);
+  if (id === "frame") openPanels(["frame-shape"]);
 }
 
 const railItems = () => [
-  { id: "crop", label: t("geometry.title"), icon: Crop },
-  { id: "frame", label: t("tabs.frame"), icon: Film },
-  { id: "caption", label: t("frames.caption"), icon: Type },
+  {
+    id: "crop",
+    label: t("geometry.title"),
+    icon: Crop,
+    mark: cropped.value ? t("common.modified") : undefined,
+  },
+  {
+    id: "frame",
+    label: t("tabs.frame"),
+    icon: Film,
+    mark: frame.id !== "none" ? t("common.modified") : undefined,
+  },
+  {
+    id: "caption",
+    label: t("frames.caption"),
+    icon: Type,
+    mark: caption.text.trim() ? t("common.modified") : undefined,
+  },
   { id: "library", label: t("frames.myFrames"), icon: FolderOpen },
 ];
 

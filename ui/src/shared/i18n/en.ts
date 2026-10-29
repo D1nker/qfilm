@@ -41,6 +41,7 @@ export const en: Messages = {
   looks: {
     intensity: "Intensity",
     rail: "Look categories",
+    applied: "Look applied",
   },
   adjust: {
     groups: {

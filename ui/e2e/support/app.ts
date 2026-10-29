@@ -206,6 +206,8 @@ export class App {
     const page = SECTION_PAGES[name];
     if (page) await this.group(page);
     const header = this.page.getByRole("button", { name: new RegExp(`^${name}( Modifié)?$`) });
+    // Une page à section unique (Recadrage, Légende…) n'a plus d'en-tête à déplier.
+    if ((await header.count()) === 0) return;
     if ((await header.getAttribute("aria-expanded")) !== "true") await header.click();
   }
 

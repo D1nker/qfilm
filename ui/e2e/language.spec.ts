@@ -59,7 +59,7 @@ test.describe("looks and frames", () => {
   test("show their French names on a French system", async ({ openApp }) => {
     await expect(openApp.page.getByRole("button", { name: "Doré 200" })).toBeVisible();
     await expect(
-      openApp.page.getByRole("button", { name: "Négatif couleur", exact: true }),
+      openApp.page.getByRole("heading", { name: "Négatif couleur", exact: true }),
     ).toBeVisible();
   });
 
@@ -69,7 +69,7 @@ test.describe("looks and frames", () => {
     test("show their English names, categories and descriptions", async ({ openApp }) => {
       await expect(openApp.page.getByRole("button", { name: "Golden 200" })).toBeVisible();
       await expect(
-        openApp.page.getByRole("button", { name: "Color negative", exact: true }),
+        openApp.page.getByRole("heading", { name: "Color negative", exact: true }),
       ).toBeVisible();
 
       await openApp.page.getByRole("button", { name: "Golden 200" }).hover();

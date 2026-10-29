@@ -1,16 +1,19 @@
 <template>
   <div class="panel">
     <nav class="rail" :aria-label="label">
-      <UiTooltip v-for="item in items" :key="item.id" :text="item.label" side="right">
+      <UiTooltip v-for="(item, index) in items" :key="item.id" :text="item.label" side="right">
         <button
           type="button"
           class="item"
           :class="{ active: item.id === model }"
           :aria-label="t('rail.goTo', { group: item.label })"
           :aria-current="item.id === model ? 'true' : undefined"
+          :aria-describedby="item.mark ? `${uid}-${index}` : undefined"
           @click="pick(item.id)"
         >
           <component :is="item.icon" :size="16" />
+          <span v-if="item.mark" class="dot" aria-hidden="true" />
+          <span v-if="item.mark" :id="`${uid}-${index}`" class="sr-only">{{ item.mark }}</span>
         </button>
       </UiTooltip>
     </nav>
@@ -25,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, ref, watch, type Component } from "vue";
+import { nextTick, ref, useId, watch, type Component } from "vue";
 
 import { t } from "@/shared/i18n";
 import { scrollParent } from "@/shared/lib/scrollParent";
@@ -35,7 +38,8 @@ import UiTooltip from "@/shared/ui/UiTooltip.vue";
 /// contenu de chaque page vient du créneau qui porte son identifiant ; `footer` suit la page affichée, quelle qu'elle soit.
 defineProps<{
   label: string;
-  items: { id: string; label: string; icon: Component }[];
+  /** `mark` : ce que dit le point sur l'icône (« Modifié »), ou rien pour pas de point. */
+  items: { id: string; label: string; icon: Component; mark?: string }[];
 }>();
 
 /// Un clic, même sur la page déjà affichée : de quoi la déplier.
@@ -51,6 +55,7 @@ function pick(id: string) {
 }
 
 const body = ref<HTMLElement | null>(null);
+const uid = useId();
 
 // Une autre page commence en haut, pas là où l'on avait défilé dans la précédente.
 watch(model, async () => {
@@ -77,6 +82,7 @@ watch(model, async () => {
 }
 
 .item {
+  position: relative;
   display: grid;
   place-items: center;
   width: 28px;
@@ -105,6 +111,26 @@ watch(model, async () => {
 .item:focus-visible {
   outline: none;
   box-shadow: var(--focus-ring);
+}
+
+.dot {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  box-shadow: 0 0 0 2px var(--surface);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .body {

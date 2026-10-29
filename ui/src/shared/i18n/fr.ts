@@ -39,6 +39,7 @@ export const fr = {
   looks: {
     intensity: "Intensité",
     rail: "Catégories de looks",
+    applied: "Look appliqué",
   },
   adjust: {
     groups: {
