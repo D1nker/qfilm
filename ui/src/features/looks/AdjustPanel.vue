@@ -45,7 +45,7 @@
       </UiCollapsible>
 
       <UiCollapsible
-        v-if="group === 'light'"
+        v-if="group === 'color'"
         id="adjust-curves"
         :title="t('adjust.groups.curves')"
         :default-open="false"

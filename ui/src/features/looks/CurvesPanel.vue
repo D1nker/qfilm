@@ -63,7 +63,7 @@ const channelOptions = computed(() =>
 }
 
 .hint {
-  margin: var(--space-3) 0 0;
+  margin: var(--space-3) 0 var(--space-2);
   color: var(--text-faint);
   font-size: var(--text-xs);
   text-align: center;
