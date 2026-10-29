@@ -132,7 +132,7 @@ const puckLabel = (puck: WheelPuck) =>
   position: relative;
   width: 168px;
   height: 168px;
-  margin: var(--space-2) auto var(--space-3);
+  margin: var(--space-4) auto var(--space-3);
   border-radius: var(--radius-full);
   background:
     radial-gradient(circle, hsl(0 0% 55%) 0%, hsl(0 0% 55% / 0) 72%),
