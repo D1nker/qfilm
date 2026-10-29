@@ -184,6 +184,10 @@ export const en: Messages = {
   dialog: {
     close: "Close",
   },
+  slider: {
+    edit: "Type a value",
+    value: "Value of {label}",
+  },
   pickers: {
     images: "Images",
     frameArchive: "Frame (.zip)",

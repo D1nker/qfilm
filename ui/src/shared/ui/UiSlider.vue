@@ -2,7 +2,28 @@
   <div class="slider" :class="{ disabled }">
     <div class="row">
       <span>{{ label }}</span>
-      <span class="value">{{ display }}</span>
+      <input
+        v-if="editing"
+        ref="field"
+        v-model="typed"
+        class="value editor"
+        inputmode="decimal"
+        :aria-label="t('slider.value', { label })"
+        @keydown.enter.prevent="commitEdit"
+        @keydown.esc.prevent="cancelEdit"
+        @blur="commitEdit"
+      />
+      <button
+        v-else
+        type="button"
+        class="value"
+        tabindex="-1"
+        :disabled="disabled"
+        :title="t('slider.edit')"
+        @click="startEdit"
+      >
+        {{ display }}
+      </button>
     </div>
 
     <SliderRoot
@@ -24,15 +45,17 @@
       >
         <span class="fill" :style="fillStyle" />
       </SliderTrack>
-      <SliderThumb class="thumb" :aria-label="label" />
+      <SliderThumb class="thumb" :aria-label="label" @keydown.enter.prevent="startEdit" />
     </SliderRoot>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, nextTick, ref } from "vue";
 import { SliderRoot, SliderThumb, SliderTrack } from "reka-ui";
 
+import { t } from "@/shared/i18n";
+import { fromEditText, toEditText } from "@/shared/lib/sliderValue";
 import { beginDrag } from "@/shared/lib/useInteraction";
 
 const props = withDefaults(
@@ -46,9 +69,11 @@ const props = withDefaults(
     track?: string;
     /** Valeur retrouvée par un double-clic ; à défaut 0, ou le minimum si 0 est hors plage. */
     resetTo?: number;
+    /** Pour passer de l'unité stockée à celle qu'on affiche et qu'on saisit (0,5 → 50 : 100). */
+    editScale?: number;
     disabled?: boolean;
   }>(),
-  { track: undefined, resetTo: undefined, disabled: false },
+  { track: undefined, resetTo: undefined, editScale: 1, disabled: false },
 );
 
 const emit = defineEmits<{
@@ -96,6 +121,36 @@ function finish() {
   emit("change");
 }
 
+const editing = ref(false);
+const typed = ref("");
+const field = ref<HTMLInputElement | null>(null);
+
+async function startEdit() {
+  if (editing.value) return;
+
+  typed.value = toEditText(model.value, props.step, props.editScale);
+  editing.value = true;
+  await nextTick();
+  field.value?.focus();
+  field.value?.select();
+}
+
+function commitEdit() {
+  if (!editing.value) return;
+
+  editing.value = false;
+  const value = fromEditText(typed.value, props.min, props.max, props.editScale);
+  if (value === null || value === model.value) return;
+
+  model.value = value;
+  emit("input");
+  emit("change");
+}
+
+function cancelEdit() {
+  editing.value = false;
+}
+
 function reset() {
   if (props.disabled) return;
 
@@ -122,8 +177,37 @@ function reset() {
 }
 
 .value {
+  padding: 0 2px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
   color: var(--text-muted);
+  font: inherit;
   font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+button.value {
+  cursor: text;
+}
+
+button.value:hover:not(:disabled) {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.editor {
+  width: 72px;
+  margin: -2px 0;
+  padding: 1px 4px;
+  border: 1px solid var(--accent);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.editor:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .root {

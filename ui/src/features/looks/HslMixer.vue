@@ -12,6 +12,7 @@
       :max="1"
       :step="0.01"
       :reset-to="0"
+      :edit-scale="channel === 'hue' ? HSL_HUE_REACH : 1"
       :track="mixerTrack(channel)"
       :disabled="!image"
       @update:model-value="setParam(hslKey(band, channel), $event)"

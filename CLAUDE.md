@@ -112,6 +112,9 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
   `controls.ts` (or `hsl.ts` for the mixer) lists them and a test fails when a field has none or two. Adding a
   setting means: the Rust field with its default, `neutral.ts`, `ui/e2e/support/tauri-mock.js`, `test/fixtures.ts`,
   the slider, both translations, `npm run rust:bindings`.
+- The value shown on a `UiSlider` is clickable: it opens a field to type the number (Enter on the focused thumb
+  too), Enter or leaving applies it, Escape cancels. When the displayed unit is not the stored one (an
+  intensity stored 0–1 shown in %, a mixer hue stored ±1 shown in degrees) pass `edit-scale`.
 - A setting whose value is a colour gets a gradient track (`features/looks/tracks.ts`, passed to `UiSlider` as
   `track`): temperature, tint, hues; a saturation track follows the hue it belongs to. Tracks use illustration
   hues, not interface colours, and replace the accent fill.

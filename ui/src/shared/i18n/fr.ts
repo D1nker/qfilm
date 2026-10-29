@@ -182,6 +182,10 @@ export const fr = {
   dialog: {
     close: "Fermer",
   },
+  slider: {
+    edit: "Saisir une valeur",
+    value: "Valeur de {label}",
+  },
   pickers: {
     images: "Images",
     frameArchive: "Cadre (.zip)",
