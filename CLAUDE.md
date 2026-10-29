@@ -154,6 +154,13 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
 - The Retouche panel lists its sections under three plain headings (`PARTS` in `AdjustPanel`): Tons (Light, Tone
   curve), Couleurs (Color, Color mixer, Color grading), Finition (Detail, Effects). A new section goes under the
   heading that matches its intent; the headings are not collapsible.
+- Long panels (Retouche, Cadre) carry a group rail (`shared/ui/UiRailPanel`): a thin column of icons on the
+  panel's left edge, sticky, one per group; a click scrolls to the group (`data-rail="<id>"` on its root) and a
+  scroll-spy (`shared/lib/scrollSpy`) shows which group is current. A clicked group stays current until the
+  user scrolls by hand (a short last group cannot reach the top, it would lose to the final one), and a
+  panel that fits without scrolling is never "at the end". The rail costs 36 px, so the panel is 356 px wide
+  (`App.vue`) to keep the controls as wide as before. The Preset tab has none (few categories). Rail
+  labels and icons come from functions of `t` like every option table.
 - Panel sections are `UiCollapsible`: with an `id` their open/closed state is remembered
   (`shared/lib/panelState`), a `modified` dot flags a section whose setting has moved, and the Retouche panel
   opens only Light and Color by default, with a reset button on each section that has changes. The e2e fixture

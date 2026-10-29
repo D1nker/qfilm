@@ -1,8 +1,8 @@
 <template>
-  <div>
-    <GeometryPanel />
+  <UiRailPanel :label="t('frames.rail')" :items="railItems()">
+    <GeometryPanel data-rail="crop" />
 
-    <UiCollapsible id="frame-shape" :title="t('frames.shape')">
+    <UiCollapsible id="frame-shape" data-rail="frame" :title="t('frames.shape')">
       <template #actions>
         <UiButton variant="ghost" size="sm" :disabled="isPristine" @click="resetFrame">
           {{ t("common.reset") }}
@@ -35,7 +35,7 @@
       />
     </UiCollapsible>
 
-    <UiCollapsible id="frame-caption" :title="t('frames.caption')">
+    <UiCollapsible id="frame-caption" data-rail="caption" :title="t('frames.caption')">
       <UiField :label="t('caption.text')" stacked>
         <UiInput v-model="caption.text" :placeholder="t('caption.placeholder')" />
       </UiField>
@@ -68,13 +68,19 @@
       </p>
     </UiCollapsible>
 
-    <UiCollapsible id="frame-mine" :title="t('frames.myFrames')" :default-open="false">
+    <UiCollapsible
+      id="frame-mine"
+      data-rail="library"
+      :title="t('frames.myFrames')"
+      :default-open="false"
+    >
       <FrameLibrary />
     </UiCollapsible>
-  </div>
+  </UiRailPanel>
 </template>
 
 <script setup lang="ts">
+import { Crop, Film, FolderOpen, Type } from "lucide-vue-next";
 import { localized, t } from "@/shared/i18n";
 import { computed } from "vue";
 
@@ -86,6 +92,7 @@ import { useFrame } from "@/features/frames/useFrame";
 import { useFrameThumbnails } from "@/features/frames/useFrameThumbnails";
 import UiButton from "@/shared/ui/UiButton.vue";
 import UiCollapsible from "@/shared/ui/UiCollapsible.vue";
+import UiRailPanel from "@/shared/ui/UiRailPanel.vue";
 import UiColorInput from "@/shared/ui/UiColorInput.vue";
 import UiField from "@/shared/ui/UiField.vue";
 import UiInput from "@/shared/ui/UiInput.vue";
@@ -107,6 +114,13 @@ const {
   recenterCaption,
 } = useFrame();
 const { thumbnails } = useFrameThumbnails();
+
+const railItems = () => [
+  { id: "crop", label: t("geometry.title"), icon: Crop },
+  { id: "frame", label: t("tabs.frame"), icon: Film },
+  { id: "caption", label: t("frames.caption"), icon: Type },
+  { id: "library", label: t("frames.myFrames"), icon: FolderOpen },
+];
 
 const sections = computed(() => (current.value ? sectionsOf(current.value, frame.params) : []));
 

@@ -46,7 +46,7 @@ onMounted(() => void Promise.all([init(), initFrames()]));
 <style scoped>
 .layout {
   display: grid;
-  grid-template-columns: 1fr calc(320px + var(--space-3));
+  grid-template-columns: 1fr calc(356px + var(--space-3));
   grid-template-rows: 52px minmax(0, 1fr);
   grid-template-areas: "header header" "main inspector";
   height: 100%;

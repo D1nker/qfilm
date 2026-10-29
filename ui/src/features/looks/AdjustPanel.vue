@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <section v-for="(part, index) in PARTS" :key="part.id" class="part">
+  <UiRailPanel :label="t('adjust.rail')" :items="railItems()">
+    <section v-for="(part, index) in PARTS" :key="part.id" class="part" :data-rail="part.id">
       <div class="part-head">
         <h3 class="part-title">{{ t(`adjust.parts.${part.id}`) }}</h3>
         <UiButton v-if="index === 0" variant="ghost" size="sm" @click="resetLook">
@@ -116,12 +116,12 @@
         </UiCollapsible>
       </template>
     </section>
-  </div>
+  </UiRailPanel>
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { RotateCcw } from "lucide-vue-next";
+import { Palette, RotateCcw, Sparkles, SunMedium } from "lucide-vue-next";
 
 import { t } from "@/shared/i18n";
 
@@ -138,6 +138,7 @@ import { useEditor } from "@/features/photo";
 import { useLook } from "@/features/looks/useLook";
 import UiButton from "@/shared/ui/UiButton.vue";
 import UiCollapsible from "@/shared/ui/UiCollapsible.vue";
+import UiRailPanel from "@/shared/ui/UiRailPanel.vue";
 import UiSlider from "@/shared/ui/UiSlider.vue";
 import UiTooltip from "@/shared/ui/UiTooltip.vue";
 
@@ -152,6 +153,11 @@ const PARTS: { id: "tone" | "color" | "finish"; sections: Section[] }[] = [
   { id: "color", sections: ["color", "hsl", "grading"] },
   { id: "finish", sections: ["detail", "effects"] },
 ];
+
+const RAIL_ICONS = { tone: SunMedium, color: Palette, finish: Sparkles };
+
+const railItems = () =>
+  PARTS.map(({ id }) => ({ id, label: t(`adjust.parts.${id}`), icon: RAIL_ICONS[id] }));
 
 const isControlGroup = (section: Section): section is ControlGroup =>
   !["curves", "hsl", "grading"].includes(section);

@@ -23,6 +23,9 @@ export const fr = {
     adjust: "Retouche",
     frame: "Cadre",
   },
+  rail: {
+    goTo: "Aller à {group}",
+  },
   panel: {
     hide: "Masquer le panneau (F)",
     show: "Afficher le panneau (F)",
@@ -50,6 +53,7 @@ export const fr = {
       color: "Couleurs",
       finish: "Finition",
     },
+    rail: "Groupes de réglages",
     resetGroup: "Réinitialiser cette section",
     curves: {
       graph: "Courbe des tons",
@@ -149,6 +153,7 @@ export const fr = {
     },
   },
   frames: {
+    rail: "Parties du cadre",
     shape: "Forme",
     settings: "Réglages",
     caption: "Légende",

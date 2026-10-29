@@ -25,6 +25,9 @@ export const en: Messages = {
     adjust: "Edit",
     frame: "Frame",
   },
+  rail: {
+    goTo: "Go to {group}",
+  },
   panel: {
     hide: "Hide the panel (F)",
     show: "Show the panel (F)",
@@ -52,6 +55,7 @@ export const en: Messages = {
       color: "Colors",
       finish: "Finish",
     },
+    rail: "Setting groups",
     resetGroup: "Reset this section",
     curves: {
       graph: "Tone curve",
@@ -151,6 +155,7 @@ export const en: Messages = {
     },
   },
   frames: {
+    rail: "Frame parts",
     shape: "Shape",
     settings: "Settings",
     caption: "Caption",
