@@ -5,10 +5,10 @@
         <button
           type="button"
           class="item"
-          :class="{ active: item.id === active }"
+          :class="{ active: item.id === model }"
           :aria-label="t('rail.goTo', { group: item.label })"
-          :aria-current="item.id === active ? 'true' : undefined"
-          @click="jump(item.id)"
+          :aria-current="item.id === model ? 'true' : undefined"
+          @click="pick(item.id)"
         >
           <component :is="item.icon" :size="16" />
         </button>
@@ -16,88 +16,45 @@
     </nav>
 
     <div ref="body" class="body">
-      <slot />
+      <div v-for="item in items" v-show="item.id === model" :key="item.id" class="page">
+        <slot :name="item.id" />
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref, type Component } from "vue";
+import { nextTick, ref, watch, type Component } from "vue";
 
 import { t } from "@/shared/i18n";
-import { activeSection, scrollParent } from "@/shared/lib/scrollSpy";
+import { scrollParent } from "@/shared/lib/scrollParent";
 import UiTooltip from "@/shared/ui/UiTooltip.vue";
 
-/// Un panneau long, et sur son bord une rampe d'icônes : une par groupe, qui y mène et montre où l'on est.
-/// Chaque groupe porte `data-rail="<id>"` ; le défilement est celui de l'ancêtre qui défile.
-const props = defineProps<{
+/// Un panneau en pages, et sur son bord une rampe d'icônes : une par page, qui l'affiche seule. Le
+/// contenu de chaque page vient du créneau qui porte son identifiant.
+defineProps<{
   label: string;
   items: { id: string; label: string; icon: Component }[];
 }>();
 
-/// Le repère se place un peu sous le haut du panneau : un titre qui vient d'y arriver compte déjà.
-const MARKER = 24;
+/// Un clic, même sur la page déjà affichée : de quoi la déplier.
+const emit = defineEmits<{ pick: [id: string] }>();
+
+defineSlots<Record<string, () => unknown>>();
+
+const model = defineModel<string>({ required: true });
+
+function pick(id: string) {
+  model.value = id;
+  emit("pick", id);
+}
 
 const body = ref<HTMLElement | null>(null);
-const active = ref<string | null>(null);
 
-let scroller: HTMLElement | null = null;
-let observer: ResizeObserver | null = null;
-
-/// Après un clic, le groupe visé reste le courant tant que l'on ne reprend pas la main : un groupe
-/// court en fin de panneau ne peut pas monter jusqu'au repère, et on le verrait céder sa place au dernier.
-let clicked: string | null = null;
-const takeOver = () => {
-  clicked = null;
-};
-const TAKE_OVER = ["wheel", "touchstart", "pointerdown", "keydown"] as const;
-
-const anchor = (id: string) =>
-  body.value?.querySelector<HTMLElement>(`[data-rail="${id}"]`) ?? null;
-
-function update() {
-  if (!scroller || clicked) return;
-
-  const top = scroller.getBoundingClientRect().top;
-  const tops = props.items.map((item) => {
-    const element = anchor(item.id);
-    return element ? element.getBoundingClientRect().top - top : null;
-  });
-  // Un panneau qui tient sans défiler est « au bout » d'office : cela ne dit rien de la fin.
-  const scrollable = scroller.scrollHeight > scroller.clientHeight + 2;
-  const atEnd =
-    scrollable && scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 2;
-
-  active.value = props.items[activeSection(tops, MARKER, atEnd)]?.id ?? null;
-}
-
-function jump(id: string) {
-  const target = anchor(id);
-  if (!target || !scroller) return;
-
-  const offset = target.getBoundingClientRect().top - scroller.getBoundingClientRect().top;
-  scroller.scrollTo({ top: scroller.scrollTop + offset - MARKER / 2, behavior: "smooth" });
-  clicked = id;
-  active.value = id;
-}
-
-onMounted(() => {
-  scroller = scrollParent(body.value);
-  scroller?.addEventListener("scroll", update, { passive: true });
-  for (const type of TAKE_OVER) scroller?.addEventListener(type, takeOver, { passive: true });
-
-  // Ouvrir ou fermer une section déplace les suivantes sans faire défiler quoi que ce soit.
-  if (body.value) {
-    observer = new ResizeObserver(update);
-    observer.observe(body.value);
-  }
-  update();
-});
-
-onBeforeUnmount(() => {
-  scroller?.removeEventListener("scroll", update);
-  for (const type of TAKE_OVER) scroller?.removeEventListener(type, takeOver);
-  observer?.disconnect();
+// Une autre page commence en haut, pas là où l'on avait défilé dans la précédente.
+watch(model, async () => {
+  await nextTick();
+  scrollParent(body.value)?.scrollTo({ top: 0 });
 });
 </script>
 

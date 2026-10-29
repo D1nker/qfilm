@@ -19,6 +19,20 @@ function read(): Record<string, boolean> {
 
 const state = reactive<Record<string, boolean>>(read());
 
+function persist() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch {
+    // Stockage indisponible : le choix reste valable pour la session.
+  }
+}
+
+/// Déplie ces sections d'un coup, quoi qu'on ait choisi avant.
+export function openPanels(ids: string[]) {
+  for (const id of ids) state[id] = true;
+  persist();
+}
+
 /// Ouvert ou fermé, pour une section du panneau : ce choix est gardé d'une session à l'autre.
 /// `fallback` vaut tant que l'utilisateur n'a rien choisi.
 export function usePanelOpen(id: string, fallback: boolean) {
@@ -26,11 +40,7 @@ export function usePanelOpen(id: string, fallback: boolean) {
     get: () => state[id] ?? fallback,
     set: (open: boolean) => {
       state[id] = open;
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      } catch {
-        // Stockage indisponible : le choix reste valable pour la session.
-      }
+      persist();
     },
   });
 }

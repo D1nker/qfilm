@@ -57,4 +57,18 @@ describe("usePanelOpen", () => {
       expect(usePanelOpen("c", false).value, garbage).toBe(garbage.includes('"c"'));
     }
   });
+
+  it("unfolds several sections at once, whatever was chosen before, and remembers it", async () => {
+    const first = await setup();
+    first.usePanelOpen("a", true).value = false;
+    first.usePanelOpen("b", false);
+
+    first.openPanels(["a", "b"]);
+
+    expect(first.usePanelOpen("a", true).value).toBe(true);
+    expect(first.usePanelOpen("b", false).value).toBe(true);
+    const second = await setup();
+    expect(second.usePanelOpen("a", false).value).toBe(true);
+    expect(second.usePanelOpen("b", false).value).toBe(true);
+  });
 });

@@ -14,7 +14,7 @@ function isTyping(target: EventTarget | null) {
 
 export function useShortcuts() {
   const { comparing, image } = useEditor();
-  const { toggle, tab } = useInspector();
+  const { toggle, tab, group } = useInspector();
   const { cropping, toggleCropping, stopCropping, swapOrientation } = useGeometry();
   const { undo, redo } = useHistory();
 
@@ -45,6 +45,7 @@ export function useShortcuts() {
     else if (key === "r" && !event.repeat && image.value) {
       // Le recadrage est dans l'onglet Cadre : on y va, comme le fait Lightroom pour son module.
       tab.value = "frame";
+      group.frame = "crop";
       toggleCropping();
     } else if (cropping.value && key === "x" && !event.repeat) swapOrientation();
     else if (cropping.value && (key === "enter" || key === "escape")) stopCropping();

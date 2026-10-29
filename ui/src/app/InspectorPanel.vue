@@ -3,8 +3,8 @@
     <div class="card">
       <UiTabs v-model="tab" :tabs="tabs">
         <template #looks><LooksPanel @select="labelFrameFromLook" /></template>
-        <template #adjust><AdjustPanel /></template>
-        <template #frame><FramePanel /></template>
+        <template #adjust><AdjustPanel v-model:group="group.adjust" /></template>
+        <template #frame><FramePanel v-model:group="group.frame" /></template>
       </UiTabs>
     </div>
   </aside>
@@ -26,7 +26,7 @@ const tabs = computed<{ value: InspectorTab; label: string }[]>(() => [
   { value: "frame", label: t("tabs.frame") },
 ]);
 
-const { tab } = useInspector();
+const { tab, group } = useInspector();
 const { labelFromLook } = useFrame();
 
 function labelFrameFromLook(preset: Preset) {

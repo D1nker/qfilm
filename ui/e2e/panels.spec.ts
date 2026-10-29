@@ -5,78 +5,106 @@ test.use({ openPanels: false });
 const header = (app: App, name: string) =>
   app.page.getByRole("button", { name: new RegExp(`^${name}( Modifié)?$`) });
 
-const resetButton = (app: App, group: string) =>
-  app.page.getByRole("button", { name: `Réinitialiser cette section : ${group}` });
+const resetButton = (app: App, section: string) =>
+  app.page.getByRole("button", { name: `Réinitialiser cette section : ${section}` });
+
+const resetGroup = (app: App, group: string) =>
+  app.page.getByRole("button", { name: `Réinitialiser ce groupe : ${group}` });
 
 const expanded = async (app: App, name: string) =>
   (await header(app, name).getAttribute("aria-expanded")) === "true";
+
+const slider = (app: App, name: string) => app.page.getByRole("slider", { name, exact: true });
 
 test.describe("the Retouche panel", () => {
   test.beforeEach(async ({ openApp }) => {
     await openApp.tab("Retouche").click();
   });
 
-  test("lists its sections under three headings, colour tools together", async ({ openApp }) => {
-    const layout = await openApp.page.locator(".part").evaluateAll((parts) =>
-      parts.map((part) => ({
-        title: part.querySelector(".part-title")?.textContent,
-        sections: [...part.querySelectorAll("button[aria-expanded]")].map((button) =>
-          button.textContent?.trim(),
-        ),
-      })),
-    );
+  test("shows one group at a time, colour tools together", async ({ openApp }) => {
+    const sectionsOf = async (group: string) => {
+      await openApp.group(group);
+      return openApp.page
+        .getByRole("tabpanel")
+        .locator("button[aria-expanded]")
+        .evaluateAll((buttons) =>
+          buttons
+            .filter((button) => button.getClientRects().length > 0)
+            .map((button) => button.textContent?.trim()),
+        );
+    };
 
-    expect(layout).toEqual([
-      { title: "Tons", sections: ["Lumière", "Courbe des tons"] },
-      { title: "Couleurs", sections: ["Couleur", "Mélangeur de couleurs", "Étalonnage"] },
-      { title: "Finition", sections: ["Détail", "Effets"] },
+    expect(await sectionsOf("Tons")).toEqual(["Lumière", "Courbe des tons"]);
+    expect(await sectionsOf("Couleurs")).toEqual([
+      "Couleur",
+      "Mélangeur de couleurs",
+      "Étalonnage",
     ]);
+    expect(await sectionsOf("Finition")).toEqual(["Détail", "Effets"]);
   });
 
-  test("opens the basics and keeps the advanced sections closed", async ({ openApp }) => {
+  test("starts on the first group, with its sections unfolded", async ({ openApp }) => {
     expect(await expanded(openApp, "Lumière")).toBe(true);
-    expect(await expanded(openApp, "Couleur")).toBe(true);
-    for (const name of ["Mélangeur de couleurs", "Étalonnage", "Détail", "Effets"]) {
-      expect(await expanded(openApp, name), name).toBe(false);
-    }
-    await expect(openApp.page.getByRole("slider", { name: "Exposition" })).toBeVisible();
-    await expect(openApp.page.getByRole("slider", { name: "Netteté", exact: true })).toBeHidden();
+    expect(await expanded(openApp, "Courbe des tons")).toBe(true);
+    await expect(slider(openApp, "Exposition")).toBeVisible();
+    await expect(slider(openApp, "Netteté")).toBeHidden();
   });
 
-  test("remembers which sections are open, across a reload", async ({ openApp }) => {
-    await header(openApp, "Détail").click();
+  test("another group replaces the first one, with its own sections unfolded", async ({
+    openApp,
+  }) => {
+    await openApp.group("Finition");
+
+    await expect(slider(openApp, "Netteté")).toBeVisible();
+    expect(await expanded(openApp, "Détail")).toBe(true);
+    expect(await expanded(openApp, "Effets")).toBe(true);
+    await expect(slider(openApp, "Exposition")).toBeHidden();
+  });
+
+  test("a click on a group's icon unfolds what had been folded there", async ({ openApp }) => {
+    await header(openApp, "Lumière").click();
+    expect(await expanded(openApp, "Lumière")).toBe(false);
+
+    await openApp.group("Tons");
+
+    expect(await expanded(openApp, "Lumière")).toBe(true);
+    await expect(slider(openApp, "Exposition")).toBeVisible();
+  });
+
+  test("remembers which sections are folded, across a reload", async ({ openApp }) => {
     await header(openApp, "Lumière").click();
 
     await openApp.page.reload();
     await openApp.openPhoto();
     await openApp.tab("Retouche").click();
 
-    expect(await expanded(openApp, "Détail")).toBe(true);
     expect(await expanded(openApp, "Lumière")).toBe(false);
-    expect(await expanded(openApp, "Effets")).toBe(false);
+    expect(await expanded(openApp, "Courbe des tons")).toBe(true);
   });
 
-  test("marks a section whose setting has moved, even when it is closed", async ({ openApp }) => {
+  test("marks a section whose setting has moved, even when it is folded", async ({ openApp }) => {
     await expect(openApp.page.locator(".modified")).toHaveCount(0);
 
-    await header(openApp, "Effets").click();
-    await openApp.page.getByRole("slider", { name: "Grain", exact: true }).focus();
+    await openApp.group("Finition");
+    await slider(openApp, "Grain").focus();
     await openApp.press("ArrowRight", 20);
     await expect(header(openApp, "Effets")).toHaveAccessibleName("Effets Modifié");
 
     await header(openApp, "Effets").click();
 
     await expect(openApp.page.getByRole("button", { name: "Effets Modifié" })).toBeVisible();
-    await expect(header(openApp, "Lumière")).toHaveAccessibleName("Lumière");
+    await expect(header(openApp, "Détail")).toHaveAccessibleName("Détail");
   });
 
   test("resets one section only, in a single undo step", async ({ openApp }) => {
-    await openApp.page.getByRole("slider", { name: "Exposition" }).focus();
+    await slider(openApp, "Exposition").focus();
     await openApp.press("ArrowRight", 30);
-    await openApp.page.getByRole("slider", { name: "Contraste" }).focus();
+    await slider(openApp, "Contraste").focus();
     await openApp.press("ArrowRight", 20);
-    await openApp.page.getByRole("slider", { name: "Saturation", exact: true }).focus();
+    await openApp.group("Couleurs");
+    await slider(openApp, "Saturation").first().focus();
     await openApp.press("ArrowRight", 10);
+    await openApp.group("Tons");
     await openApp.waitForHistoryCommit();
 
     await resetButton(openApp, "Lumière").click();
@@ -85,7 +113,6 @@ test.describe("the Retouche panel", () => {
       .poll(async () => (await openApp.lastRender()).params)
       .toMatchObject({ exposure: 0, contrast: 0, saturation: 0.1 });
     await expect(resetButton(openApp, "Lumière")).toHaveCount(0);
-    await expect(resetButton(openApp, "Couleur")).toBeVisible();
     await openApp.waitForHistoryCommit();
 
     await openApp.page.keyboard.press("ControlOrMeta+z");
@@ -95,12 +122,45 @@ test.describe("the Retouche panel", () => {
       .toMatchObject({ exposure: 0.3, contrast: 0.2, saturation: 0.1 });
   });
 
-  test("offers a reset only for a section that has changed", async ({ openApp }) => {
+  test("resets a whole group, and only that one", async ({ openApp }) => {
+    await expect(resetGroup(openApp, "Tons")).toBeDisabled();
+    await slider(openApp, "Exposition").focus();
+    await openApp.press("ArrowRight", 30);
+    await openApp.group("Couleurs");
+    await slider(openApp, "Saturation").first().focus();
+    await openApp.press("ArrowRight", 10);
+    await openApp.group("Tons");
+    await expect(resetGroup(openApp, "Tons")).toBeEnabled();
+
+    await resetGroup(openApp, "Tons").click();
+
+    await expect
+      .poll(async () => (await openApp.lastRender()).params)
+      .toMatchObject({ exposure: 0, saturation: 0.1 });
+    await expect(resetGroup(openApp, "Tons")).toBeDisabled();
+    await openApp.group("Couleurs");
+    await expect(resetGroup(openApp, "Couleurs")).toBeEnabled();
+  });
+
+  test("a group reset also flattens the curves of that group", async ({ openApp }) => {
+    const graph = openApp.page.locator(".graph");
+    await graph.scrollIntoViewIfNeeded();
+    const box = await graph.boundingBox();
+    if (!box) throw new Error("graphique introuvable");
+    await openApp.page.mouse.click(box.x + box.width / 2, box.y + box.height * 0.3);
+    await expect.poll(async () => (await openApp.lastRender()).params.curves.rgb.length).toBe(3);
+
+    await resetGroup(openApp, "Tons").click();
+
+    await expect.poll(async () => (await openApp.lastRender()).params.curves.rgb).toEqual([]);
+  });
+
+  test("offers a section reset only for a section that has changed", async ({ openApp }) => {
     await expect(
       openApp.page.getByRole("button", { name: /Réinitialiser cette section/ }),
     ).toHaveCount(0);
 
-    await openApp.page.getByRole("slider", { name: "Exposition" }).focus();
+    await slider(openApp, "Exposition").focus();
     await openApp.press("ArrowRight", 5);
 
     await expect(
@@ -129,20 +189,14 @@ test.describe("the Retouche panel", () => {
 });
 
 test.describe("the other panels", () => {
-  test("remember their sections too", async ({ openApp }) => {
+  test("remember their folded sections too", async ({ openApp }) => {
     await openApp.tab("Cadre").click();
-    await openApp.page.getByRole("button", { name: "Légende", exact: true }).click();
+    await header(openApp, "Forme").click();
 
     await openApp.page.reload();
     await openApp.openPhoto();
     await openApp.tab("Cadre").click();
 
-    await expect(
-      openApp.page.getByRole("button", { name: "Légende", exact: true }),
-    ).toHaveAttribute("aria-expanded", "false");
-    await expect(openApp.page.getByRole("button", { name: "Forme", exact: true })).toHaveAttribute(
-      "aria-expanded",
-      "true",
-    );
+    await expect(header(openApp, "Forme")).toHaveAttribute("aria-expanded", "false");
   });
 });

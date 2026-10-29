@@ -1,10 +1,5 @@
 <template>
-  <UiCollapsible
-    id="frame-geometry"
-    :title="t('geometry.title')"
-    :default-open="false"
-    :modified="modified"
-  >
+  <UiCollapsible id="frame-geometry" :title="t('geometry.title')" :modified="modified">
     <template #actions>
       <UiTooltip v-if="modified" :text="t('adjust.resetGroup')">
         <UiButton

@@ -48,6 +48,7 @@ test.describe("typing a slider value", () => {
     await edit(openApp, "Exposition", "9");
     await expect.poll(async () => (await openApp.lastRender()).params.exposure).toBe(3);
 
+    await openApp.group("Finition");
     await edit(openApp, "Rayon de la netteté", "0");
     await expect.poll(async () => (await openApp.lastRender()).params.sharpenRadius).toBe(0.5);
   });

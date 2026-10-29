@@ -1,14 +1,14 @@
 <template>
-  <UiRailPanel :label="t('adjust.rail')" :items="railItems()">
-    <section v-for="(part, index) in PARTS" :key="part.id" class="part" :data-rail="part.id">
+  <UiRailPanel v-model="group" :label="t('adjust.rail')" :items="railItems()" @pick="unfold">
+    <template v-for="part in PARTS" :key="part.id" #[part.id]>
       <div class="part-head">
         <h3 class="part-title">{{ t(`adjust.parts.${part.id}`) }}</h3>
         <UiButton
-          v-if="index === 0"
           variant="ghost"
           size="sm"
-          :disabled="isPristine"
-          @click="resetLook"
+          :disabled="!partChanged(part)"
+          :aria-label="`${t('adjust.resetPart')} : ${t(`adjust.parts.${part.id}`)}`"
+          @click="resetPart(part)"
         >
           {{ t("common.reset") }}
         </UiButton>
@@ -19,7 +19,6 @@
           v-if="isControlGroup(id)"
           :id="`adjust-${id}`"
           :title="t(`adjust.groups.${id}`)"
-          :default-open="OPEN_BY_DEFAULT.has(id)"
           :modified="changed(keysOf(itemsOf(id)))"
         >
           <template #actions>
@@ -56,7 +55,6 @@
           v-else-if="id === 'curves'"
           id="adjust-curves"
           :title="t('adjust.groups.curves')"
-          :default-open="false"
           :modified="curvesChanged"
         >
           <template #actions>
@@ -79,7 +77,6 @@
           v-else-if="id === 'hsl'"
           id="adjust-hsl"
           :title="t('adjust.groups.hsl')"
-          :default-open="false"
           :modified="changed(HSL_KEYS)"
         >
           <template #actions>
@@ -102,7 +99,6 @@
           v-else
           id="adjust-grading"
           :title="t('adjust.groups.grading')"
-          :default-open="false"
           :modified="changed(GRADING_KEYS)"
         >
           <template #actions>
@@ -121,7 +117,7 @@
           <GradingPanel />
         </UiCollapsible>
       </template>
-    </section>
+    </template>
   </UiRailPanel>
 </template>
 
@@ -140,6 +136,7 @@ import HslMixer from "@/features/looks/HslMixer.vue";
 import { hslRanges } from "@/features/looks/hsl";
 import { NEUTRAL, type NumericParamKey } from "@/features/looks/neutral";
 import { trackFor } from "@/features/looks/tracks";
+import { openPanels } from "@/shared/lib/panelState";
 import { useEditor } from "@/features/photo";
 import { useLook } from "@/features/looks/useLook";
 import UiButton from "@/shared/ui/UiButton.vue";
@@ -149,7 +146,10 @@ import UiSlider from "@/shared/ui/UiSlider.vue";
 import UiTooltip from "@/shared/ui/UiTooltip.vue";
 
 const { image } = useEditor();
-const { params, isPristine, setParam, setCurve, resetLook } = useLook();
+const { params, setParam, setCurve } = useLook();
+
+/// La page affichée : le panneau d'à côté (`InspectorPanel`) la tient, pour que le raccourci de recadrage, ailleurs, sache y aller.
+const group = defineModel<string>("group", { required: true });
 
 type Section = ControlGroup | "curves" | "hsl" | "grading";
 
@@ -170,8 +170,6 @@ const isControlGroup = (section: Section): section is ControlGroup =>
 
 const itemsOf = (group: ControlGroup) => controls.filter((control) => control.group === group);
 
-/// Les bases d'abord : le reste s'ouvre à la demande, et un point signale ce qui a bougé.
-const OPEN_BY_DEFAULT = new Set(["light", "color"]);
 const HSL_KEYS = hslRanges.map((range) => range.key);
 const GRADING_KEYS = gradingRanges.map((range) => range.key);
 
@@ -184,6 +182,34 @@ function reset(keys: NumericParamKey[]) {
   for (const key of keys) setParam(key, NEUTRAL[key]);
 }
 
+/// L'identifiant sous lequel chaque section retient qu'elle est ouverte.
+const panelId = (section: Section) => `adjust-${section}`;
+
+/// Choisir une page déplie ses sections : elles sont peu nombreuses, on veut voir leur contenu.
+function unfold(id: string) {
+  const part = PARTS.find((entry) => entry.id === id);
+  if (part) openPanels(part.sections.map(panelId));
+}
+
+const sectionKeys = (section: Section): NumericParamKey[] => {
+  if (section === "hsl") return HSL_KEYS;
+  if (section === "grading") return GRADING_KEYS;
+  if (isControlGroup(section)) return keysOf(itemsOf(section));
+  return [];
+};
+
+type Part = (typeof PARTS)[number];
+
+/// Une page se réinitialise d'un bloc : ses curseurs, et ses courbes si elle en a.
+const partChanged = (part: Part) =>
+  part.sections.some((section) => changed(sectionKeys(section))) ||
+  (part.sections.includes("curves") && curvesChanged.value);
+
+function resetPart(part: Part) {
+  for (const section of part.sections) reset(sectionKeys(section));
+  if (part.sections.includes("curves")) resetCurves();
+}
+
 const curvesChanged = computed(() => CURVE_IDS.some((id) => !isFlat(params.value.curves[id])));
 
 function resetCurves() {
@@ -192,10 +218,6 @@ function resetCurves() {
 </script>
 
 <style scoped>
-.part + .part {
-  margin-top: var(--space-6);
-}
-
 .part-head {
   display: flex;
   align-items: center;

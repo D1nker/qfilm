@@ -17,6 +17,21 @@ const OPEN_PANEL_IDS = [
   "adjust-hsl",
 ];
 
+/// La page (icône de la rampe) de chaque section nommée dans les tests.
+const SECTION_PAGES: Record<string, string> = {
+  Lumière: "Tons",
+  "Courbe des tons": "Tons",
+  Couleur: "Couleurs",
+  "Mélangeur de couleurs": "Couleurs",
+  Étalonnage: "Couleurs",
+  Détail: "Finition",
+  Effets: "Finition",
+  Recadrage: "Recadrage",
+  Forme: "Cadre",
+  Légende: "Légende",
+  "Mes cadres": "Mes cadres",
+};
+
 const BUILTIN_FRAMES = ["solid", "instant", "film35", "film120", "letterbox", "padding"];
 
 interface RawParam {
@@ -145,6 +160,9 @@ export class App {
     const done = () =>
       this.page.evaluate(() => (window as unknown as { __renderDone?: number }).__renderDone ?? 0);
     const before = await done();
+    // On finit sur Retouche > Tons : c'est là que se trouve le curseur dont on se sert.
+    await this.tab("Retouche").click();
+    await this.group("Tons");
     await this.page.getByRole("slider", { name: "Exposition" }).focus();
     await this.press("ArrowRight", 1);
     await expect.poll(done).toBeGreaterThan(before);
@@ -177,8 +195,15 @@ export class App {
     return this.page.getByRole("tab", { name });
   }
 
-  /// Ouvre une section du panneau si elle ne l'est pas déjà (les tests les ouvrent d'office).
+  /// Les panneaux Retouche et Cadre sont en pages : affiche celle de la rampe d'icônes qui porte ce nom.
+  async group(name: string) {
+    await this.page.getByRole("button", { name: `Aller à ${name}`, exact: true }).click();
+  }
+
+  /// Ouvre une section du panneau si elle ne l'est pas déjà, en passant d'abord sur sa page.
   async openSection(name: string) {
+    const page = SECTION_PAGES[name];
+    if (page) await this.group(page);
     const header = this.page.getByRole("button", { name: new RegExp(`^${name}( Modifié)?$`) });
     if ((await header.getAttribute("aria-expanded")) !== "true") await header.click();
   }

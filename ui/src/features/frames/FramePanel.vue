@@ -1,81 +1,84 @@
 <template>
-  <UiRailPanel :label="t('frames.rail')" :items="railItems()">
-    <GeometryPanel data-rail="crop" />
+  <UiRailPanel v-model="group" :label="t('frames.rail')" :items="railItems()" @pick="unfold">
+    <template #crop>
+      <GeometryPanel />
+    </template>
 
-    <UiCollapsible id="frame-shape" data-rail="frame" :title="t('frames.shape')">
-      <template #actions>
-        <UiButton variant="ghost" size="sm" :disabled="isPristine" @click="resetFrame">
-          {{ t("common.reset") }}
-        </UiButton>
-      </template>
-      <div class="grid">
-        <UiThumbnailButton
-          v-for="info in frames"
-          :key="info.id"
-          :name="localized(info.name)"
-          :src="thumbnails[info.id]"
-          :active="info.id === frame.id"
-          fit="contain"
-          @click="applyFrame(info.id)"
+    <template #frame>
+      <UiCollapsible id="frame-shape" :title="t('frames.shape')">
+        <template #actions>
+          <UiButton variant="ghost" size="sm" :disabled="isPristine" @click="resetFrame">
+            {{ t("common.reset") }}
+          </UiButton>
+        </template>
+        <div class="grid">
+          <UiThumbnailButton
+            v-for="info in frames"
+            :key="info.id"
+            :name="localized(info.name)"
+            :src="thumbnails[info.id]"
+            :active="info.id === frame.id"
+            fit="contain"
+            @click="applyFrame(info.id)"
+          />
+        </div>
+      </UiCollapsible>
+
+      <UiCollapsible
+        v-for="section in sections"
+        :key="`${frame.id}:${section.key}`"
+        :title="localized(section.title)"
+      >
+        <FrameParamControl
+          v-for="def in section.defs"
+          :key="def.id"
+          :def="def"
+          :value="valueOf(def)"
+          @change="setParam(def, $event)"
         />
-      </div>
-    </UiCollapsible>
+      </UiCollapsible>
+    </template>
 
-    <UiCollapsible
-      v-for="section in sections"
-      :key="`${frame.id}:${section.key}`"
-      :title="localized(section.title)"
-    >
-      <FrameParamControl
-        v-for="def in section.defs"
-        :key="def.id"
-        :def="def"
-        :value="valueOf(def)"
-        @change="setParam(def, $event)"
-      />
-    </UiCollapsible>
+    <template #caption>
+      <UiCollapsible id="frame-caption" :title="t('frames.caption')">
+        <UiField :label="t('caption.text')" stacked>
+          <UiInput v-model="caption.text" :placeholder="t('caption.placeholder')" />
+        </UiField>
 
-    <UiCollapsible id="frame-caption" data-rail="caption" :title="t('frames.caption')">
-      <UiField :label="t('caption.text')" stacked>
-        <UiInput v-model="caption.text" :placeholder="t('caption.placeholder')" />
-      </UiField>
+        <UiField :label="t('caption.font')">
+          <UiSelect v-model="caption.font" :options="fontOptions()" />
+        </UiField>
 
-      <UiField :label="t('caption.font')">
-        <UiSelect v-model="caption.font" :options="fontOptions()" />
-      </UiField>
+        <UiSlider
+          v-model="caption.size"
+          :label="t('caption.size')"
+          :display="`${caption.size.toFixed(1)} %`"
+          :min="1"
+          :max="20"
+          :step="0.5"
+        />
 
-      <UiSlider
-        v-model="caption.size"
-        :label="t('caption.size')"
-        :display="`${caption.size.toFixed(1)} %`"
-        :min="1"
-        :max="20"
-        :step="0.5"
-      />
+        <UiField :label="t('caption.color')">
+          <UiColorInput v-model="caption.color" />
+        </UiField>
 
-      <UiField :label="t('caption.color')">
-        <UiColorInput v-model="caption.color" />
-      </UiField>
+        <UiField :label="t('caption.position')" as="div">
+          <UiButton size="sm" :disabled="caption.x === null" @click="recenterCaption">
+            {{ t("caption.recenter") }}
+          </UiButton>
+        </UiField>
 
-      <UiField :label="t('caption.position')" as="div">
-        <UiButton size="sm" :disabled="caption.x === null" @click="recenterCaption">
-          {{ t("caption.recenter") }}
-        </UiButton>
-      </UiField>
+        <p class="note">
+          {{ t("caption.hint") }}
+        </p>
+      </UiCollapsible>
+    </template>
 
-      <p class="note">
-        {{ t("caption.hint") }}
-      </p>
-    </UiCollapsible>
-
-    <UiCollapsible
-      id="frame-mine"
-      data-rail="library"
-      :title="t('frames.myFrames')"
-      :default-open="false"
-    >
-      <FrameLibrary />
-    </UiCollapsible>
+    <template #library>
+      <UiCollapsible id="frame-mine" :title="t('frames.myFrames')">
+        <FrameLibrary />
+      </UiCollapsible>
+    </template>
   </UiRailPanel>
 </template>
 
@@ -93,6 +96,7 @@ import { useFrameThumbnails } from "@/features/frames/useFrameThumbnails";
 import UiButton from "@/shared/ui/UiButton.vue";
 import UiCollapsible from "@/shared/ui/UiCollapsible.vue";
 import UiRailPanel from "@/shared/ui/UiRailPanel.vue";
+import { openPanels } from "@/shared/lib/panelState";
 import UiColorInput from "@/shared/ui/UiColorInput.vue";
 import UiField from "@/shared/ui/UiField.vue";
 import UiInput from "@/shared/ui/UiInput.vue";
@@ -114,6 +118,22 @@ const {
   recenterCaption,
 } = useFrame();
 const { thumbnails } = useFrameThumbnails();
+
+/// La page affichée, tenue par le panneau d'à côté (voir `AdjustPanel`).
+const group = defineModel<string>("group", { required: true });
+
+const PANELS: Record<string, string> = {
+  crop: "frame-geometry",
+  frame: "frame-shape",
+  caption: "frame-caption",
+  library: "frame-mine",
+};
+
+/// Choisir une page déplie sa section : elles sont peu nombreuses, on veut voir leur contenu.
+function unfold(id: string) {
+  const panel = PANELS[id];
+  if (panel) openPanels([panel]);
+}
 
 const railItems = () => [
   { id: "crop", label: t("geometry.title"), icon: Crop },

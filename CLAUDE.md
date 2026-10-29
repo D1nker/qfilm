@@ -154,17 +154,20 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
 - The Retouche panel lists its sections under three plain headings (`PARTS` in `AdjustPanel`): Tons (Light, Tone
   curve), Couleurs (Color, Color mixer, Color grading), Finition (Detail, Effects). A new section goes under the
   heading that matches its intent; the headings are not collapsible.
-- Long panels (Retouche, Cadre) carry a group rail (`shared/ui/UiRailPanel`): a thin column of icons on the
-  panel's left edge, sticky, one per group; a click scrolls to the group (`data-rail="<id>"` on its root) and a
-  scroll-spy (`shared/lib/scrollSpy`) shows which group is current. A clicked group stays current until the
-  user scrolls by hand (a short last group cannot reach the top, it would lose to the final one), and a
-  panel that fits without scrolling is never "at the end". The rail costs 36 px, so the panel is 356 px wide
-  (`App.vue`) to keep the controls as wide as before. The Preset tab has none (few categories). Rail
-  labels and icons come from functions of `t` like every option table.
-- Each tab has its Reset on the line of its first heading (`UiCollapsible` actions slot, or the first group
-  title in Retouche). Preset and Retouche both call `resetLook` (back to Neutral, adjustments and curves
-  included, which is what choosing the Neutral preset does) and are disabled while `useLook().isPristine`;
-  the Preset tab's intensity slider comes after its categories.
+- Long panels (Retouche, Cadre) are split into pages by a group rail (`shared/ui/UiRailPanel`): a thin column of
+  icons on the panel's left edge, one per page; a click shows that page alone (its content is the slot named
+  after its id, the others are `v-show`n away), restarts at the top and **unfolds the page's sections**
+  (`openPanels`, even if they had been folded: pages are small, we want to see the content). Every section
+  is open by default. The selected page of each tab lives in `useInspector().group` (the host, `InspectorPanel`,
+  passes it down with `v-model:group` because `looks` may not import `inspector`), so the crop shortcut can
+  say `group.frame = "crop"`. The rail costs 36 px, so the panel is 356 px wide (`App.vue`). The Preset tab has
+  none (few categories). Labels and icons come from functions of `t`, and the buttons are named "Aller à X" so
+  they never collide with the section headers of the same name. E2E: `App.group(name)` shows a page, and
+  `App.openSection(name)` goes to the page of a section first.
+- Resets: the Preset tab's (on its first category header) calls `resetLook`, back to Neutral with adjustments
+  and curves, which is what choosing the Neutral preset does; it is disabled while `useLook().isPristine`.
+  A Retouche page has its own Reset on its heading (that page's sliders and, for Tons, the curves), the Cadre
+  tab's is on "Forme". The Preset tab's intensity slider comes after its categories.
 - Panel sections are `UiCollapsible`: with an `id` their open/closed state is remembered
   (`shared/lib/panelState`), a `modified` dot flags a section whose setting has moved, and the Retouche panel
   opens only Light and Color by default, with a reset button on each section that has changes. The e2e fixture

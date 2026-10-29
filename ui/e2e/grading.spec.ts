@@ -57,6 +57,7 @@ test.describe("colour grading wheel", () => {
     openApp,
   }) => {
     await openApp.slowRenders();
+    await openApp.group("Couleurs");
     const start = await spot(wheel(openApp), 0, 0.3);
     const end = await spot(wheel(openApp), 180, 0.8);
 

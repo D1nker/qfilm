@@ -86,6 +86,7 @@ test.describe("undo and redo", () => {
 
   test("leaves a text field's own undo alone", async ({ openApp }) => {
     await openApp.tab("Cadre").click();
+    await openApp.group("Légende");
     const caption = openApp.page.getByPlaceholder("Biarritz, août 2026");
     await caption.fill("abc");
     await openApp.waitForHistoryCommit();
@@ -102,6 +103,7 @@ test.describe("undo and redo", () => {
     await openApp.tab("Cadre").click();
     await openApp.page.locator(".grid .thumb", { hasText: "35 mm" }).click();
     await openApp.waitForHistoryCommit();
+    await openApp.group("Légende");
     await openApp.page.getByPlaceholder("Biarritz, août 2026").fill("Salut");
     await openApp.waitForHistoryCommit();
 

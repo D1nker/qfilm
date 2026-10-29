@@ -56,6 +56,7 @@ export const en: Messages = {
       finish: "Finish",
     },
     rail: "Setting groups",
+    resetPart: "Reset this group",
     resetGroup: "Reset this section",
     curves: {
       graph: "Tone curve",

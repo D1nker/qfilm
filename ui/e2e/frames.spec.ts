@@ -30,7 +30,9 @@ test.describe("frame panel", () => {
     openApp,
   }) => {
     await expect(section(openApp, "Forme")).toBeVisible();
+    await openApp.group("Légende");
     await expect(section(openApp, "Légende")).toBeVisible();
+    await openApp.group("Mes cadres");
     await expect(section(openApp, "Mes cadres")).toBeVisible();
     await expect(section(openApp, "Pellicule")).toHaveCount(0);
     await expect(section(openApp, "Réglages")).toHaveCount(0);
@@ -59,6 +61,7 @@ test.describe("frame panel", () => {
   test("leaves room for the focus ring of a field that touches the section edge", async ({
     openApp,
   }) => {
+    await openApp.group("Légende");
     const field = openApp.page.getByPlaceholder("Biarritz, août 2026");
     await field.focus();
 
@@ -94,11 +97,14 @@ test.describe("frame panel", () => {
   });
 
   test("keeps the caption when the frame changes", async ({ openApp }) => {
+    await openApp.group("Légende");
     const caption = openApp.page.getByPlaceholder("Biarritz, août 2026");
     await caption.fill("Salut");
 
+    await openApp.group("Cadre");
     await shape(openApp, "35 mm").click();
     await shape(openApp, "Marge unie").click();
+    await openApp.group("Légende");
 
     await expect(caption).toHaveValue("Salut");
   });
@@ -230,7 +236,9 @@ test.describe("frame panel", () => {
   });
 
   test("the frame proposes its own caption style", async ({ openApp }) => {
+    await openApp.group("Légende");
     await openApp.page.getByPlaceholder("Biarritz, août 2026").fill("Été");
+    await openApp.group("Cadre");
     await shape(openApp, "Instantané").click();
     await openApp.page.getByRole("button", { name: "Exporter…" }).click();
     await openApp.page.getByRole("button", { name: "Enregistrer…" }).click();
@@ -243,8 +251,10 @@ test.describe("frame panel", () => {
   test("reset brings back no frame and an empty caption, and can be undone", async ({
     openApp,
   }) => {
+    await openApp.group("Légende");
     const caption = openApp.page.getByPlaceholder("Biarritz, août 2026");
     await caption.fill("Bonjour");
+    await openApp.group("Cadre");
     await shape(openApp, "35 mm").click();
     await openApp.waitForHistoryCommit();
     const reset = openApp.page.getByRole("button", { name: "Réinitialiser" });
@@ -253,8 +263,9 @@ test.describe("frame panel", () => {
     await reset.click();
 
     await expect.poll(async () => (await openApp.lastRender()).frame.id).toBe("none");
-    await expect(caption).toHaveValue("");
     await expect(reset).toBeDisabled();
+    await openApp.group("Légende");
+    await expect(caption).toHaveValue("");
 
     await openApp.page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
     await openApp.page.keyboard.press("Meta+z");
@@ -267,7 +278,7 @@ test.describe("frame panel", () => {
 test.describe("importing frames", () => {
   test.beforeEach(async ({ openApp }) => {
     await openApp.tab("Cadre").click();
-    await section(openApp, "Mes cadres").click();
+    await openApp.group("Mes cadres");
   });
 
   test("starts with no imported frame", async ({ openApp }) => {
@@ -292,6 +303,7 @@ test.describe("importing frames", () => {
   test("an imported frame is chosen and configured like the built-in ones", async ({ openApp }) => {
     await openApp.page.getByRole("button", { name: "Importer un .zip" }).click();
 
+    await openApp.group("Cadre");
     await shape(openApp, "Cadre zip").click();
 
     await expect
@@ -304,7 +316,9 @@ test.describe("importing frames", () => {
 
   test("removing the chosen frame falls back to no frame", async ({ openApp }) => {
     await openApp.page.getByRole("button", { name: "Importer un .zip" }).click();
+    await openApp.group("Cadre");
     await shape(openApp, "Cadre zip").click();
+    await openApp.group("Mes cadres");
 
     await openApp.page.getByRole("button", { name: "Supprimer le cadre Cadre zip" }).click();
 

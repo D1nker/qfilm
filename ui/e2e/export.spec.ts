@@ -69,6 +69,7 @@ test.describe("export", () => {
     await openApp.page.getByRole("button", { name: "Portrait 400" }).click();
     await openApp.tab("Cadre").click();
     await openApp.page.locator(".grid .thumb", { hasText: "35 mm" }).click();
+    await openApp.group("Légende");
     await openApp.page.getByPlaceholder("Biarritz, août 2026").fill("Hello");
 
     await openApp.page.getByRole("button", { name: "Exporter…" }).click();

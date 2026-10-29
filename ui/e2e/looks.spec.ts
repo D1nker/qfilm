@@ -126,6 +126,7 @@ test.describe("looks", () => {
       await expect.poll(async () => (await openApp.lastRender()).params[key]).toBeCloseTo(back, 3);
     };
 
+    await openApp.group("Finition");
     await reset("Taille du grain", "grainSize", 2, 2);
     await reset("Rugosité du grain", "grainRoughness", 1, 1);
     await reset("Progressivité du vignettage", "vignetteFeather", 0.5, 0.5);
@@ -202,7 +203,7 @@ test.describe("looks", () => {
       await expect.poll(async () => (await openApp.lastRender()).params.greenHue).toBe(0);
     });
 
-    test("the reset button clears the mixer too", async ({ openApp }) => {
+    test("the group reset clears the mixer too", async ({ openApp }) => {
       await mixer(openApp).getByRole("radio", { name: "Jaune" }).click();
       await mixer(openApp).getByRole("slider", { name: "Luminosité" }).focus();
       await openApp.press("ArrowRight", 50);
@@ -210,7 +211,9 @@ test.describe("looks", () => {
         .poll(async () => (await openApp.lastRender()).params.yellowLuminance)
         .toBeCloseTo(0.5);
 
-      await openApp.page.getByRole("button", { name: "Réinitialiser", exact: true }).click();
+      await openApp.page
+        .getByRole("button", { name: "Réinitialiser ce groupe : Couleurs" })
+        .click();
 
       await expect.poll(async () => (await openApp.lastRender()).params.yellowLuminance).toBe(0);
     });
@@ -229,6 +232,7 @@ test.describe("looks", () => {
     test("show blue to yellow for the temperature and green to magenta for the tint", async ({
       openApp,
     }) => {
+      await openApp.group("Couleurs");
       expect(await background(openApp, "Température")).toContain("linear-gradient");
       expect(await background(openApp, "Teinte vert / magenta")).toContain("linear-gradient");
 
@@ -286,6 +290,7 @@ test.describe("looks", () => {
 
   test("groups sharpening and noise reduction under Detail", async ({ openApp }) => {
     await openApp.tab("Retouche").click();
+    await openApp.group("Finition");
     const detail = openApp.page.getByRole("button", { name: "Détail", exact: true });
     await expect(detail).toBeVisible();
 
@@ -310,6 +315,7 @@ test.describe("looks", () => {
 
   test("offers the vignette midpoint and feather and the grain roughness", async ({ openApp }) => {
     await openApp.tab("Retouche").click();
+    await openApp.group("Finition");
 
     for (const name of [
       "Rugosité du grain",
@@ -335,16 +341,14 @@ test.describe("looks", () => {
     await expect(exposure).toContainText("+0.25 EV");
   });
 
-  test("the reset button brings back a neutral look", async ({ openApp }) => {
+  test("the Preset reset brings back a neutral look", async ({ openApp }) => {
     await openApp.page.getByRole("button", { name: "Portrait 400" }).click();
-    await openApp.tab("Retouche").click();
 
     await openApp.page.getByRole("button", { name: "Réinitialiser", exact: true }).click();
 
     await expect
       .poll(async () => (await openApp.lastRender()).params)
       .toMatchObject({ exposure: 0, contrast: 0, grainSize: 2 });
-    await openApp.tab("Preset").click();
     await expect(openApp.page.locator(".thumb.active")).toContainText("Neutre");
   });
 

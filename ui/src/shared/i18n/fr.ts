@@ -54,6 +54,7 @@ export const fr = {
       finish: "Finition",
     },
     rail: "Groupes de réglages",
+    resetPart: "Réinitialiser ce groupe",
     resetGroup: "Réinitialiser cette section",
     curves: {
       graph: "Courbe des tons",

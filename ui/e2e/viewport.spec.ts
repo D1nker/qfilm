@@ -208,6 +208,7 @@ test.describe("seeing the original and the panel", () => {
 
   test("the shortcuts are ignored while typing", async ({ openApp }) => {
     await openApp.tab("Cadre").click();
+    await openApp.group("Légende");
     const caption = openApp.page.getByPlaceholder("Biarritz, août 2026");
     await caption.click();
 
