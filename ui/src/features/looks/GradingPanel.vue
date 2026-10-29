@@ -107,6 +107,7 @@ function resetZone(id: string) {
 .grading :deep(.segments) {
   justify-self: stretch;
   justify-content: space-between;
+  margin-top: var(--space-4);
 }
 
 .grading :deep(.segment) {

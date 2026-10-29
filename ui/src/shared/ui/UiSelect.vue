@@ -67,7 +67,7 @@ const model = defineModel<T>({ required: true });
 
 .trigger:focus-visible {
   outline: none;
-  box-shadow: var(--focus-ring);
+  border-color: var(--accent);
 }
 
 .chevron {

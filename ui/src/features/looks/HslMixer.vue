@@ -71,6 +71,6 @@ const bandOptions = computed(() =>
 .mixer :deep(.segments) {
   justify-self: stretch;
   justify-content: space-between;
-  margin-bottom: var(--space-2);
+  margin: var(--space-4) 0 var(--space-2);
 }
 </style>

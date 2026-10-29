@@ -31,6 +31,5 @@ const model = defineModel<string>({ required: true });
 .input:focus-visible {
   outline: none;
   border-color: var(--accent);
-  box-shadow: var(--focus-ring);
 }
 </style>

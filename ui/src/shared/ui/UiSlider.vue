@@ -207,7 +207,6 @@ button.value:hover:not(:disabled) {
 
 .editor:focus-visible {
   outline: none;
-  box-shadow: var(--focus-ring);
 }
 
 .root {

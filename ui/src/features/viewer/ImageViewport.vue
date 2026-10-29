@@ -367,6 +367,6 @@ img {
 
 .zone-editor input:focus-visible {
   outline: none;
-  box-shadow: var(--focus-ring);
+  border-color: var(--accent);
 }
 </style>
