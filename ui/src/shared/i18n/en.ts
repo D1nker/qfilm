@@ -40,6 +40,7 @@ export const en: Messages = {
     groups: {
       light: "Light",
       color: "Color",
+      detail: "Detail",
       effects: "Effects",
     },
     controls: {
@@ -54,6 +55,10 @@ export const en: Messages = {
       saturation: "Saturation",
       vibrance: "Vibrance",
       clarity: "Clarity",
+      sharpening: "Sharpening",
+      sharpenRadius: "Sharpening radius",
+      noiseLuminance: "Luminance noise reduction",
+      noiseColor: "Color noise reduction",
       lift: "Faded blacks",
       halation: "Halation",
       grain: "Grain",

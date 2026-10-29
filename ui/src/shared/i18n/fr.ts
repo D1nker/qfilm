@@ -38,6 +38,7 @@ export const fr = {
     groups: {
       light: "Lumière",
       color: "Couleur",
+      detail: "Détail",
       effects: "Effets",
     },
     controls: {
@@ -52,6 +53,10 @@ export const fr = {
       saturation: "Saturation",
       vibrance: "Vibrance",
       clarity: "Clarté",
+      sharpening: "Netteté",
+      sharpenRadius: "Rayon de la netteté",
+      noiseLuminance: "Bruit de luminance",
+      noiseColor: "Bruit de couleur",
       lift: "Noirs délavés",
       halation: "Halation",
       grain: "Grain",

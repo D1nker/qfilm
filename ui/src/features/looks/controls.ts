@@ -1,6 +1,6 @@
 import type { RenderParams } from "@/shared/api/api";
 
-export type ControlGroup = "light" | "color" | "effects";
+export type ControlGroup = "light" | "color" | "detail" | "effects";
 
 export interface Control {
   key: keyof RenderParams;
@@ -23,6 +23,11 @@ export const controls: Control[] = [
   { group: "color", key: "saturation", min: -1, max: 1, step: 0.01 },
   { group: "color", key: "vibrance", min: -1, max: 1, step: 0.01 },
 
+  { group: "detail", key: "sharpening", min: 0, max: 1, step: 0.01 },
+  { group: "detail", key: "sharpenRadius", min: 0.5, max: 3, step: 0.1 },
+  { group: "detail", key: "noiseLuminance", min: 0, max: 1, step: 0.01 },
+  { group: "detail", key: "noiseColor", min: 0, max: 1, step: 0.01 },
+
   { group: "effects", key: "clarity", min: -1, max: 1, step: 0.01 },
   { group: "effects", key: "lift", min: 0, max: 1, step: 0.01 },
   { group: "effects", key: "halation", min: 0, max: 1, step: 0.01 },
@@ -36,6 +41,6 @@ export const controls: Control[] = [
 
 export function formatControlValue(key: keyof RenderParams, value: number) {
   if (key === "exposure") return `${value > 0 ? "+" : ""}${value.toFixed(2)} EV`;
-  if (key === "grainSize") return value.toFixed(1);
+  if (key === "grainSize" || key === "sharpenRadius") return value.toFixed(1);
   return value.toFixed(2);
 }

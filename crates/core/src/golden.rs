@@ -456,6 +456,48 @@ golden_look!(
     }
 );
 
+/// La scène de test, avec un bruit déterministe par canal : de quoi voir ce que le lissage retire.
+fn noisy_landscape() -> ImageBuf {
+    let mut img = landscape();
+    let mut state: u32 = 0x9E37_79B9;
+    for value in &mut img.data {
+        state = state.wrapping_mul(1_664_525).wrapping_add(1_013_904_223);
+        let unit = (state >> 8) as f32 / (1u32 << 24) as f32 * 2.0 - 1.0;
+        *value = (*value + unit * 0.05).max(0.0);
+    }
+    img
+}
+
+golden_look!(
+    look_sharpened,
+    RenderParams {
+        sharpening: 0.8,
+        sharpen_radius: 1.0,
+        ..RenderParams::default()
+    }
+);
+
+#[test]
+fn look_noise_reduced() {
+    let params = RenderParams {
+        noise_luminance: 0.7,
+        noise_color: 0.8,
+        ..RenderParams::default()
+    };
+    assert_golden(
+        "look_noise_reduced",
+        &render::apply(&noisy_landscape(), &params),
+    );
+}
+
+#[test]
+fn look_noisy_source_without_reduction() {
+    assert_golden(
+        "look_noisy_source_without_reduction",
+        &render::apply(&noisy_landscape(), &RenderParams::default()),
+    );
+}
+
 #[test]
 fn rendering_is_deterministic() {
     let params = RenderParams {

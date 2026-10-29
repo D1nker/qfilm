@@ -297,6 +297,14 @@ export type RenderParams_Deserialize = {
 	/**  Vert (-1) vers magenta (+1). */
 	tint?: number,
 	clarity?: number,
+	/**  Netteté (accentuation locale de la luminance). */
+	sharpening?: number,
+	/**  Rayon de la netteté, en pixels d'une image de 1 800 px de large (proportionnel au-delà). */
+	sharpenRadius?: number,
+	/**  Lissage du bruit de luminance, qui épargne les contours. */
+	noiseLuminance?: number,
+	/**  Lissage du bruit de couleur, qui épargne les contours. */
+	noiseColor?: number,
 	lift?: number,
 	halation?: number,
 	grain?: number,
@@ -327,6 +335,14 @@ export type RenderParams_Serialize = {
 	/**  Vert (-1) vers magenta (+1). */
 	tint: number,
 	clarity: number,
+	/**  Netteté (accentuation locale de la luminance). */
+	sharpening: number,
+	/**  Rayon de la netteté, en pixels d'une image de 1 800 px de large (proportionnel au-delà). */
+	sharpenRadius: number,
+	/**  Lissage du bruit de luminance, qui épargne les contours. */
+	noiseLuminance: number,
+	/**  Lissage du bruit de couleur, qui épargne les contours. */
+	noiseColor: number,
 	lift: number,
 	halation: number,
 	grain: number,

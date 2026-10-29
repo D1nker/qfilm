@@ -81,6 +81,31 @@ test.describe("looks", () => {
     await reset("Taille du grain", "grainSize", 2, 2);
     await reset("Rugosité du grain", "grainRoughness", 1, 1);
     await reset("Progressivité du vignettage", "vignetteFeather", 0.5, 0.5);
+    await reset("Rayon de la netteté", "sharpenRadius", 1, 1);
+  });
+
+  test("groups sharpening and noise reduction under Detail", async ({ openApp }) => {
+    await openApp.tab("Retouche").click();
+    const detail = openApp.page.getByRole("button", { name: "Détail", exact: true });
+    await expect(detail).toBeVisible();
+
+    for (const name of [
+      "Netteté",
+      "Rayon de la netteté",
+      "Bruit de luminance",
+      "Bruit de couleur",
+    ]) {
+      await expect(openApp.page.getByRole("slider", { name, exact: true })).toBeVisible();
+    }
+
+    await openApp.page.getByRole("slider", { name: "Netteté", exact: true }).focus();
+    await openApp.press("ArrowRight", 60);
+    await openApp.page.getByRole("slider", { name: "Bruit de couleur" }).focus();
+    await openApp.press("ArrowRight", 25);
+
+    await expect
+      .poll(async () => (await openApp.lastRender()).params)
+      .toMatchObject({ sharpening: 0.6, noiseColor: 0.25, sharpenRadius: 1 });
   });
 
   test("offers the vignette midpoint and feather and the grain roughness", async ({ openApp }) => {

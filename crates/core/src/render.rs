@@ -22,6 +22,14 @@ pub struct RenderParams {
     /// Vert (-1) vers magenta (+1).
     pub tint: f32,
     pub clarity: f32,
+    /// Netteté (accentuation locale de la luminance).
+    pub sharpening: f32,
+    /// Rayon de la netteté, en pixels d'une image de 1 800 px de large (proportionnel au-delà).
+    pub sharpen_radius: f32,
+    /// Lissage du bruit de luminance, qui épargne les contours.
+    pub noise_luminance: f32,
+    /// Lissage du bruit de couleur, qui épargne les contours.
+    pub noise_color: f32,
     pub lift: f32,
     pub halation: f32,
     pub grain: f32,
@@ -49,6 +57,10 @@ impl Default for RenderParams {
             temperature: 0.0,
             tint: 0.0,
             clarity: 0.0,
+            sharpening: 0.0,
+            sharpen_radius: 1.0,
+            noise_luminance: 0.0,
+            noise_color: 0.0,
             lift: 0.0,
             halation: 0.0,
             grain: 0.0,
@@ -68,6 +80,10 @@ pub fn apply(source: &ImageBuf, params: &RenderParams) -> ImageBuf {
 
     apply_exposure_and_white_balance(&mut img, params);
 
+    if params.noise_luminance > 0.001 || params.noise_color > 0.001 {
+        apply_noise_reduction(&mut img, params.noise_luminance, params.noise_color);
+    }
+
     if params.halation > 0.001 {
         apply_halation(&mut img, params.halation);
     }
@@ -77,6 +93,10 @@ pub fn apply(source: &ImageBuf, params: &RenderParams) -> ImageBuf {
     }
 
     apply_tone_and_color(&mut img, params);
+
+    if params.sharpening > 0.001 {
+        apply_sharpening(&mut img, params.sharpening, params.sharpen_radius);
+    }
 
     if params.vignette.abs() > 0.001 {
         apply_vignette(
@@ -190,6 +210,93 @@ fn apply_tone_and_color(img: &mut ImageBuf, p: &RenderParams) {
     });
 }
 
+/// Luminance encodée comme à l'écran : les contours et la netteté s'y jugent à la perception, pas à
+/// la lumière physique (sinon les hautes lumières se bordent de halos).
+fn encoded_luma(img: &ImageBuf) -> Vec<f32> {
+    img.data
+        .par_chunks(3)
+        // Sans plafond à 1 : un soleil plus clair que le blanc doit rester tel quel hors des contours.
+        .map(|px| linear_to_srgb(luma_of(px).max(0.0)))
+        .collect()
+}
+
+/// Flou plus doux qu'un seul passage de boîte : deux passages donnent un profil triangulaire.
+fn soft_blur(data: &mut [f32], w: usize, h: usize, radius: usize) {
+    box_blur(data, w, h, radius);
+    box_blur(data, w, h, radius);
+}
+
+fn apply_sharpening(img: &mut ImageBuf, amount: f32, radius: f32) {
+    let (w, h) = (img.width as usize, img.height as usize);
+
+    let encoded = encoded_luma(img);
+    let mut blurred = encoded.clone();
+    let reach = radius.max(0.1) * (w.max(h) as f32 / 1800.0);
+    soft_blur(&mut blurred, w, h, (reach.round() as usize).max(1));
+
+    img.data
+        .par_chunks_mut(3)
+        .zip(encoded.par_iter().zip(blurred.par_iter()))
+        .for_each(|(px, (&sharp, &soft))| {
+            let luma = luma_of(px).max(1e-5);
+            let boosted = (sharp + (sharp - soft) * amount * 2.0).max(0.0);
+            let ratio = srgb_to_linear(boosted) / luma;
+            for channel in px.iter_mut() {
+                *channel *= ratio;
+            }
+        });
+}
+
+/// Lisse le bruit là où l'image est unie et s'abstient sur les contours : plus un pixel s'écarte
+/// de son voisinage, moins il est lissé. La couleur se lisse plus franchement que la luminance,
+/// l'œil y étant bien moins sensible.
+fn apply_noise_reduction(img: &mut ImageBuf, luminance: f32, color: f32) {
+    let (w, h) = (img.width as usize, img.height as usize);
+    let longest = w.max(h) as f32;
+    let radius = |fraction: f32| ((longest * fraction).round() as usize).max(1);
+
+    let encoded = encoded_luma(img);
+    let mut surroundings = encoded.clone();
+    soft_blur(&mut surroundings, w, h, radius(0.002));
+    let tolerance = 0.015 + 0.05 * luminance.max(color);
+    let calm: Vec<f32> = encoded
+        .par_iter()
+        .zip(surroundings.par_iter())
+        .map(|(own, around)| (-((own - around) / tolerance).powi(2)).exp())
+        .collect();
+
+    let luma: Vec<f32> = img.data.par_chunks(3).map(luma_of).collect();
+
+    let mut smooth_luma = luma.clone();
+    if luminance > 0.001 {
+        soft_blur(&mut smooth_luma, w, h, radius(0.0015 + 0.003 * luminance));
+    }
+
+    let mut chroma: [Vec<f32>; 3] = std::array::from_fn(|channel| {
+        img.data
+            .chunks(3)
+            .zip(&luma)
+            .map(|(px, l)| px[channel] - l)
+            .collect()
+    });
+    if color > 0.001 {
+        for plane in &mut chroma {
+            soft_blur(plane, w, h, radius(0.002 + 0.008 * color));
+        }
+    }
+    let original = img.data.clone();
+
+    img.data.par_chunks_mut(3).enumerate().for_each(|(i, px)| {
+        let kept = calm[i];
+        let new_luma = luma[i] + (smooth_luma[i] - luma[i]) * luminance * kept;
+        for (channel, value) in px.iter_mut().enumerate() {
+            let own_chroma = original[i * 3 + channel] - luma[i];
+            let new_chroma = own_chroma + (chroma[channel][i] - own_chroma) * color * kept;
+            *value = (new_luma + new_chroma).max(0.0);
+        }
+    });
+}
+
 fn apply_clarity(img: &mut ImageBuf, amount: f32) {
     let (w, h) = (img.width as usize, img.height as usize);
 
@@ -237,39 +344,34 @@ fn apply_halation(img: &mut ImageBuf, amount: f32) {
     }
 }
 
+/// Flou de boîte séparable. Hors de l'image, le bord est prolongé : sans cela, un aplat se
+/// ternirait en approchant des bords et clarté, halation ou netteté y dessineraient un halo.
 fn box_blur(data: &mut [f32], w: usize, h: usize, radius: usize) {
+    let r = radius.cast_signed();
+    let window = (2 * radius + 1) as f64;
     let mut temp = vec![0.0f32; w * h];
-    let window = (radius * 2 + 1) as f32;
 
-    for y in 0..h {
-        let mut sum = 0.0;
-        for x in 0..(radius.min(w)) {
-            sum += data[y * w + x];
-        }
-        for x in 0..w {
-            let add = (x + radius).min(w - 1);
-            let sub = x.saturating_sub(radius + 1);
-            sum += data[y * w + add];
-            if x > radius {
-                sum -= data[y * w + sub];
-            }
-            temp[y * w + x] = sum / window;
+    for (line, out) in data.chunks(w).zip(temp.chunks_mut(w)) {
+        let last = w.cast_signed() - 1;
+        let at = |i: isize| f64::from(line[i.clamp(0, last) as usize]);
+        let mut sum: f64 = (-r..=r).map(at).sum();
+        for (x, value) in out.iter_mut().enumerate() {
+            *value = (sum / window) as f32;
+            let x = x.cast_signed();
+            sum += at(x + r + 1) - at(x - r);
         }
     }
 
-    for x in 0..w {
-        let mut sum = 0.0;
-        for y in 0..(radius.min(h)) {
-            sum += temp[y * w + x];
-        }
-        for y in 0..h {
-            let add = (y + radius).min(h - 1);
-            let sub = y.saturating_sub(radius + 1);
-            sum += temp[add * w + x];
-            if y > radius {
-                sum -= temp[sub * w + x];
-            }
-            data[y * w + x] = sum / window;
+    // Une passe verticale qui avance ligne par ligne, plus sage pour le cache qu'une colonne à la fois.
+    let last = h.cast_signed() - 1;
+    let row = |y: isize| (y.clamp(0, last) as usize) * w;
+    let mut sums: Vec<f64> = (0..w)
+        .map(|x| (-r..=r).map(|dy| f64::from(temp[row(dy) + x])).sum())
+        .collect();
+    for y in 0..h.cast_signed() {
+        for (x, sum) in sums.iter_mut().enumerate() {
+            data[y as usize * w + x] = (*sum / window) as f32;
+            *sum += f64::from(temp[row(y + r + 1) + x]) - f64::from(temp[row(y - r) + x]);
         }
     }
 }
@@ -491,5 +593,235 @@ mod tests {
             smooth > rough * 0.6 && smooth < rough * 1.6,
             "{smooth} contre {rough}"
         );
+    }
+
+    /// Une valeur de bruit déterministe, centrée sur zéro, d'amplitude `amount`.
+    fn noise(x: u32, y: u32, channel: u32, amount: f32) -> f32 {
+        hash_noise(x + channel * 4001, y + channel * 7919) * amount
+    }
+
+    fn noisy_gray(size: u32, level: f32, amount: f32, per_channel: bool) -> ImageBuf {
+        let mut img = flat(size, level);
+        for y in 0..size {
+            for x in 0..size {
+                let shared = noise(x, y, 0, amount);
+                for channel in 0..3u32 {
+                    let delta = if per_channel {
+                        noise(x, y, channel, amount)
+                    } else {
+                        shared
+                    };
+                    img.data[((y * size + x) * 3 + channel) as usize] += delta;
+                }
+            }
+        }
+        img
+    }
+
+    fn red_minus_green_spread(img: &ImageBuf) -> f32 {
+        let diffs: Vec<f32> = img.data.chunks(3).map(|px| px[0] - px[1]).collect();
+        let mean = diffs.iter().sum::<f32>() / diffs.len() as f32;
+        (diffs.iter().map(|d| (d - mean).powi(2)).sum::<f32>() / diffs.len() as f32).sqrt()
+    }
+
+    fn mean_luma(img: &ImageBuf) -> f32 {
+        img.data.chunks(3).map(luma_of).sum::<f32>() / (img.data.len() / 3) as f32
+    }
+
+    #[test]
+    fn noise_reduction_at_zero_changes_nothing() {
+        let source = noisy_gray(64, 0.3, 0.05, true);
+
+        assert_eq!(
+            apply(&source, &RenderParams::default()).data,
+            apply(&source, &RenderParams::default()).data
+        );
+        let with_zero = RenderParams {
+            noise_luminance: 0.0,
+            noise_color: 0.0,
+            ..RenderParams::default()
+        };
+        assert_eq!(
+            apply(&source, &with_zero).data,
+            apply(&source, &RenderParams::default()).data
+        );
+    }
+
+    #[test]
+    fn luminance_noise_reduction_calms_a_flat_noisy_area() {
+        let source = noisy_gray(96, 0.3, 0.04, false);
+        let cleaned = apply(
+            &source,
+            &RenderParams {
+                noise_luminance: 1.0,
+                ..RenderParams::default()
+            },
+        );
+
+        assert!(
+            standard_deviation(&cleaned)
+                < standard_deviation(&apply(&source, &RenderParams::default())) * 0.5
+        );
+        assert!(
+            (mean_luma(&cleaned) - mean_luma(&apply(&source, &RenderParams::default()))).abs()
+                < 0.01
+        );
+    }
+
+    #[test]
+    fn noise_reduction_spares_a_strong_edge() {
+        let size = 96;
+        let mut source = noisy_gray(size, 0.1, 0.01, false);
+        for y in 0..size {
+            for x in size / 2..size {
+                for channel in 0..3 {
+                    source.data[((y * size + x) * 3 + channel) as usize] += 0.5;
+                }
+            }
+        }
+        let plain = apply(&source, &RenderParams::default());
+        let cleaned = apply(
+            &source,
+            &RenderParams {
+                noise_luminance: 1.0,
+                noise_color: 1.0,
+                ..RenderParams::default()
+            },
+        );
+
+        let step = |img: &ImageBuf| at(img, size / 2, 40) - at(img, size / 2 - 1, 40);
+        assert!(
+            step(&cleaned) > step(&plain) * 0.8,
+            "{} contre {}",
+            step(&cleaned),
+            step(&plain)
+        );
+    }
+
+    #[test]
+    fn colour_noise_reduction_calms_chroma_and_keeps_brightness() {
+        let source = noisy_gray(96, 0.3, 0.04, true);
+        let plain = apply(&source, &RenderParams::default());
+        let cleaned = apply(
+            &source,
+            &RenderParams {
+                noise_color: 1.0,
+                ..RenderParams::default()
+            },
+        );
+
+        assert!(red_minus_green_spread(&cleaned) < red_minus_green_spread(&plain) * 0.4);
+        assert!((mean_luma(&cleaned) - mean_luma(&plain)).abs() < 0.01);
+    }
+
+    fn step_edge(width: u32, height: u32) -> ImageBuf {
+        let mut img = ImageBuf::new(width, height);
+        for y in 0..height {
+            for x in 0..width {
+                let value = if x < width / 2 { 0.1 } else { 0.4 };
+                for channel in 0..3 {
+                    img.data[((y * width + x) * 3 + channel) as usize] = value;
+                }
+            }
+        }
+        img
+    }
+
+    fn sharpened(img: &ImageBuf, amount: f32, radius: f32) -> ImageBuf {
+        apply(
+            img,
+            &RenderParams {
+                sharpening: amount,
+                sharpen_radius: radius,
+                ..RenderParams::default()
+            },
+        )
+    }
+
+    #[test]
+    fn sharpening_overshoots_on_both_sides_of_an_edge() {
+        let source = step_edge(200, 8);
+        let plain = apply(&source, &RenderParams::default());
+        let crisp = sharpened(&source, 1.0, 1.0);
+
+        let (dark, bright) = (200 / 2 - 1, 200 / 2);
+        assert!(
+            at(&crisp, dark, 4) < at(&plain, dark, 4) - 0.005,
+            "côté sombre"
+        );
+        assert!(
+            at(&crisp, bright, 4) > at(&plain, bright, 4) + 0.005,
+            "côté clair"
+        );
+        assert!(
+            (at(&crisp, 10, 4) - at(&plain, 10, 4)).abs() < 1e-4,
+            "loin du contour, rien ne bouge"
+        );
+    }
+
+    #[test]
+    fn sharpening_leaves_a_flat_image_alone_even_brighter_than_white() {
+        for level in [0.05, 0.3, 1.0, 1.6] {
+            let crisp = sharpened(&flat(64, level), 1.0, 2.0);
+
+            let plain = apply(&flat(64, level), &RenderParams::default());
+            let unchanged = crisp
+                .data
+                .iter()
+                .zip(&plain.data)
+                .all(|(a, b)| (a - b).abs() < 1e-5);
+            assert!(unchanged, "niveau {level}");
+        }
+    }
+
+    #[test]
+    fn a_larger_radius_spreads_the_sharpening_wider() {
+        let source = step_edge(1800, 8);
+        let plain = apply(&source, &RenderParams::default());
+        let reach = |radius| {
+            let crisp = sharpened(&source, 1.0, radius);
+            (0..900)
+                .rev()
+                .take_while(|x| (at(&crisp, *x, 4) - at(&plain, *x, 4)).abs() > 0.002)
+                .count()
+        };
+
+        assert!(
+            reach(3.0) > reach(0.5),
+            "{} contre {}",
+            reach(3.0),
+            reach(0.5)
+        );
+    }
+
+    #[test]
+    fn the_sharpening_radius_follows_the_resolution() {
+        let overshoot = |width: u32| {
+            let source = step_edge(width, 8);
+            let plain = apply(&source, &RenderParams::default());
+            let crisp = sharpened(&source, 1.0, 2.0);
+            at(&crisp, width / 2, 4) - at(&plain, width / 2, 4)
+        };
+
+        let (small, large) = (overshoot(900), overshoot(1800));
+        assert!(
+            (small - large).abs() < large * 0.2,
+            "{small} contre {large}"
+        );
+    }
+
+    #[test]
+    fn blurring_a_flat_area_keeps_it_flat_right_up_to_the_borders() {
+        for (w, h, radius) in [(40, 30, 1), (40, 30, 5), (7, 5, 3)] {
+            let mut data = vec![0.37; w * h];
+
+            box_blur(&mut data, w, h, radius);
+
+            assert!(
+                data.iter().all(|v| (v - 0.37).abs() < 1e-5),
+                "{w}x{h}, rayon {radius} : {:?}",
+                data.iter().copied().fold(f32::MAX, f32::min)
+            );
+        }
     }
 }
