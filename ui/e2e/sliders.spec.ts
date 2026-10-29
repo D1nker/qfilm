@@ -91,7 +91,7 @@ test.describe("typing a slider value", () => {
   });
 
   test("takes the displayed unit for the mixer hue, in degrees", async ({ openApp }) => {
-    await openApp.page.getByRole("button", { name: "Mélangeur de couleurs", exact: true }).click();
+    await openApp.openSection("Mélangeur de couleurs");
     const hue = openApp.page.locator(".mixer .slider", { hasText: "Teinte" });
 
     await hue.locator("button.value").click();

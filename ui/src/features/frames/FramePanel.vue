@@ -7,7 +7,7 @@
       </UiButton>
     </div>
 
-    <UiCollapsible :title="t('frames.shape')">
+    <UiCollapsible id="frame-shape" :title="t('frames.shape')">
       <div class="grid">
         <UiThumbnailButton
           v-for="info in frames"
@@ -35,7 +35,7 @@
       />
     </UiCollapsible>
 
-    <UiCollapsible :title="t('frames.caption')">
+    <UiCollapsible id="frame-caption" :title="t('frames.caption')">
       <UiField :label="t('caption.text')" stacked>
         <UiInput v-model="caption.text" :placeholder="t('caption.placeholder')" />
       </UiField>
@@ -68,7 +68,7 @@
       </p>
     </UiCollapsible>
 
-    <UiCollapsible :title="t('frames.myFrames')" :default-open="false">
+    <UiCollapsible id="frame-mine" :title="t('frames.myFrames')" :default-open="false">
       <FrameLibrary />
     </UiCollapsible>
   </div>

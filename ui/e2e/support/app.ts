@@ -6,6 +6,15 @@ import { expect, test as base, type Page } from "@playwright/test";
 const FRAMES_DIRECTORY = fileURLToPath(new URL("../../../crates/core/frames/", import.meta.url));
 const MOCK_SCRIPT = fileURLToPath(new URL("./tauri-mock.js", import.meta.url));
 
+const OPEN_PANEL_IDS = [
+  "adjust-light",
+  "adjust-color",
+  "adjust-grading",
+  "adjust-detail",
+  "adjust-effects",
+  "adjust-hsl",
+];
+
 const BUILTIN_FRAMES = ["solid", "instant", "film35", "film120", "letterbox", "padding"];
 
 interface RawParam {
@@ -66,7 +75,18 @@ export interface ExportCall extends RenderCall {
 export class App {
   constructor(readonly page: Page) {}
 
-  async start(imageSize?: [number, number]) {
+  async start(imageSize?: [number, number], openPanels = true) {
+    if (openPanels) {
+      // Le panneau Retouche garde ses sections avancées fermées : les tests les veulent ouvertes,
+      // sauf ceux qui vérifient justement ce comportement (`openPanels: false`).
+      await this.page.addInitScript((ids) => {
+        if (localStorage.getItem("qfilm-panels")) return;
+        localStorage.setItem(
+          "qfilm-panels",
+          JSON.stringify(Object.fromEntries(ids.map((id) => [id, true]))),
+        );
+      }, OPEN_PANEL_IDS);
+    }
     await this.page.addInitScript((manifests) => {
       (window as unknown as { __MANIFESTS__: unknown }).__MANIFESTS__ = manifests;
     }, builtinManifests());
@@ -134,6 +154,12 @@ export class App {
     return this.page.getByRole("tab", { name });
   }
 
+  /// Ouvre une section du panneau si elle ne l'est pas déjà (les tests les ouvrent d'office).
+  async openSection(name: string) {
+    const header = this.page.getByRole("button", { name: new RegExp(`^${name}( Modifié)?$`) });
+    if ((await header.getAttribute("aria-expanded")) !== "true") await header.click();
+  }
+
   get preferencesButton() {
     return this.page.getByRole("button", { name: /^(Préférences|Preferences)$/ });
   }
@@ -172,16 +198,18 @@ export const test = base.extend<{
   app: App;
   openApp: App;
   imageSize: [number, number] | undefined;
+  openPanels: boolean;
 }>({
   imageSize: [undefined, { option: true }],
-  app: async ({ page, imageSize }, use) => {
+  openPanels: [true, { option: true }],
+  app: async ({ page, imageSize, openPanels }, use) => {
     const app = new App(page);
-    await app.start(imageSize);
+    await app.start(imageSize, openPanels);
     await use(app);
   },
-  openApp: async ({ page, imageSize }, use) => {
+  openApp: async ({ page, imageSize, openPanels }, use) => {
     const app = new App(page);
-    await app.start(imageSize);
+    await app.start(imageSize, openPanels);
     await app.openPhoto();
     await use(app);
   },

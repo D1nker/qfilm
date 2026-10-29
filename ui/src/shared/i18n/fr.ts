@@ -28,6 +28,7 @@ export const fr = {
     show: "Afficher le panneau (F)",
   },
   common: {
+    modified: "Modifié",
     reset: "Réinitialiser",
     cancel: "Annuler",
   },
@@ -43,6 +44,7 @@ export const fr = {
       detail: "Détail",
       effects: "Effets",
     },
+    resetGroup: "Réinitialiser cette section",
     hsl: {
       band: "Teinte à ajuster",
       hue: "Teinte",

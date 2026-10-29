@@ -8,7 +8,26 @@
     </div>
 
     <template v-for="[group, items] in groupedControls" :key="group">
-      <UiCollapsible :title="t(`adjust.groups.${group}`)">
+      <UiCollapsible
+        :id="`adjust-${group}`"
+        :title="t(`adjust.groups.${group}`)"
+        :default-open="OPEN_BY_DEFAULT.has(group)"
+        :modified="changed(keysOf(items))"
+      >
+        <template #actions>
+          <UiTooltip v-if="changed(keysOf(items))" :text="t('adjust.resetGroup')">
+            <UiButton
+              variant="ghost"
+              size="sm"
+              icon
+              :aria-label="`${t('adjust.resetGroup')} : ${t(`adjust.groups.${group}`)}`"
+              @click="reset(keysOf(items))"
+            >
+              <RotateCcw :size="13" />
+            </UiButton>
+          </UiTooltip>
+        </template>
+
         <UiSlider
           v-for="control in items"
           :key="control.key"
@@ -25,7 +44,26 @@
         />
       </UiCollapsible>
 
-      <UiCollapsible v-if="group === 'color'" :title="t('adjust.groups.hsl')" :default-open="false">
+      <UiCollapsible
+        v-if="group === 'color'"
+        id="adjust-hsl"
+        :title="t('adjust.groups.hsl')"
+        :default-open="false"
+        :modified="changed(HSL_KEYS)"
+      >
+        <template #actions>
+          <UiTooltip v-if="changed(HSL_KEYS)" :text="t('adjust.resetGroup')">
+            <UiButton
+              variant="ghost"
+              size="sm"
+              icon
+              :aria-label="`${t('adjust.resetGroup')} : ${t('adjust.groups.hsl')}`"
+              @click="reset(HSL_KEYS)"
+            >
+              <RotateCcw :size="13" />
+            </UiButton>
+          </UiTooltip>
+        </template>
         <HslMixer />
       </UiCollapsible>
     </template>
@@ -34,10 +72,14 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { RotateCcw } from "lucide-vue-next";
+
 import { t } from "@/shared/i18n";
+import type { RenderParams } from "@/shared/api/api";
 
 import { controls, formatControlValue } from "@/features/looks/controls";
 import HslMixer from "@/features/looks/HslMixer.vue";
+import { hslRanges } from "@/features/looks/hsl";
 import { NEUTRAL } from "@/features/looks/neutral";
 import { trackFor } from "@/features/looks/tracks";
 import { groupBy } from "@/shared/lib/groupBy";
@@ -46,11 +88,25 @@ import { useLook } from "@/features/looks/useLook";
 import UiButton from "@/shared/ui/UiButton.vue";
 import UiCollapsible from "@/shared/ui/UiCollapsible.vue";
 import UiSlider from "@/shared/ui/UiSlider.vue";
+import UiTooltip from "@/shared/ui/UiTooltip.vue";
 
 const { image } = useEditor();
 const { params, setParam, resetLook } = useLook();
 
 const groupedControls = computed(() => groupBy(controls, (control) => control.group));
+
+/// Les bases d'abord : le reste s'ouvre à la demande, et un point signale ce qui a bougé.
+const OPEN_BY_DEFAULT = new Set(["light", "color"]);
+const HSL_KEYS = hslRanges.map((range) => range.key);
+
+const keysOf = (items: { key: keyof RenderParams }[]) => items.map((item) => item.key);
+
+const changed = (keys: (keyof RenderParams)[]) =>
+  keys.some((key) => Math.abs(params.value[key] - NEUTRAL[key]) > 1e-6);
+
+function reset(keys: (keyof RenderParams)[]) {
+  for (const key of keys) setParam(key, NEUTRAL[key]);
+}
 </script>
 
 <style scoped>

@@ -30,6 +30,7 @@ export const en: Messages = {
     show: "Show the panel (F)",
   },
   common: {
+    modified: "Modified",
     reset: "Reset",
     cancel: "Cancel",
   },
@@ -45,6 +46,7 @@ export const en: Messages = {
       detail: "Detail",
       effects: "Effects",
     },
+    resetGroup: "Reset this section",
     hsl: {
       band: "Color to adjust",
       hue: "Hue",

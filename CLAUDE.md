@@ -112,6 +112,11 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
   `controls.ts` (or `hsl.ts` for the mixer) lists them and a test fails when a field has none or two. Adding a
   setting means: the Rust field with its default, `neutral.ts`, `ui/e2e/support/tauri-mock.js`, `test/fixtures.ts`,
   the slider, both translations, `npm run rust:bindings`.
+- Panel sections are `UiCollapsible`: with an `id` their open/closed state is remembered
+  (`shared/lib/panelState`), a `modified` dot flags a section whose setting has moved, and the Retouche panel
+  opens only Light and Color by default, with a reset button on each section that has changes. The e2e fixture
+  opens every section (`openPanels`, `App.openSection`), so a spec that wants the real defaults sets
+  `test.use({ openPanels: false })`.
 - The value shown on a `UiSlider` is clickable: it opens a field to type the number (Enter on the focused thumb
   too), Enter or leaving applies it, Escape cancels. When the displayed unit is not the stored one (an
   intensity stored 0–1 shown in %, a mixer hue stored ±1 shown in degrees) pass `edit-scale`.

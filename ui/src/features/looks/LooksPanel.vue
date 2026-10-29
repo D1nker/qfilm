@@ -12,7 +12,12 @@
       class="amount"
     />
 
-    <UiCollapsible v-for="group in groupedPresets" :key="group.key" :title="localized(group.title)">
+    <UiCollapsible
+      v-for="group in groupedPresets"
+      :id="`looks-${group.key}`"
+      :key="group.key"
+      :title="localized(group.title)"
+    >
       <div class="grid">
         <UiTooltip
           v-for="preset in group.items"

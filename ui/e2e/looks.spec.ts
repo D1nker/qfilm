@@ -120,9 +120,7 @@ test.describe("looks", () => {
   test.describe("colour mixer", () => {
     test.beforeEach(async ({ openApp }) => {
       await openApp.tab("Retouche").click();
-      await openApp.page
-        .getByRole("button", { name: "Mélangeur de couleurs", exact: true })
-        .click();
+      await openApp.openSection("Mélangeur de couleurs");
     });
 
     const mixer = (app: { page: Page }) => app.page.locator(".mixer");
@@ -197,7 +195,7 @@ test.describe("looks", () => {
         .poll(async () => (await openApp.lastRender()).params.yellowLuminance)
         .toBeCloseTo(0.5);
 
-      await openApp.page.getByRole("button", { name: "Réinitialiser" }).click();
+      await openApp.page.getByRole("button", { name: "Réinitialiser", exact: true }).click();
 
       await expect.poll(async () => (await openApp.lastRender()).params.yellowLuminance).toBe(0);
     });
@@ -244,9 +242,7 @@ test.describe("looks", () => {
     });
 
     test("make the mixer tracks follow the colour being adjusted", async ({ openApp }) => {
-      await openApp.page
-        .getByRole("button", { name: "Mélangeur de couleurs", exact: true })
-        .click();
+      await openApp.openSection("Mélangeur de couleurs");
       const mixer = openApp.page.locator(".mixer");
       const saturation = () =>
         mixer
@@ -317,7 +313,7 @@ test.describe("looks", () => {
     await openApp.page.getByRole("button", { name: "Portrait 400" }).click();
     await openApp.tab("Retouche").click();
 
-    await openApp.page.getByRole("button", { name: "Réinitialiser" }).click();
+    await openApp.page.getByRole("button", { name: "Réinitialiser", exact: true }).click();
 
     await expect
       .poll(async () => (await openApp.lastRender()).params)
