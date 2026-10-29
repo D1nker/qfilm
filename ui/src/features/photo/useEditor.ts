@@ -22,8 +22,13 @@ const error = ref("");
 const loading = ref(false);
 const comparing = ref(false);
 
+/// « Neutre » existe (c'est l'état de départ, et ce que « Réinitialiser » rétablit), mais ne se choisit pas :
+/// la liste n'a pas à proposer de ne rien faire.
 const groupedPresets = computed(() =>
-  groupBy(presets.value, (preset) => textKey(preset.category)).map(([key, items]) => ({
+  groupBy(
+    presets.value.filter((preset) => preset.id !== "neutral"),
+    (preset) => textKey(preset.category),
+  ).map(([key, items]) => ({
     key,
     title: items[0]?.category ?? key,
     items,

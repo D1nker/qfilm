@@ -43,7 +43,7 @@ test.describe("undo and redo", () => {
     await undo(openApp);
     await expect.poll(() => exposure(openApp)).toBe(0);
     await openApp.tab("Preset").click();
-    await expect(openApp.page.locator(".thumb.active")).toContainText("Neutre");
+    await expect(openApp.page.locator(".thumb.active")).toHaveCount(0);
 
     await redo(openApp);
     await expect.poll(() => exposure(openApp)).toBeCloseTo(1);

@@ -46,7 +46,7 @@ const open = props.id ? usePanelOpen(props.id, props.defaultOpen) : ref(props.de
 }
 
 .group + .group {
-  margin-top: var(--space-3);
+  margin-top: var(--space-5);
 }
 
 .bar {

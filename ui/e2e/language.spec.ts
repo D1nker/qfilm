@@ -71,9 +71,6 @@ test.describe("looks and frames", () => {
       await expect(
         openApp.page.getByRole("button", { name: "Color negative", exact: true }),
       ).toBeVisible();
-      await openApp.group("Base");
-      await expect(openApp.page.getByRole("button", { name: /Neutral/ })).toBeVisible();
-      await openApp.group("Color negative");
 
       await openApp.page.getByRole("button", { name: "Golden 200" }).hover();
       await expect(openApp.page.getByRole("tooltip")).toHaveText("Description of Golden 200");

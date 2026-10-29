@@ -223,7 +223,7 @@ function resetCurves() {
   align-items: center;
   justify-content: space-between;
   min-height: 28px;
-  margin-bottom: var(--space-1);
+  margin-bottom: var(--space-4);
 }
 
 .part-title {
@@ -231,5 +231,7 @@ function resetCurves() {
   color: var(--text);
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 </style>

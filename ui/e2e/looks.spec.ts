@@ -349,7 +349,7 @@ test.describe("looks", () => {
     await expect
       .poll(async () => (await openApp.lastRender()).params)
       .toMatchObject({ exposure: 0, contrast: 0, grainSize: 2 });
-    await expect(openApp.page.locator(".thumb.active")).toContainText("Neutre");
+    await expect(openApp.page.locator(".thumb.active")).toHaveCount(0);
   });
 
   test("choosing a look names the film stock printed on the frame", async ({ openApp }) => {

@@ -29,24 +29,27 @@ test.describe("the group rail", () => {
     await expect(openApp.page.getByRole("slider", { name: "Exposition" })).toBeHidden();
   });
 
-  test("a new group starts at its top", async ({ openApp }) => {
-    await openApp.tab("Retouche").click();
-    await item(openApp, "Finition").click();
-    await panel(openApp).evaluate((element) => (element.scrollTop = element.scrollHeight));
-    expect(await panel(openApp).evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
+  test.describe("in a short window, where the panel scrolls", () => {
+    test.use({ viewport: { width: 1280, height: 480 } });
 
-    await item(openApp, "Couleurs").click();
+    test("a new group starts at its top", async ({ openApp }) => {
+      await openApp.tab("Retouche").click();
+      await panel(openApp).evaluate((element) => (element.scrollTop = element.scrollHeight));
+      expect(await panel(openApp).evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
 
-    await expect.poll(() => panel(openApp).evaluate((element) => element.scrollTop)).toBe(0);
-  });
+      await item(openApp, "Couleurs").click();
 
-  test("stays on screen while the panel scrolls", async ({ openApp }) => {
-    await openApp.tab("Retouche").click();
-    await item(openApp, "Finition").click();
+      await expect.poll(() => panel(openApp).evaluate((element) => element.scrollTop)).toBe(0);
+    });
 
-    await panel(openApp).evaluate((element) => (element.scrollTop = element.scrollHeight));
+    test("stays on screen while the panel scrolls", async ({ openApp }) => {
+      await openApp.tab("Retouche").click();
 
-    await expect(item(openApp, "Tons")).toBeInViewport();
+      await panel(openApp).evaluate((element) => (element.scrollTop = element.scrollHeight));
+      expect(await panel(openApp).evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
+
+      await expect(item(openApp, "Tons")).toBeInViewport();
+    });
   });
 
   test("keeps the chosen group when another tab is visited", async ({ openApp }) => {
@@ -88,18 +91,22 @@ test.describe("the group rail", () => {
   });
 
   test.describe("the Preset tab", () => {
-    test("has one icon per look category, and opens on the first useful one", async ({
-      openApp,
-    }) => {
+    test("has one icon per look category, and opens on the first one", async ({ openApp }) => {
       await openApp.tab("Preset").click();
 
-      await expect(rail(openApp).getByRole("button")).toHaveCount(3);
-      for (const name of ["Base", "Négatif couleur", "Noir & blanc"]) {
+      await expect(rail(openApp).getByRole("button")).toHaveCount(2);
+      for (const name of ["Négatif couleur", "Noir & blanc"]) {
         await expect(item(openApp, name)).toBeVisible();
       }
-      // « Base » ne propose que Neutre : on ouvre sur la catégorie suivante.
       await expect(item(openApp, "Négatif couleur")).toHaveAttribute("aria-current", "true");
       await expect(openApp.page.getByRole("button", { name: "Portrait 400" })).toBeVisible();
+    });
+
+    test("does not offer the neutral look: Reset is how to get back to it", async ({ openApp }) => {
+      await openApp.tab("Preset").click();
+
+      await expect(item(openApp, "Base")).toHaveCount(0);
+      await expect(openApp.page.getByRole("button", { name: /Neutre|Neutral/ })).toHaveCount(0);
     });
 
     test("a click shows that category alone, the intensity staying below", async ({ openApp }) => {

@@ -173,6 +173,12 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
   and curves, which is what choosing the Neutral preset does; it is disabled while `useLook().isPristine`.
   A Retouche page has its own Reset on its heading (that page's sliders and, for Tons, the curves), the Cadre
   tab's is on "Forme". The Preset tab's intensity slider comes after its categories.
+- Density: a Retouche page title is uppercase, with room below it (`AdjustPanel`), and sections are `--space-5`
+  apart. A `UiSlider` inside a `UiRailPanel` measures its container (`container-type` on the rail panel's
+  body): from 340 px of body width it is one line (name | track | value, a grid in a `@container` rule that
+  must stay **last** in the stylesheet, a container query adds no specificity), below that two lines. Dialogs
+  have no such container, so their sliders stay stacked. "Neutral" is not offered in the Preset list
+  (`groupedPresets` filters it, it stays the starting state): Reset is the way back.
 - Panel sections are `UiCollapsible`: with an `id` their open/closed state is remembered
   (`shared/lib/panelState`), a `modified` dot flags a section whose setting has moved, and the Retouche panel
   opens only Light and Color by default, with a reset button on each section that has changes. The e2e fixture

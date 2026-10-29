@@ -261,4 +261,41 @@ button.value:hover:not(:disabled) {
   outline: none;
   box-shadow: var(--focus-ring);
 }
+
+/* En dernier : à spécificité égale la dernière règle gagne, requête de conteneur ou non. À l'aise, un
+   curseur tient sur une ligne (le nom, la piste, la valeur) ; plus étroit, sur deux. */
+@container rail-body (min-width: 340px) {
+  .slider {
+    display: grid;
+    grid-template-columns: minmax(6rem, 32%) minmax(0, 1fr) 3.75rem;
+    column-gap: var(--space-3);
+    align-items: center;
+    margin-top: var(--space-3);
+  }
+
+  .row {
+    display: contents;
+  }
+
+  .row > span {
+    grid-column: 1;
+    grid-row: 1;
+    line-height: 1.25;
+  }
+
+  .root {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .value {
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+  }
+
+  .editor {
+    width: 100%;
+  }
+}
 </style>

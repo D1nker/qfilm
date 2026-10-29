@@ -164,3 +164,43 @@ test.describe("typing in a dialog", () => {
     await expect(openApp.page.getByRole("dialog")).toHaveCount(0);
   });
 });
+
+test.describe("slider layout", () => {
+  const rows = async (app: App) =>
+    app.page
+      .locator(".slider")
+      .first()
+      .evaluate((slider) => {
+        const label = slider.querySelector(".row > span")?.getBoundingClientRect();
+        const track = slider.querySelector(".root")?.getBoundingClientRect();
+        const value = slider.querySelector(".value")?.getBoundingClientRect();
+        return { label, track, value };
+      });
+
+  test.describe("in a wide panel", () => {
+    test.use({ viewport: { width: 1440, height: 900 } });
+
+    test("the name, the track and the value share one line", async ({ openApp }) => {
+      await openApp.tab("Retouche").click();
+
+      const { label, track, value } = await rows(openApp);
+
+      expect(Math.abs((label?.top ?? 0) - (track?.top ?? 99))).toBeLessThan(12);
+      expect(track?.left ?? 0).toBeGreaterThan(label?.right ?? Infinity);
+      expect(value?.left ?? 0).toBeGreaterThanOrEqual(track?.right ?? Infinity);
+      expect(track?.width ?? 0).toBeGreaterThan(130);
+    });
+  });
+
+  test.describe("in a narrow panel", () => {
+    test.use({ viewport: { width: 1200, height: 800 } });
+
+    test("the track goes under the name and the value", async ({ openApp }) => {
+      await openApp.tab("Retouche").click();
+
+      const { label, track } = await rows(openApp);
+
+      expect(track?.top ?? 0).toBeGreaterThan(label?.bottom ?? Infinity);
+    });
+  });
+});

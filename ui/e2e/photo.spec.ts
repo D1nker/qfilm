@@ -25,8 +25,9 @@ test.describe("opening a photo", () => {
     expect(order).toEqual(["open_image", "preset_thumbnails"]);
   });
 
-  test("shows one thumbnail per look", async ({ openApp }) => {
-    await expect(openApp.page.locator(".thumb img")).toHaveCount(4);
+  test("shows one thumbnail per look, the neutral one apart", async ({ openApp }) => {
+    // Le faux pont sert quatre looks, dont « Neutre », que la liste ne propose pas.
+    await expect(openApp.page.locator(".thumb img")).toHaveCount(3);
   });
 
   test("opens a dropped photo", async ({ app }) => {

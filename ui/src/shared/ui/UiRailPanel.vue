@@ -110,5 +110,9 @@ watch(model, async () => {
 .body {
   flex: 1;
   min-width: 0;
+
+  /* Les curseurs s'y mesurent : assez large, ils tiennent sur une seule ligne (voir `UiSlider`). */
+  container-type: inline-size;
+  container-name: rail-body;
 }
 </style>

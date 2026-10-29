@@ -63,8 +63,7 @@ const { groupedPresets, thumbnails } = useEditor();
 const { activePreset, amount, isPristine, applyPreset, resetLook } = useLook();
 
 /// La catégorie affichée, tenue par le panneau d'à côté (voir `AdjustPanel`). Vide : celle du look
-/// appliqué ; à défaut, la première qui propose autre chose que « Neutre », pour ne pas ouvrir sur
-/// une page à une seule vignette.
+/// appliqué, à défaut la première.
 const chosen = defineModel<string>("group", { required: true });
 
 const automatic = computed(() => {
@@ -72,8 +71,7 @@ const automatic = computed(() => {
   const active = groups.find((entry) =>
     entry.items.some((preset) => preset.id === activePreset.value),
   );
-  const useful = groups.find((entry) => entry.items.some((preset) => preset.id !== "neutral"));
-  return (activePreset.value !== "neutral" ? active : useful)?.key ?? groups[0]?.key ?? "";
+  return (active ?? groups[0])?.key ?? "";
 });
 
 const page = computed({
