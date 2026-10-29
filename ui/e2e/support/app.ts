@@ -197,7 +197,8 @@ export class App {
 
   /// Les panneaux Retouche et Cadre sont en pages : affiche celle de la rampe d'icônes qui porte ce nom.
   async group(name: string) {
-    await this.page.getByRole("button", { name: `Aller à ${name}`, exact: true }).click();
+    const goTo = new RegExp(`^(Aller à|Go to) ${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`);
+    await this.page.getByRole("button", { name: goTo }).click();
   }
 
   /// Ouvre une section du panneau si elle ne l'est pas déjà, en passant d'abord sur sa page.

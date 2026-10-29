@@ -78,13 +78,15 @@ function setCrop(rect: Rect) {
   Object.assign(crop, rect);
 }
 
-/// Toucher à un réglage de géométrie passe en mode recadrage : on les règle sur la photo entière.
+/// Le redressement et les proportions se règlent sur la photo entière, cadre par-dessus : y toucher ouvre
+/// l'outil de recadrage.
 const edit = () => {
   cropping.value = true;
 };
 
+/// Un quart de tour ou un miroir s'applique tout de suite, à la photo cadrée : le cadre suit la photo, et
+/// l'outil de recadrage n'a pas besoin de s'ouvrir.
 function rotate(clockwise: boolean) {
-  edit();
   quarterTurns.value = (quarterTurns.value + (clockwise ? 1 : 3)) % 4;
   setCrop(clockwise ? rotateClockwise(crop) : rotateCounterClockwise(crop));
   portrait.value = !portrait.value;
@@ -92,7 +94,6 @@ function rotate(clockwise: boolean) {
 
 /// Un miroir à l'écran : après un quart de tour, l'axe de la photo d'origine n'est plus le même.
 function flip(axis: "horizontal" | "vertical") {
-  edit();
   const sideways = quarterTurns.value % 2 === 1;
   const onSourceHorizontal = (axis === "horizontal") !== sideways;
 

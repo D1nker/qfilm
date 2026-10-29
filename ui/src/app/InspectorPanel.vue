@@ -2,7 +2,9 @@
   <aside>
     <div class="card">
       <UiTabs v-model="tab" :tabs="tabs">
-        <template #looks><LooksPanel @select="labelFrameFromLook" /></template>
+        <template #looks>
+          <LooksPanel v-model:group="group.looks" @select="labelFrameFromLook" />
+        </template>
         <template #adjust><AdjustPanel v-model:group="group.adjust" /></template>
         <template #frame><FramePanel v-model:group="group.frame" /></template>
       </UiTabs>

@@ -54,10 +54,8 @@ describe("useGeometry", () => {
     expect(geometry.previewGeometry.value.crop.width).toBe(0.5);
   });
 
-  it("any geometry control switches to cropping", async () => {
+  it("straightening and the aspect ratio switch to cropping, the cadre being set on the whole photo", async () => {
     for (const touch of [
-      (g: Awaited<ReturnType<typeof setup>>["geometry"]) => g.rotate(true),
-      (g: Awaited<ReturnType<typeof setup>>["geometry"]) => g.flip("horizontal"),
       (g: Awaited<ReturnType<typeof setup>>["geometry"]) => g.setAngle(2),
       (g: Awaited<ReturnType<typeof setup>>["geometry"]) => g.setAspect("1:1"),
     ]) {
@@ -66,6 +64,29 @@ describe("useGeometry", () => {
 
       expect(geometry.cropping.value).toBe(true);
     }
+  });
+
+  it("a turn or a mirror applies at once to the cropped photo, without opening the tool", async () => {
+    const { geometry } = await setup();
+    geometry.setCrop({ x: 0.1, y: 0.2, width: 0.3, height: 0.5 });
+
+    geometry.rotate(true);
+    geometry.flip("horizontal");
+
+    expect(geometry.cropping.value).toBe(false);
+    // Ce que reçoit le moteur : le vrai cadre, tourné et retourné avec la photo.
+    expect(geometry.previewGeometry.value.quarterTurns).toBe(1);
+    expect(geometry.previewGeometry.value.crop.width).toBeCloseTo(0.5);
+    expect(geometry.previewGeometry.value.crop.height).toBeCloseTo(0.3);
+  });
+
+  it("a turn leaves the tool open when it already was", async () => {
+    const { geometry } = await setup();
+    geometry.startCropping();
+
+    geometry.rotate(false);
+
+    expect(geometry.cropping.value).toBe(true);
   });
 
   describe("quarter turns", () => {

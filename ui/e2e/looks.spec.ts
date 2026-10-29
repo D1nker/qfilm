@@ -11,11 +11,11 @@ test.describe("looks", () => {
     await expect(intensity).not.toHaveAttribute("data-disabled");
   });
 
-  test("the intensity slider sits below the categories, not above them", async ({ openApp }) => {
+  test("the intensity slider sits below the looks, not above them", async ({ openApp }) => {
     const intensity = await openApp.page.getByRole("slider", { name: "Intensité" }).boundingBox();
-    const lastCategory = await openApp.page.locator("button[aria-expanded]").last().boundingBox();
+    const lastLook = await openApp.page.locator(".grid .thumb:visible").last().boundingBox();
 
-    expect(intensity?.y ?? 0).toBeGreaterThan(lastCategory?.y ?? Infinity);
+    expect(intensity?.y ?? 0).toBeGreaterThan(lastLook?.y ?? Infinity);
   });
 
   test.describe("reset", () => {

@@ -39,6 +39,7 @@ export const en: Messages = {
   },
   looks: {
     intensity: "Intensity",
+    rail: "Look categories",
   },
   adjust: {
     groups: {
@@ -132,7 +133,7 @@ export const en: Messages = {
   geometry: {
     title: "Crop",
     crop: "Crop",
-    done: "Done",
+    done: "Finish cropping",
     overlay: "Crop area",
     cropSize: "Crop of {width} × {height} px",
     aspect: "Aspect ratio",

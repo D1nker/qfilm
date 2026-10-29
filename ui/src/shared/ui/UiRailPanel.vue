@@ -19,6 +19,7 @@
       <div v-for="item in items" v-show="item.id === model" :key="item.id" class="page">
         <slot :name="item.id" />
       </div>
+      <slot name="footer" />
     </div>
   </div>
 </template>
@@ -31,7 +32,7 @@ import { scrollParent } from "@/shared/lib/scrollParent";
 import UiTooltip from "@/shared/ui/UiTooltip.vue";
 
 /// Un panneau en pages, et sur son bord une rampe d'icônes : une par page, qui l'affiche seule. Le
-/// contenu de chaque page vient du créneau qui porte son identifiant.
+/// contenu de chaque page vient du créneau qui porte son identifiant ; `footer` suit la page affichée, quelle qu'elle soit.
 defineProps<{
   label: string;
   items: { id: string; label: string; icon: Component }[];

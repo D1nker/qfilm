@@ -84,14 +84,44 @@ test.describe("the group rail", () => {
     await openApp.page.keyboard.press("r");
 
     await expect(item(openApp, "Recadrage")).toHaveAttribute("aria-current", "true");
-    await expect(openApp.page.getByRole("button", { name: "Terminer" })).toBeVisible();
+    await expect(openApp.page.getByRole("button", { name: "Terminer le recadrage" })).toBeVisible();
   });
 
-  test("the Preset tab has none: its categories are few and fit on one screen", async ({
-    openApp,
-  }) => {
-    await openApp.tab("Preset").click();
+  test.describe("the Preset tab", () => {
+    test("has one icon per look category, and opens on the first useful one", async ({
+      openApp,
+    }) => {
+      await openApp.tab("Preset").click();
 
-    await expect(rail(openApp)).toHaveCount(0);
+      await expect(rail(openApp).getByRole("button")).toHaveCount(3);
+      for (const name of ["Base", "Négatif couleur", "Noir & blanc"]) {
+        await expect(item(openApp, name)).toBeVisible();
+      }
+      // « Base » ne propose que Neutre : on ouvre sur la catégorie suivante.
+      await expect(item(openApp, "Négatif couleur")).toHaveAttribute("aria-current", "true");
+      await expect(openApp.page.getByRole("button", { name: "Portrait 400" })).toBeVisible();
+    });
+
+    test("a click shows that category alone, the intensity staying below", async ({ openApp }) => {
+      await openApp.tab("Preset").click();
+
+      await item(openApp, "Noir & blanc").click();
+
+      await expect(openApp.page.getByRole("button", { name: "Classique 400" })).toBeVisible();
+      await expect(openApp.page.getByRole("button", { name: "Portrait 400" })).toBeHidden();
+      await expect(openApp.page.getByRole("slider", { name: "Intensité" })).toBeVisible();
+    });
+
+    test("keeps the category that was looked at last", async ({ openApp }) => {
+      await openApp.tab("Preset").click();
+      await item(openApp, "Noir & blanc").click();
+      await openApp.page.getByRole("button", { name: "Classique 400" }).click();
+
+      await openApp.tab("Cadre").click();
+      await openApp.tab("Preset").click();
+
+      await expect(item(openApp, "Noir & blanc")).toHaveAttribute("aria-current", "true");
+      await expect(openApp.page.getByRole("button", { name: "Classique 400" })).toBeVisible();
+    });
   });
 });

@@ -139,8 +139,10 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
   reduces the full image just enough, so a tight crop stays sharp) and the cropped preview is cached in
   `LoadedImage.prepared`; the render cache key is `(RenderParams, Geometry)`. While the crop tool is open the
   UI sends a whole-canvas crop (`previewGeometry`) and the frame `none`: the preview is the rotated photo from
-  the 1800 px proxy (instant) with a `CropOverlay` on top; closing it sends the real crop. Touching any
-  geometry control (`rotate`, `flip`, `setAngle`, `setAspect`) opens the tool, `R` toggles it (and goes to the
+  the 1800 px proxy (instant) with a `CropOverlay` on top; closing it sends the real crop. Straightening
+  and choosing an aspect ratio (`setAngle`, `setAspect`) open the tool (they need the whole photo under
+  the box); a quarter turn or a flip (`rotate`, `flip`) applies at once to the cropped photo and carries the
+  crop with it, without opening it, `R` toggles it (and goes to the
   Frame tab), Enter/Escape/double-click close it, leaving the Frame tab closes it. `crop.ts` holds the pure
   maths (`fits`, `resize`, `move`, `fitInside`, `largestRect`): the crop must always stay inside the rotated
   photo, so no empty corner ever reaches the export; a drag goes as far as `fits` allows (bisection along
@@ -160,8 +162,11 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
   (`openPanels`, even if they had been folded: pages are small, we want to see the content). Every section
   is open by default. The selected page of each tab lives in `useInspector().group` (the host, `InspectorPanel`,
   passes it down with `v-model:group` because `looks` may not import `inspector`), so the crop shortcut can
-  say `group.frame = "crop"`. The rail costs 36 px, so the panel is 356 px wide (`App.vue`). The Preset tab has
-  none (few categories). Labels and icons come from functions of `t`, and the buttons are named "Aller à X" so
+  say `group.frame = "crop"`. The panel is 30 % of the window, between 356 and 520 px (`clamp` in `App.vue`; the
+  rail alone costs 36 px). The Preset tab has one too, one icon per look category (`categoryIcons.ts`, a
+  fallback icon for a category the table does not know): it opens on the applied look's category, or the first
+  one offering more than "Neutral", then keeps the last one viewed; the intensity slider is the rail panel's
+  `footer` slot, one slider under whichever page is shown. Labels and icons come from functions of `t`, and the buttons are named "Aller à X" so
   they never collide with the section headers of the same name. E2E: `App.group(name)` shows a page, and
   `App.openSection(name)` goes to the page of a section first.
 - Resets: the Preset tab's (on its first category header) calls `resetLook`, back to Neutral with adjustments

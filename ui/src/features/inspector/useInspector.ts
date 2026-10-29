@@ -11,7 +11,8 @@ const tab = ref<InspectorTab>("looks");
 
 /// Le groupe affiché dans chaque onglet à rampe d'icônes ; le raccourci de recadrage, par exemple, sait
 /// ainsi où aller.
-const group = reactive({ adjust: "tone", frame: "frame" });
+/// `looks` vide : la page des looks se choisit toute seule (voir `LooksPanel`).
+const group = reactive({ looks: "", adjust: "tone", frame: "frame" });
 const open = ref(hasImage.value);
 
 watch(hasImage, (present) => {

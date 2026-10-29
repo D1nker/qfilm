@@ -37,6 +37,7 @@ export const fr = {
   },
   looks: {
     intensity: "Intensité",
+    rail: "Catégories de looks",
   },
   adjust: {
     groups: {
@@ -130,7 +131,7 @@ export const fr = {
   geometry: {
     title: "Recadrage",
     crop: "Recadrer",
-    done: "Terminer",
+    done: "Terminer le recadrage",
     overlay: "Zone de recadrage",
     cropSize: "Cadre de {width} × {height} px",
     aspect: "Proportions",

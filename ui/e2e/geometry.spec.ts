@@ -2,7 +2,8 @@ import { expect, test, type App } from "./support/app";
 
 const overlay = (app: App) => app.page.locator(".overlay");
 const handle = (app: App, name: string) => app.page.locator(`[data-handle="${name}"]`);
-const cropButton = (app: App) => app.page.getByRole("button", { name: /^(Recadrer|Terminer)$/ });
+const cropButton = (app: App) =>
+  app.page.getByRole("button", { name: /^(Recadrer|Terminer le recadrage)$/ });
 const tool = (app: App, name: string) => app.page.getByRole("button", { name });
 const geometry = async (app: App) => (await app.lastRender()).geometry;
 
@@ -44,7 +45,7 @@ test.describe("crop and rotate", () => {
 
     await expect(overlay(openApp)).toBeVisible();
     await expect(openApp.page.locator("[data-handle]")).toHaveCount(8);
-    await expect(cropButton(openApp)).toHaveText("Terminer");
+    await expect(cropButton(openApp)).toHaveText("Terminer le recadrage");
 
     await cropButton(openApp).click();
 
@@ -105,16 +106,35 @@ test.describe("crop and rotate", () => {
     expect(crop.width * 3600).toBeCloseTo(crop.height * 2400, -1);
   });
 
-  test("a quarter turn turns the photo and its sides", async ({ openApp }) => {
+  test("a quarter turn turns the photo and its sides, without opening the tool", async ({
+    openApp,
+  }) => {
     const before = await openApp.page.locator("main img").first().boundingBox();
 
     await tool(openApp, "Pivoter à droite").click();
 
     await expect.poll(async () => (await geometry(openApp)).quarterTurns).toBe(1);
-    await expect(overlay(openApp)).toBeVisible();
+    await expect(overlay(openApp)).toHaveCount(0);
+    await expect(cropButton(openApp)).toHaveText("Recadrer");
     await expect
       .poll(async () => (await openApp.page.locator("main img").first().boundingBox())?.height)
       .toBeGreaterThan(before?.height ?? 0);
+  });
+
+  test("a turn carries an existing crop with the photo, still without the tool", async ({
+    openApp,
+  }) => {
+    await cropButton(openApp).click();
+    await drag(openApp, await onPhoto(openApp, 1, 1), await onPhoto(openApp, 0.6, 0.7));
+    await cropButton(openApp).click();
+    await expect.poll(async () => (await geometry(openApp)).crop.width).toBeCloseTo(0.6, 1);
+
+    await tool(openApp, "Pivoter à droite").click();
+
+    await expect.poll(async () => (await geometry(openApp)).quarterTurns).toBe(1);
+    const { crop } = await geometry(openApp);
+    expect([crop.width, crop.height]).toEqual([expect.closeTo(0.7, 1), expect.closeTo(0.6, 1)]);
+    await expect(overlay(openApp)).toHaveCount(0);
   });
 
   test("the mirrors flip the photo", async ({ openApp }) => {
