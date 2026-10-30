@@ -1,7 +1,5 @@
 import { expect, test, type App } from "./support/app";
 
-test.use({ openPanels: false });
-
 const header = (app: App, name: string) =>
   app.page.getByRole("button", { name: new RegExp(`^${name}( Modifié)?$`) });
 

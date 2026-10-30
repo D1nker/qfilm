@@ -28,7 +28,7 @@ const props = withDefaults(
   defineProps<{
     title: string;
     defaultOpen?: boolean;
-    /** Avec un identifiant, l'état ouvert ou fermé est gardé d'une session à l'autre. */
+    /** Avec un identifiant, l'état ouvert ou fermé est partagé : la rampe d'icônes peut déplier la section. */
     id?: string;
     /** Signale, en tête de section, qu'un réglage qu'elle contient a bougé. */
     modified?: boolean;

@@ -6,17 +6,6 @@ import { expect, test as base, type Page } from "@playwright/test";
 const FRAMES_DIRECTORY = fileURLToPath(new URL("../../../crates/core/frames/", import.meta.url));
 const MOCK_SCRIPT = fileURLToPath(new URL("./tauri-mock.js", import.meta.url));
 
-const OPEN_PANEL_IDS = [
-  "adjust-light",
-  "frame-geometry",
-  "adjust-curves",
-  "adjust-color",
-  "adjust-grading",
-  "adjust-detail",
-  "adjust-effects",
-  "adjust-hsl",
-];
-
 /// La page (icône de la rampe) de chaque section nommée dans les tests.
 const SECTION_PAGES: Record<string, string> = {
   Lumière: "Tons",
@@ -99,18 +88,7 @@ export interface ExportCall extends RenderCall {
 export class App {
   constructor(readonly page: Page) {}
 
-  async start(imageSize?: [number, number], openPanels = true) {
-    if (openPanels) {
-      // Le panneau Retouche garde ses sections avancées fermées : les tests les veulent ouvertes,
-      // sauf ceux qui vérifient justement ce comportement (`openPanels: false`).
-      await this.page.addInitScript((ids) => {
-        if (localStorage.getItem("qfilm-panels")) return;
-        localStorage.setItem(
-          "qfilm-panels",
-          JSON.stringify(Object.fromEntries(ids.map((id) => [id, true]))),
-        );
-      }, OPEN_PANEL_IDS);
-    }
+  async start(imageSize?: [number, number]) {
     await this.page.addInitScript((manifests) => {
       (window as unknown as { __MANIFESTS__: unknown }).__MANIFESTS__ = manifests;
     }, builtinManifests());
@@ -258,18 +236,16 @@ export const test = base.extend<{
   app: App;
   openApp: App;
   imageSize: [number, number] | undefined;
-  openPanels: boolean;
 }>({
   imageSize: [undefined, { option: true }],
-  openPanels: [true, { option: true }],
-  app: async ({ page, imageSize, openPanels }, use) => {
+  app: async ({ page, imageSize }, use) => {
     const app = new App(page);
-    await app.start(imageSize, openPanels);
+    await app.start(imageSize);
     await use(app);
   },
-  openApp: async ({ page, imageSize, openPanels }, use) => {
+  openApp: async ({ page, imageSize }, use) => {
     const app = new App(page);
-    await app.start(imageSize, openPanels);
+    await app.start(imageSize);
     await app.openPhoto();
     await use(app);
   },

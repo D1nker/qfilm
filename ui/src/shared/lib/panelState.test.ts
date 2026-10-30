@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { fresh } from "@/test/fresh";
 
@@ -7,10 +7,6 @@ async function setup() {
 }
 
 describe("usePanelOpen", () => {
-  beforeEach(() => {
-    localStorage.clear();
-  });
-
   it("uses the fallback until the user chooses", async () => {
     const { usePanelOpen } = await setup();
 
@@ -18,24 +14,15 @@ describe("usePanelOpen", () => {
     expect(usePanelOpen("b", false).value).toBe(false);
   });
 
-  it("remembers a choice, across sessions", async () => {
-    const first = await setup();
-    const open = first.usePanelOpen("detail", false);
-    open.value = true;
+  it("remembers a choice, whichever way the fallback goes", async () => {
+    const { usePanelOpen } = await setup();
 
-    const second = await setup();
+    usePanelOpen("detail", false).value = true;
+    usePanelOpen("light", true).value = false;
 
-    expect(second.usePanelOpen("detail", false).value).toBe(true);
-    expect(second.usePanelOpen("other", false).value).toBe(false);
-  });
-
-  it("remembers a section closed that is open by default", async () => {
-    const first = await setup();
-    first.usePanelOpen("light", true).value = false;
-
-    const second = await setup();
-
-    expect(second.usePanelOpen("light", true).value).toBe(false);
+    expect(usePanelOpen("detail", false).value).toBe(true);
+    expect(usePanelOpen("light", true).value).toBe(false);
+    expect(usePanelOpen("other", false).value).toBe(false);
   });
 
   it("shares the choice between the places that read it", async () => {
@@ -48,27 +35,22 @@ describe("usePanelOpen", () => {
     expect(two.value).toBe(true);
   });
 
-  it("ignores stored data that is not what it wrote", async () => {
-    for (const garbage of ["not json", "[1,2]", "null", '{"a": "yes", "b": 3, "c": true}']) {
-      localStorage.setItem("qfilm-panels", garbage);
-      const { usePanelOpen } = await setup();
+  it("does not outlive the session: nothing is written to the browser's storage", async () => {
+    const { usePanelOpen } = await setup();
 
-      expect(usePanelOpen("a", false).value, garbage).toBe(false);
-      expect(usePanelOpen("c", false).value, garbage).toBe(garbage.includes('"c"'));
-    }
+    usePanelOpen("a", true).value = false;
+
+    expect(localStorage.length).toBe(0);
   });
 
-  it("unfolds several sections at once, whatever was chosen before, and remembers it", async () => {
-    const first = await setup();
-    first.usePanelOpen("a", true).value = false;
-    first.usePanelOpen("b", false);
+  it("unfolds several sections at once, whatever was chosen before", async () => {
+    const { openPanels, usePanelOpen } = await setup();
+    usePanelOpen("a", true).value = false;
+    usePanelOpen("b", false);
 
-    first.openPanels(["a", "b"]);
+    openPanels(["a", "b"]);
 
-    expect(first.usePanelOpen("a", true).value).toBe(true);
-    expect(first.usePanelOpen("b", false).value).toBe(true);
-    const second = await setup();
-    expect(second.usePanelOpen("a", false).value).toBe(true);
-    expect(second.usePanelOpen("b", false).value).toBe(true);
+    expect(usePanelOpen("a", true).value).toBe(true);
+    expect(usePanelOpen("b", false).value).toBe(true);
   });
 });
