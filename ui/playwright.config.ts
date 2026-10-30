@@ -2,6 +2,8 @@ import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
   testDir: "e2e",
+  // Les captures du site ont leur propre commande : `npm run website:screenshots`.
+  testIgnore: "**/site-screenshots.spec.ts",
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
@@ -18,9 +20,14 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"], viewport: { width: 1400, height: 900 } },
     },
   ],
-  webServer: {
-    command: "npm run dev",
-    url: "http://localhost:5173",
-    reuseExistingServer: !process.env.CI,
-  },
+  webServer: [
+    { command: "npm run dev", url: "http://localhost:5173", reuseExistingServer: !process.env.CI },
+    // Le site statique (`website/`), pour les tests de `website.spec.ts`.
+    {
+      command: "npm run website",
+      cwd: "..",
+      url: "http://localhost:4000",
+      reuseExistingServer: !process.env.CI,
+    },
+  ],
 });

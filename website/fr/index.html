@@ -1,0 +1,867 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>qFilm — des looks argentiques et des cadres pour tes photos</title>
+    <meta
+      name="description"
+      content="Application de bureau gratuite et open source : un look argentique pour tes photos, des cadres pellicule, instantané, cinéma. Privée. macOS, Windows, Linux."
+    />
+    <meta name="theme-color" content="#232323" />
+    <link rel="canonical" href="https://d1nker.github.io/qfilm/fr/" />
+    <link rel="alternate" hreflang="en" href="https://d1nker.github.io/qfilm/" />
+    <link rel="alternate" hreflang="fr" href="https://d1nker.github.io/qfilm/fr/" />
+    <link rel="alternate" hreflang="x-default" href="https://d1nker.github.io/qfilm/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="qFilm" />
+    <meta property="og:title" content="qFilm — donne à tes photos un look argentique" />
+    <meta
+      property="og:description"
+      content="Application de bureau gratuite et open source : un look argentique pour tes photos, des cadres pellicule, instantané, cinéma. Privée. macOS, Windows, Linux."
+    />
+    <meta property="og:url" content="https://d1nker.github.io/qfilm/fr/" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:image" content="https://d1nker.github.io/qfilm/img/og-fr.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://d1nker.github.io/qfilm/img/og-fr.jpg" />
+    <link rel="icon" type="image/svg+xml" href="../icon.svg" />
+    <link rel="apple-touch-icon" href="../apple-touch-icon.png" />
+    <link
+      rel="preload"
+      href="../fonts/inter-latin-wght-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="stylesheet" href="../style.css" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "qFilm",
+        "applicationCategory": "PhotographyApplication",
+        "operatingSystem": "macOS, Windows, Linux",
+        "description": "Application de bureau gratuite et open source : un look argentique pour tes photos, des cadres pellicule, instantané, cinéma. Privée. macOS, Windows, Linux.",
+        "inLanguage": "fr",
+        "url": "https://d1nker.github.io/qfilm/fr/",
+        "license": "https://opensource.org/licenses/MIT",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
+      }
+    </script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Aller au contenu</a>
+
+    <header class="top">
+      <div class="wrap">
+        <a class="brand" href="#top"
+          ><img src="../icon.svg" alt="" width="28" height="28" />qFilm</a
+        >
+        <nav aria-label="Main">
+          <a href="#looks">Looks</a><a href="#frames">Cadres</a><a href="#tools">Outils</a
+          ><a href="#privacy">Confidentialité</a><a href="#download">Télécharger</a
+          ><a href="#faq">Questions</a>
+        </nav>
+        <div class="lang" role="group" aria-label="Langue">
+          <a href="../" hreflang="en" lang="en">EN</a><span aria-current="true" lang="fr">FR</span>
+        </div>
+        <a class="button small" href="https://github.com/D1nker/qfilm"
+          ><svg
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path
+              d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"
+            />
+            <path d="M9 18c-4.51 2-5-2-7-2" /></svg
+          >GitHub</a
+        >
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero" id="top">
+        <div class="wrap">
+          <p class="badge">Gratuit · Open source · macOS, Windows, Linux</p>
+          <h1>Donne à tes photos un look <em>argentique</em>.</h1>
+          <p class="lead">
+            Du grain, de la halation et des couleurs inspirés de la pellicule, puis un cadre assorti
+            : bande 35 mm, tirage instantané, recadrage cinéma. qFilm est une petite application de
+            bureau qui fait une chose et la fait bien, et garde tes photos sur ton ordinateur.
+          </p>
+          <div class="actions">
+            <a class="button primary" href="#download" data-cta
+              ><svg
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M12 15V3" />
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <path d="m7 10 5 5 5-5" /></svg
+              ><span>Télécharger</span></a
+            >
+            <a class="button" href="https://github.com/D1nker/qfilm">Suivre sur GitHub</a>
+          </div>
+          <p class="note when-soon-note" data-note>
+            Accès anticipé : les versions publiques arrivent.
+          </p>
+          <figure>
+            <img
+              src="../img/hero-1000.jpg"
+              srcset="../img/hero-1000.jpg 1000w, ../img/hero-1600.jpg 1600w"
+              sizes="(min-width: 1040px) 1000px, 94vw"
+              width="1600"
+              height="1292"
+              alt="Une photo avec le look Doré 200, dans un cadre pellicule 35 mm avec ses inscriptions de bord"
+              fetchpriority="high"
+            />
+          </figure>
+        </div>
+      </section>
+
+      <section class="steps" id="how" aria-labelledby="how-title">
+        <div class="wrap">
+          <div class="head">
+            <p class="eyebrow">Comment ça marche</p>
+            <h2 id="how-title">Quatre étapes. Pas de catalogue.</h2>
+          </div>
+          <ol>
+            <li>
+              <h3>Ouvre une photo</h3>
+              <p>Dépose un JPEG, un PNG ou un TIFF. Ton original n&#x27;est jamais touché.</p>
+            </li>
+            <li>
+              <h3>Choisis un look</h3>
+              <p>33 looks inspirés de la pellicule. Règle l&#x27;intensité, puis affine.</p>
+            </li>
+            <li>
+              <h3>Ajoute un cadre</h3>
+              <p>
+                Une bande pellicule, un tirage instantané, un recadrage cinéma, ou le tien, avec une
+                légende que tu déplaces à ta guise.
+              </p>
+            </li>
+            <li>
+              <h3>Exporte</h3>
+              <p>
+                JPEG, PNG ou TIFF 16 bits, en taille réelle ou réduit, avec l&#x27;EXIF
+                d&#x27;origine si tu veux.
+              </p>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section id="looks" aria-labelledby="looks-title">
+        <div class="wrap">
+          <div class="head">
+            <p class="eyebrow">Looks</p>
+            <h2 id="looks-title">Le caractère de la pellicule, sans la pellicule.</h2>
+            <p class="intro">
+              Chaque look est construit avec le peu que fait vraiment la pellicule : un épaulement
+              doux dans les hautes lumières, des couleurs qui dérivent dans les ombres, un grain qui
+              s&#x27;agglomère, un halo autour des bords clairs. Choisis-en un, règle son intensité,
+              puis fais-le tien.
+            </p>
+          </div>
+          <figure class="compare" data-compare>
+            <img
+              class="after"
+              src="../img/look-slider-900.jpg"
+              srcset="../img/look-slider-900.jpg 900w, ../img/look-slider-1600.jpg 1600w"
+              sizes="(min-width: 1120px) 1080px, 94vw"
+              width="1600"
+              height="1067"
+              alt="La même photo avec le look Cine 500T"
+              loading="lazy"
+              decoding="async"
+            /><img
+              class="before"
+              src="../img/look-slider-before-900.jpg"
+              srcset="
+                ../img/look-slider-before-900.jpg   900w,
+                ../img/look-slider-before-1600.jpg 1600w
+              "
+              sizes="(min-width: 1120px) 1080px, 94vw"
+              width="1600"
+              height="1067"
+              alt=""
+              aria-hidden="true"
+              loading="lazy"
+              decoding="async"
+            /><span class="tag left">Original</span><span class="tag right">Avec un look</span
+            ><span class="knob"
+              ><svg
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="m18 8 4 4-4 4" />
+                <path d="M2 12h20" />
+                <path d="m6 8-4 4 4 4" /></svg></span
+            ><input
+              type="range"
+              min="0"
+              max="100"
+              value="50"
+              aria-label="Comparer l&#x27;original et le look"
+            />
+          </figure>
+          <p class="hint">
+            Fais glisser la poignée, ou utilise les flèches du clavier, pour comparer.
+          </p>
+          <div class="looks-grid">
+            <figure class="tile">
+              <img
+                src="../img/look-golden-640.jpg"
+                srcset="../img/look-golden-640.jpg 640w, ../img/look-golden-1100.jpg 1100w"
+                sizes="(min-width: 1120px) 270px, (min-width: 640px) 45vw, 90vw"
+                width="1100"
+                height="734"
+                alt="Look Doré 200"
+                loading="lazy"
+                decoding="async"
+              />
+              <figcaption>
+                <strong>Doré 200</strong
+                ><span>Négatif couleur · Jaunes dorés, nostalgique, contraste moyen.</span>
+              </figcaption>
+            </figure>
+            <figure class="tile">
+              <img
+                src="../img/look-portrait-640.jpg"
+                srcset="../img/look-portrait-640.jpg 640w, ../img/look-portrait-1100.jpg 1100w"
+                sizes="(min-width: 1120px) 270px, (min-width: 640px) 45vw, 90vw"
+                width="1100"
+                height="734"
+                alt="Look Portrait 400"
+                loading="lazy"
+                decoding="async"
+              />
+              <figcaption>
+                <strong>Portrait 400</strong
+                ><span
+                  >Négatif couleur · Carnations douces, contraste faible, dominante chaude.</span
+                >
+              </figcaption>
+            </figure>
+            <figure class="tile">
+              <img
+                src="../img/look-bw-640.jpg"
+                srcset="../img/look-bw-640.jpg 640w, ../img/look-bw-1100.jpg 1100w"
+                sizes="(min-width: 1120px) 270px, (min-width: 640px) 45vw, 90vw"
+                width="1100"
+                height="734"
+                alt="Look Classique 400"
+                loading="lazy"
+                decoding="async"
+              />
+              <figcaption>
+                <strong>Classique 400</strong
+                ><span>Noir et blanc · Noirs profonds, grain sec et tranchant.</span>
+              </figcaption>
+            </figure>
+            <figure class="tile">
+              <img
+                src="../img/look-night-640.jpg"
+                srcset="../img/look-night-640.jpg 640w, ../img/look-night-1100.jpg 1100w"
+                sizes="(min-width: 1120px) 270px, (min-width: 640px) 45vw, 90vw"
+                width="1100"
+                height="734"
+                alt="Look Nuit 800T"
+                loading="lazy"
+                decoding="async"
+              />
+              <figcaption>
+                <strong>Nuit 800T</strong
+                ><span
+                  >Négatif couleur · Équilibré tungstène, avec une halation rouge sur les hautes
+                  lumières.</span
+                >
+              </figcaption>
+            </figure>
+          </div>
+          <ul class="chips">
+            <li>Grain, avec sa taille et sa rugosité</li>
+            <li>Halation</li>
+            <li>Courbe des tons</li>
+            <li>Mélangeur de couleurs</li>
+            <li>Étalonnage</li>
+            <li>Clarté</li>
+            <li>Netteté et réduction du bruit</li>
+            <li>Vignettage</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="frames" id="frames" aria-labelledby="frames-title">
+        <div class="wrap">
+          <div class="head">
+            <p class="eyebrow">Cadres</p>
+            <h2 id="frames-title">La bordure fait la moitié de l&#x27;image.</h2>
+            <p class="intro">
+              Une bande pellicule avec ses inscriptions de bord. Un tirage instantané avec sa marge
+              blanche. Un recadrage cinéma. Les cadres distinguent qFilm, et ils ne sont pas figés :
+              un cadre est un SVG et un petit manifeste, tu peux donc dessiner le tien et
+              l&#x27;importer.
+            </p>
+          </div>
+          <div class="frames-grid">
+            <figure>
+              <img
+                src="../img/frame-35mm-640.jpg"
+                srcset="../img/frame-35mm-640.jpg 640w, ../img/frame-35mm-1100.jpg 1100w"
+                sizes="(min-width: 1120px) 340px, (min-width: 640px) 45vw, 90vw"
+                width="1100"
+                height="890"
+                alt="Photo dans le cadre 35 mm"
+                loading="lazy"
+                decoding="async"
+              />
+              <figcaption>
+                <strong>35 mm</strong
+                ><span>Inscriptions de bord, numéro de vue, perforations en option.</span>
+              </figcaption>
+            </figure>
+            <figure>
+              <img
+                src="../img/frame-120-640.jpg"
+                srcset="../img/frame-120-640.jpg 640w, ../img/frame-120-1100.jpg 1100w"
+                sizes="(min-width: 1120px) 340px, (min-width: 640px) 45vw, 90vw"
+                width="1100"
+                height="846"
+                alt="Photo dans le cadre Moyen format"
+                loading="lazy"
+                decoding="async"
+              />
+              <figcaption>
+                <strong>Moyen format</strong
+                ><span>Une bande plus large, pour les négatifs presque carrés.</span>
+              </figcaption>
+            </figure>
+            <figure>
+              <img
+                src="../img/frame-instant-640.jpg"
+                srcset="../img/frame-instant-640.jpg 640w, ../img/frame-instant-1100.jpg 1100w"
+                sizes="(min-width: 1120px) 340px, (min-width: 640px) 45vw, 90vw"
+                width="1100"
+                height="843"
+                alt="Photo dans le cadre Instantané"
+                loading="lazy"
+                decoding="async"
+              />
+              <figcaption>
+                <strong>Instantané</strong><span>La marge blanche d&#x27;un tirage.</span>
+              </figcaption>
+            </figure>
+            <figure>
+              <img
+                src="../img/frame-cinema-640.jpg"
+                srcset="../img/frame-cinema-640.jpg 640w, ../img/frame-cinema-1100.jpg 1100w"
+                sizes="(min-width: 1120px) 340px, (min-width: 640px) 45vw, 90vw"
+                width="1100"
+                height="734"
+                alt="Photo dans le cadre Cinéma"
+                loading="lazy"
+                decoding="async"
+              />
+              <figcaption>
+                <strong>Cinéma</strong
+                ><span>Des bandes noires pour un recadrage large, façon film.</span>
+              </figcaption>
+            </figure>
+            <figure>
+              <img
+                src="../img/frame-solid-640.jpg"
+                srcset="../img/frame-solid-640.jpg 640w, ../img/frame-solid-1100.jpg 1100w"
+                sizes="(min-width: 1120px) 340px, (min-width: 640px) 45vw, 90vw"
+                width="1100"
+                height="752"
+                alt="Photo dans le cadre Marge unie"
+                loading="lazy"
+                decoding="async"
+              />
+              <figcaption>
+                <strong>Marge unie</strong
+                ><span>Une bordure nette, de la couleur de ton choix.</span>
+              </figcaption>
+            </figure>
+            <figure>
+              <img
+                src="../img/frame-social-640.jpg"
+                srcset="../img/frame-social-640.jpg 640w, ../img/frame-social-1100.jpg 1100w"
+                sizes="(min-width: 1120px) 340px, (min-width: 640px) 45vw, 90vw"
+                width="1100"
+                height="1100"
+                alt="Photo dans le cadre Format réseaux"
+                loading="lazy"
+                decoding="async"
+              />
+              <figcaption>
+                <strong>Format réseaux</strong><span>Complète en carré ou en portrait.</span>
+              </figcaption>
+            </figure>
+          </div>
+          <div class="callout">
+            <div>
+              <h3>Dessine ton propre cadre</h3>
+              <p>
+                Un cadre est un dossier avec un manifeste et un SVG. Dessine-le dans Figma,
+                importe-le en .zip, en dossier ou par glisser-déposer, et ses réglages apparaissent
+                dans l&#x27;application.
+              </p>
+            </div>
+            <a class="button" href="https://github.com/D1nker/qfilm/blob/main/docs/FRAMES.md"
+              ><svg
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M12 7v14" />
+                <path
+                  d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"
+                /></svg
+              >Lire le guide des cadres</a
+            >
+          </div>
+        </div>
+      </section>
+
+      <section id="tools" aria-labelledby="tools-title">
+        <div class="wrap">
+          <div class="head">
+            <p class="eyebrow">Outils</p>
+            <h2 id="tools-title">Les retouches dont tu as vraiment besoin.</h2>
+            <p class="intro">
+              Pas de catalogue, pas de cloud, pas soixante curseurs. Un jeu d&#x27;outils précis,
+              pensé pour rester rapide sur les gros fichiers.
+            </p>
+          </div>
+          <div class="bento">
+            <article>
+              <div>
+                <h3>Recadrer et redresser</h3>
+                <p>
+                  Des poignées sur la photo, les formats courants, un redressement jusqu&#x27;à 45°,
+                  quarts de tour et miroirs. Le recadrage part de tes pixels d&#x27;origine, jamais
+                  de l&#x27;aperçu.
+                </p>
+              </div>
+              <img
+                src="../img/tool-crop-fr.jpg"
+                width="1470"
+                height="1200"
+                alt="L&#x27;outil de recadrage, avec ses poignées et sa grille des tiers sur une photo"
+                loading="lazy"
+                decoding="async"
+              />
+            </article>
+            <article>
+              <div>
+                <h3>Courbe des tons</h3>
+                <p>
+                  Des points libres, RVB ou par canal, sur une courbe douce qui ne dépasse jamais.
+                  Tire sur le graphique ; un double-clic retire un point.
+                </p>
+              </div>
+              <img
+                src="../img/tool-curves-fr.jpg"
+                width="1470"
+                height="1200"
+                alt="Le graphique de la courbe des tons à côté des curseurs de lumière"
+                loading="lazy"
+                decoding="async"
+              />
+            </article>
+            <article>
+              <div>
+                <h3>Mélangeur de couleurs</h3>
+                <p>
+                  Huit teintes pour la teinte, la saturation et la luminosité. Retire la couleur et
+                  il devient un mélangeur de canaux noir et blanc.
+                </p>
+              </div>
+              <img
+                src="../img/tool-mixer-fr.jpg"
+                width="1470"
+                height="1200"
+                alt="Le mélangeur de couleurs avec ses huit pastilles et ses curseurs"
+                loading="lazy"
+                decoding="async"
+              />
+            </article>
+            <article>
+              <div>
+                <h3>Masques</h3>
+                <p>
+                  Des dégradés linéaires et radiaux pour la lumière et la couleur locales, avec
+                  leurs poignées directement sur la photo.
+                </p>
+              </div>
+              <img
+                src="../img/tool-masks-fr.jpg"
+                width="1470"
+                height="1200"
+                alt="Un masque radial avec ses poignées dessinées sur une photo"
+                loading="lazy"
+                decoding="async"
+              />
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="privacy" aria-labelledby="privacy-title">
+        <div class="wrap">
+          <div class="head">
+            <p class="eyebrow">Confidentialité</p>
+            <h2 id="privacy-title">Tes photos restent sur ton ordinateur.</h2>
+          </div>
+          <div class="trust">
+            <article>
+              <div class="icon">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"
+                  />
+                  <path d="m9 12 2 2 4-4" />
+                </svg>
+              </div>
+              <h3>Privé par conception</h3>
+              <p>
+                Pas de compte, pas d&#x27;envoi, pas de mesure d&#x27;audience. qFilm ne se connecte
+                jamais à Internet : tes photos restent sur ton disque.
+              </p>
+            </article>
+            <article>
+              <div class="icon">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M3 7V5a2 2 0 0 1 2-2h2" />
+                  <path d="M17 3h2a2 2 0 0 1 2 2v2" />
+                  <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
+                  <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
+                  <circle cx="12" cy="12" r="1" />
+                  <path
+                    d="M18.944 12.33a1 1 0 0 0 0-.66 7.5 7.5 0 0 0-13.888 0 1 1 0 0 0 0 .66 7.5 7.5 0 0 0 13.888 0"
+                  />
+                </svg>
+              </div>
+              <h3>Fidèle à tes fichiers</h3>
+              <p>
+                Orientation lue dans l&#x27;EXIF, couleurs à gamut large converties plutôt que mal
+                lues, export TIFF 16 bits, EXIF d&#x27;origine conservé sur demande.
+              </p>
+            </article>
+            <article>
+              <div class="icon">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"
+                  />
+                </svg>
+              </div>
+              <h3>Rapide et léger</h3>
+              <p>
+                Un cœur d&#x27;imagerie en Rust et une coque native, pas un navigateur embarqué.
+                L&#x27;aperçu suit tes curseurs en quelques dizaines de millisecondes.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section
+        class="download"
+        id="download"
+        aria-labelledby="download-title"
+        data-state="soon"
+        data-repo="D1nker/qfilm"
+        data-cta-ready="Télécharger pour {os}"
+        data-status-ready="Dernière version : {tag}"
+        data-status-soon="Accès anticipé : les versions publiques ne sont pas encore sorties"
+      >
+        <div class="wrap">
+          <p class="eyebrow">Télécharger</p>
+          <h2 id="download-title">Gratuit, pour macOS, Windows et Linux.</h2>
+          <p class="intro">
+            qFilm est gratuit et open source, sous licence MIT. Pas de compte, pas
+            d&#x27;abonnement.
+          </p>
+          <p class="status" role="status" data-status>
+            Accès anticipé : les versions publiques ne sont pas encore sorties
+          </p>
+          <div class="platforms">
+            <div class="os" data-os="mac">
+              <header>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M12 6.528V3a1 1 0 0 1 1-1h0" />
+                  <path
+                    d="M18.237 21A15 15 0 0 0 22 11a6 6 0 0 0-10-4.472A6 6 0 0 0 2 11a15.1 15.1 0 0 0 3.763 10 3 3 0 0 0 3.648.648 5.5 5.5 0 0 1 5.178 0A3 3 0 0 0 18.237 21"
+                  />
+                </svg>
+                <h3>macOS</h3>
+              </header>
+              <a
+                class="button primary when-ready"
+                href="https://github.com/D1nker/qfilm/releases/latest"
+                data-get
+                >Télécharger</a
+              ><a class="button when-soon" aria-disabled="true" role="link" href="#download"
+                >Bientôt</a
+              >
+              <p class="others when-ready" data-others hidden></p>
+            </div>
+            <div class="os" data-os="windows">
+              <header>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <rect width="20" height="14" x="2" y="3" rx="2" />
+                  <line x1="8" x2="16" y1="21" y2="21" />
+                  <line x1="12" x2="12" y1="17" y2="21" />
+                </svg>
+                <h3>Windows</h3>
+              </header>
+              <a
+                class="button primary when-ready"
+                href="https://github.com/D1nker/qfilm/releases/latest"
+                data-get
+                >Télécharger</a
+              ><a class="button when-soon" aria-disabled="true" role="link" href="#download"
+                >Bientôt</a
+              >
+              <p class="others when-ready" data-others hidden></p>
+            </div>
+            <div class="os" data-os="linux">
+              <header>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M12 19h8" />
+                  <path d="m4 17 6-6-6-6" />
+                </svg>
+                <h3>Linux</h3>
+              </header>
+              <a
+                class="button primary when-ready"
+                href="https://github.com/D1nker/qfilm/releases/latest"
+                data-get
+                >Télécharger</a
+              ><a class="button when-soon" aria-disabled="true" role="link" href="#download"
+                >Bientôt</a
+              >
+              <p class="others when-ready" data-others hidden></p>
+            </div>
+          </div>
+          <div class="install">
+            <div>
+              <h3>Premier lancement</h3>
+              <p>
+                qFilm n&#x27;est pas encore signé, ton système te demandera donc une confirmation la
+                première fois.
+              </p>
+              <ul>
+                <li>
+                  <strong>macOS :</strong> ouvre le .dmg, glisse qFilm dans Applications, puis clic
+                  droit sur l'app et Ouvrir.
+                </li>
+                <li>
+                  <strong>Windows :</strong> si SmartScreen t'avertit, clique sur Informations
+                  complémentaires, puis Exécuter quand même.
+                </li>
+                <li><strong>Linux :</strong> rends l'AppImage exécutable et lance-la.</li>
+              </ul>
+            </div>
+            <div>
+              <h3>Tu veux l&#x27;essayer maintenant ? Compile-le</h3>
+              <p>Il te faut Node et Rust 1.88 ou plus récent. Le README détaille chaque système.</p>
+              <pre><code>git clone https://github.com/D1nker/qfilm.git
+cd qfilm
+npm install
+npm run app:build</code></pre>
+              <p>
+                <a href="https://github.com/D1nker/qfilm#getting-started">README</a> ·
+                <a href="https://github.com/D1nker/qfilm">Mettre une étoile au projet</a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="faq" id="faq" aria-labelledby="faq-title">
+        <div class="wrap faq-wrap">
+          <div class="head">
+            <p class="eyebrow">Questions</p>
+            <h2 id="faq-title">Bon à savoir.</h2>
+          </div>
+          <details>
+            <summary>qFilm est-il gratuit ?</summary>
+            <p>
+              Oui. qFilm est gratuit et open source, sous licence MIT : utilise-le, modifie-le,
+              partage-le. Pas de compte, pas d&#x27;abonnement, pas de publicité.
+            </p>
+          </details>
+          <details>
+            <summary>Remplace-t-il Lightroom ?</summary>
+            <p>
+              Non, et il n&#x27;essaie pas. Il n&#x27;y a ni catalogue ni cloud. qFilm est un studio
+              ciblé pour les looks argentiques, les cadres et les légendes, avec les retouches dont
+              tu as vraiment besoin : courbes, mélangeur de couleurs, étalonnage, masques et
+              recadrage.
+            </p>
+          </details>
+          <details>
+            <summary>qFilm modifie-t-il ou envoie-t-il mes photos ?</summary>
+            <p>
+              Jamais. Tes originaux sont lus et laissés intacts, et les exports vont où tu les
+              envoies. L&#x27;application ne se connecte pas du tout à Internet.
+            </p>
+          </details>
+          <details>
+            <summary>Quels fichiers puis-je ouvrir et exporter ?</summary>
+            <p>
+              Tu peux ouvrir des JPEG, PNG et TIFF, et exporter en JPEG, PNG ou TIFF 16 bits. Les
+              fichiers RAW ne sont pas encore pris en charge. Les photos sont redressées
+              d&#x27;après leur orientation EXIF, les fichiers à gamut large (Display P3, Adobe
+              RGB…) sont convertis en sRGB, et l&#x27;EXIF d&#x27;origine peut être conservé à
+              l&#x27;export.
+            </p>
+          </details>
+          <details>
+            <summary>Les looks copient-ils de vraies pellicules ?</summary>
+            <p>
+              Non. Ce sont des looks originaux, inspirés du comportement de la pellicule (contraste
+              doux, dominantes, grain, halation), avec des noms génériques. Aucun n&#x27;utilise un
+              nom de marque ni ne prétend reproduire une émulsion précise.
+            </p>
+          </details>
+          <details>
+            <summary>Puis-je créer mes propres cadres ?</summary>
+            <p>
+              Oui. Un cadre est un SVG et un petit fichier manifeste. Dessine-le dans Figma ou
+              n&#x27;importe quel outil vectoriel, puis importe-le en .zip, en dossier ou par
+              glisser-déposer. Le guide est sur GitHub.
+            </p>
+          </details>
+          <details>
+            <summary>Sur quels systèmes fonctionne-t-il ?</summary>
+            <p>
+              macOS, Windows et Linux. qFilm est construit avec Tauri : c&#x27;est une petite
+              application native, pas un navigateur embarqué.
+            </p>
+          </details>
+          <details>
+            <summary>Dans quelles langues est-il disponible ?</summary>
+            <p>
+              L&#x27;application et ce site parlent français et anglais. L&#x27;application suit la
+              langue de ton système et tu peux en changer dans les préférences.
+            </p>
+          </details>
+          <details>
+            <summary>Comment signaler un bug ou aider ?</summary>
+            <p>
+              Ouvre un ticket sur GitHub. Les looks et les cadres sont de simples fichiers de
+              données : en ajouter un est une bonne première contribution.
+            </p>
+          </details>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="wrap">
+        <div>
+          <a class="brand" href="#top"
+            ><img src="../icon.svg" alt="" width="28" height="28" />qFilm</a
+          >
+          <small>Un studio de looks argentiques et de cadres.</small>
+          <small
+            >Gratuit et open source. Police de l&#x27;interface : Inter (licence SIL Open
+            Font).</small
+          >
+        </div>
+        <nav aria-label="Links">
+          <a href="https://github.com/D1nker/qfilm">GitHub</a
+          ><a href="https://github.com/D1nker/qfilm/releases">Versions</a
+          ><a href="https://github.com/D1nker/qfilm/issues">Signaler un problème</a
+          ><a href="https://github.com/D1nker/qfilm/blob/main/LICENSE">Licence MIT</a>
+        </nav>
+      </div>
+    </footer>
+
+    <script type="module" src="../main.js"></script>
+  </body>
+</html>

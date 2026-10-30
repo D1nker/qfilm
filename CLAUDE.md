@@ -16,8 +16,8 @@ npm and cargo are run locally in this project (no Docker).
 
 Monorepo. `ui/` is the Vue app (npm workspace `@qfilm/ui`: Vite, Vitest, Playwright, ESLint and tsconfigs live
 there; the root scripts delegate to it), `desktop/` is the Tauri shell, `crates/core/` is the engine, `assets/`
-holds files shared by both sides, `website/` is the static download page (plain HTML/CSS/JS, no build
-step, preview with `npm run website`), `docs/` and `branding/` are what they say. Frontend paths below are relative to `ui/`.
+holds files shared by both sides, `website/` is the public landing page in English and French (plain HTML/CSS/JS, no build
+step, preview with `npm run website`, see `website/README.md`), `docs/` and `branding/` are what they say. Frontend paths below are relative to `ui/`.
 
 ## Frontend conventions
 
@@ -270,6 +270,27 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
   `UPDATE_GOLDEN=1 cargo test golden` and **look at the PNGs** before committing them. Failures
   write the actual output to `target/golden-failures/`. The test scene has a 0–2 gray
   ramp and odd dimensions on purpose; mutation-checked (8/8 injected bugs caught).
+
+## Website
+
+- `website/` is written as if the project were public: a darkroom-style landing page (EN `index.html`, FR
+  `fr/index.html`), Inter self-hosted, no third-party request but GitHub's release API, dark first and light by
+  system setting. The two pages are hand-maintained and must keep the same structure
+  (`ui/e2e/website.spec.ts` compares sections, cards, questions and external links); every image must load and
+  have `width`/`height`, headings must not skip a level, descriptions stay under 160 characters.
+- Its pictures are made by the engine, never drawn: `crates/core/examples/site_images.rs` (`npm run
+website:images`, driven by `website/images.json`) applies a look and a frame to the photos in
+  `~/qFilm-site-photos`, strips all metadata (no GPS on a public site) and writes sized JPEGs;
+  `ui/e2e/site-screenshots.spec.ts` (`npm run website:screenshots`, its own config, outside the normal e2e run)
+  takes the app screenshots and the share cards through the mock bridge, which shows a real photo when
+  `window.__PHOTO__` is set. The committed images may be stand-ins until real photos are supplied.
+- The download section is honest about the state of the project: with no release it says "early access" and
+  offers nothing to click; once `releases/latest` has files it flips by itself, per system (`releases.js`).
+  Builds are not code-signed yet and the page says so. Do not claim anything the app does not do (the privacy
+  claim, "never connects to the internet", holds because the app has no network code: keep it true).
+- A parent's scoped CSS reaches the root element of a child component, so never give a component root a generic
+  class (`.overlay`) that an ancestor also styles: it once dimmed the photo under the crop and mask handles
+  (`ImageViewport` now calls its message `.decoding`, and both overlays have a test that their backdrop is clear).
 
 ## Product direction
 

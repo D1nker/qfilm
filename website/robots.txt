@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://d1nker.github.io/qfilm/sitemap.xml

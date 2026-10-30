@@ -1,0 +1,111 @@
+{
+  "images": [
+    {
+      "name": "hero",
+      "photo": "photo-1.png",
+      "widths": [1000, 1600],
+      "preset": "dore_200",
+      "frame": {
+        "id": "film35",
+        "params": {
+          "text": "GOLDEN 200",
+          "frameNumber": "7A",
+          "sprockets": true
+        }
+      }
+    },
+    {
+      "name": "look-slider",
+      "photo": "photo-2.png",
+      "widths": [900, 1600],
+      "preset": "cine_500t",
+      "before": true
+    },
+    {
+      "name": "look-golden",
+      "photo": "photo-1.png",
+      "widths": [640, 1100],
+      "preset": "dore_200"
+    },
+    {
+      "name": "look-portrait",
+      "photo": "photo-1.png",
+      "widths": [640, 1100],
+      "preset": "portrait_400"
+    },
+    {
+      "name": "look-bw",
+      "photo": "photo-1.png",
+      "widths": [640, 1100],
+      "preset": "classique_400"
+    },
+    {
+      "name": "look-night",
+      "photo": "photo-2.png",
+      "widths": [640, 1100],
+      "preset": "nuit_800t"
+    },
+    {
+      "name": "frame-35mm",
+      "photo": "photo-1.png",
+      "widths": [640, 1100],
+      "preset": "dore_200",
+      "frame": {
+        "id": "film35",
+        "params": {
+          "text": "GOLDEN 200",
+          "frameNumber": "7A"
+        }
+      }
+    },
+    {
+      "name": "frame-120",
+      "photo": "photo-2.png",
+      "widths": [640, 1100],
+      "preset": "portrait_400",
+      "frame": {
+        "id": "film120",
+        "params": {
+          "text": "PORTRAIT 400",
+          "frameNumber": "12"
+        }
+      }
+    },
+    {
+      "name": "frame-instant",
+      "photo": "photo-1.png",
+      "widths": [640, 1100],
+      "preset": "retro_200",
+      "frame": {
+        "id": "instant"
+      }
+    },
+    {
+      "name": "frame-cinema",
+      "photo": "photo-2.png",
+      "widths": [640, 1100],
+      "preset": "cine_500t",
+      "frame": {
+        "id": "letterbox"
+      }
+    },
+    {
+      "name": "frame-solid",
+      "photo": "photo-1.png",
+      "widths": [640, 1100],
+      "preset": "classique_400",
+      "frame": {
+        "id": "solid"
+      }
+    },
+    {
+      "name": "frame-social",
+      "photo": "photo-2.png",
+      "widths": [640, 1100],
+      "preset": "pastel_400",
+      "frame": {
+        "id": "padding"
+      }
+    }
+  ]
+}

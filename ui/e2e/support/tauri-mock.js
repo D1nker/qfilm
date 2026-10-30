@@ -138,7 +138,14 @@
     "plugin:dialog|save": () => "/fake/out/IMG_0001.jpg",
     open_image: () => {
       const [w, h] = imageSize();
-      return { id: "1", fileName: "IMG_0001.jpg", width: w * 3, height: h * 3, preview: svg(w, h) };
+      // `__PHOTO__` : une vraie photo à montrer à la place du dégradé (les captures du site).
+      return {
+        id: "1",
+        fileName: "IMG_0001.jpg",
+        width: w * 3,
+        height: h * 3,
+        preview: window.__PHOTO__ ?? svg(w, h),
+      };
     },
     preset_thumbnails: () =>
       presets.map((p) => ({ id: p.id, image: svg(240, 160, ...thumbnailColors[p.id]) })),
@@ -155,7 +162,7 @@
       const printed = frame.id.startsWith("film") && frame.params.stock !== "plain";
       return {
         // Comme le vrai moteur : un brouillon est plus petit mais annonce la taille du rendu final.
-        image: draft ? svg(Math.round(w / 3), Math.round(h / 3)) : svg(w, h),
+        image: window.__PHOTO__ ?? (draft ? svg(Math.round(w / 3), Math.round(h / 3)) : svg(w, h)),
         width: w,
         height: h,
         zones: printed
