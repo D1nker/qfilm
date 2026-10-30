@@ -27,13 +27,7 @@ test.describe("opening a photo", () => {
 
   test("shows one thumbnail per look, the neutral one apart", async ({ openApp }) => {
     // Le faux pont sert quatre looks, dont « Neutre », que la liste ne propose pas.
-    const thumbnails = openApp.page.locator(".thumb img");
-    const goTo = (name: string) =>
-      openApp.page.getByRole("button", { name: `Aller à ${name}`, exact: true }).click();
-
-    await expect(thumbnails).toHaveCount(2);
-    await goTo("Noir & blanc");
-    await expect(thumbnails).toHaveCount(1);
+    await expect(openApp.page.locator(".thumb img")).toHaveCount(3);
   });
 
   test("opens a dropped photo", async ({ app }) => {

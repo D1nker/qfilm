@@ -9,11 +9,11 @@ test.describe("the group rail", () => {
   test("is one rail for the whole panel: the looks, then Retouche, then Cadre", async ({
     openApp,
   }) => {
-    await expect(rail(openApp).getByRole("button")).toHaveCount(11);
-    for (const name of ["Favoris", "Récents", "Négatif couleur", "Noir & blanc", "Tons"]) {
+    await expect(rail(openApp).getByRole("button")).toHaveCount(9);
+    for (const name of ["Négatif couleur", "Noir & blanc", "Tons", "Couleurs", "Finition"]) {
       await expect(item(openApp, name)).toBeVisible();
     }
-    await expect(rail(openApp).locator('[data-section="looks"]')).toHaveCount(4);
+    await expect(rail(openApp).locator('[data-section="looks"]')).toHaveCount(2);
     await expect(rail(openApp).locator('[data-section="adjust"]')).toHaveCount(3);
     await expect(rail(openApp).locator('[data-section="frame"]')).toHaveCount(4);
   });
@@ -115,13 +115,13 @@ test.describe("the group rail", () => {
     test("they wrap around, and Home and End jump to the ends", async ({ openApp }) => {
       await item(openApp, "Mes cadres").click();
       await openApp.page.keyboard.press("ArrowDown");
-      await expect(item(openApp, "Favoris")).toHaveAttribute("aria-current", "true");
+      await expect(item(openApp, "Négatif couleur")).toHaveAttribute("aria-current", "true");
 
       await openApp.page.keyboard.press("ArrowUp");
       await expect(item(openApp, "Mes cadres")).toHaveAttribute("aria-current", "true");
 
       await openApp.page.keyboard.press("Home");
-      await expect(item(openApp, "Favoris")).toBeFocused();
+      await expect(item(openApp, "Négatif couleur")).toBeFocused();
 
       await openApp.page.keyboard.press("End");
       await expect(item(openApp, "Mes cadres")).toBeFocused();
@@ -178,8 +178,8 @@ test.describe("the group rail", () => {
     test("has one icon per look category, and opens on the first one", async ({ openApp }) => {
       await openApp.tab("Preset").click();
 
-      await expect(rail(openApp).locator('[data-section="looks"]')).toHaveCount(4);
-      for (const name of ["Favoris", "Récents", "Négatif couleur", "Noir & blanc"]) {
+      await expect(rail(openApp).locator('[data-section="looks"]')).toHaveCount(2);
+      for (const name of ["Négatif couleur", "Noir & blanc"]) {
         await expect(item(openApp, name)).toBeVisible();
       }
       await expect(item(openApp, "Négatif couleur")).toHaveAttribute("aria-current", "true");

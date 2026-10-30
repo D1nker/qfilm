@@ -36,12 +36,6 @@ export const fr = {
   looks: {
     intensity: "Intensité",
     applied: "Look appliqué",
-    favorites: "Favoris",
-    recent: "Récents",
-    noFavorites: "Aucun favori pour l'instant. Clique l'étoile d'un look pour le garder ici.",
-    noRecent: "Les looks que tu appliques apparaissent ici.",
-    addFavorite: "Ajouter aux favoris",
-    removeFavorite: "Retirer des favoris",
   },
   adjust: {
     groups: {
