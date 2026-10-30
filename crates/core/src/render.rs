@@ -331,6 +331,18 @@ impl Tone {
             whites: p.whites + delta.whites,
         }
     }
+
+    /// Rien à faire : ni contraste, ni ombres, ni couleur. L'étape se saute alors tout entière.
+    fn is_identity(&self) -> bool {
+        const EPS: f32 = 1e-6;
+        (self.gamma - 1.0).abs() < EPS
+            && self.black_point.abs() < EPS
+            && (self.saturation - 1.0).abs() < EPS
+            && self.vibrance.abs() < EPS
+            && self.shadows.abs() < EPS
+            && self.highlights.abs() < EPS
+            && self.whites.abs() < EPS
+    }
 }
 
 /// Courbe appliquée à la seule luminance ; les canaux sont ensuite mis à
@@ -351,9 +363,46 @@ fn tone_curve(linear: f32, t: &Tone) -> f32 {
     srgb_to_linear(v.max(0.0))
 }
 
-fn tone_and_color_pixel(px: &mut [f32], t: &Tone) {
+/// La courbe de tons ne dépend que de la luminance : au lieu de trois `powf` par pixel (la moitié du temps
+/// d'un rendu), on l'échantillonne une fois par rendu et on interpole. Les pas sont réguliers en racine
+/// quatrième de la luminance : très fins dans les ombres, où la courbe se comporte comme une puissance
+/// (`l^0,66` avec un contraste négatif) qu'une racine carrée suivrait mal, et déjà assez serrés ailleurs.
+struct ToneLut {
+    values: Vec<f32>,
+}
+
+/// Nombre de pas, et luminance maximale de la table (`LUT_REACH` puissance 4, soit 16) : le soleil d'une photo
+/// dépasse à peine 2, au-delà on calcule directement.
+const LUT_STEPS: usize = 4096;
+const LUT_REACH: f32 = 2.0;
+
+impl ToneLut {
+    fn new(t: &Tone) -> Self {
+        let values = (0..=LUT_STEPS)
+            .map(|i| {
+                let root = i as f32 / LUT_STEPS as f32 * LUT_REACH;
+                tone_curve(root.powi(4).max(1e-5), t)
+            })
+            .collect();
+        Self { values }
+    }
+
+    /// Même résultat que `tone_curve(linear, t)`, à un millionième près environ.
+    fn at(&self, linear: f32, t: &Tone) -> f32 {
+        let position = linear.sqrt().sqrt() * (LUT_STEPS as f32 / LUT_REACH);
+        if position >= LUT_STEPS as f32 {
+            return tone_curve(linear, t);
+        }
+        let below = position as usize;
+        let fraction = position - below as f32;
+        self.values[below] + (self.values[below + 1] - self.values[below]) * fraction
+    }
+}
+
+fn tone_and_color_pixel(px: &mut [f32], t: &Tone, lut: Option<&ToneLut>) {
     let luma_in = luma_of(px).max(1e-5);
-    let ratio = tone_curve(luma_in, t) / luma_in;
+    let curved = lut.map_or_else(|| tone_curve(luma_in, t), |lut| lut.at(luma_in, t));
+    let ratio = curved / luma_in;
     for channel in px.iter_mut() {
         *channel *= ratio;
     }
@@ -383,19 +432,29 @@ fn apply_tone_and_color(img: &mut ImageBuf, p: &RenderParams, local: Option<&Loc
     let global = Tone::new(p, &MaskAdjust::default());
 
     let Some(local) = local else {
+        if global.is_identity() {
+            return;
+        }
+        let lut = ToneLut::new(&global);
         img.data
             .par_chunks_mut(3)
-            .for_each(|px| tone_and_color_pixel(px, &global));
+            .for_each(|px| tone_and_color_pixel(px, &global, Some(&lut)));
         return;
     };
 
+    // Hors de toute zone la table sert (ou rien, si les tons globaux n'ont rien à faire : le pixel reste tel quel,
+    // comme sans masque) ; sous un masque les réglages changent d'un pixel à l'autre.
+    let lut = ToneLut::new(&global);
+    let untouched = global.is_identity();
     let width = img.width as usize;
     img.data.par_chunks_mut(3).enumerate().for_each(|(i, px)| {
         let delta = local.at((i % width) as u32, (i / width) as u32);
         if delta.is_zero() {
-            tone_and_color_pixel(px, &global);
+            if !untouched {
+                tone_and_color_pixel(px, &global, Some(&lut));
+            }
         } else {
-            tone_and_color_pixel(px, &Tone::new(p, &delta));
+            tone_and_color_pixel(px, &Tone::new(p, &delta), None);
         }
     });
 }
@@ -2036,6 +2095,165 @@ mod masked_tests {
         for (fx, fy) in [(0.5, 0.5), (0.6, 0.5), (0.35, 0.55), (0.5, 0.35)] {
             let (a, b) = (pixel(&small, fx, fy)[0], pixel(&large, fx, fy)[0]);
             assert!((a - b).abs() < 0.01, "{fx},{fy} : {a} contre {b}");
+        }
+    }
+}
+
+#[cfg(test)]
+mod tone_table_tests {
+    use super::*;
+
+    fn tone(contrast: f32, shadows: f32, highlights: f32, whites: f32) -> Tone {
+        Tone::new(
+            &RenderParams {
+                contrast,
+                highlights,
+                shadows,
+                whites,
+                ..RenderParams::default()
+            },
+            &MaskAdjust::default(),
+        )
+    }
+
+    /// Des luminances de la nuit noire au soleil plus clair que le blanc, et au-delà de la table.
+    const LUMINANCES: [f32; 14] = [
+        0.0, 1e-7, 1e-5, 1e-4, 1e-3, 0.01, 0.05, 0.18, 0.5, 0.9, 1.0, 2.0, 10.0, 25.0,
+    ];
+
+    #[test]
+    fn the_table_gives_the_curve_to_well_under_one_level_of_a_screen() {
+        // Écart mesuré sur l'écran (valeurs encodées) : 1 / 255 vaut 0,004, la table reste cent fois en dessous.
+        let configs = [
+            tone(0.0, 0.0, 0.0, 0.0),
+            tone(0.6, 0.0, 0.0, 0.0),
+            tone(-0.6, 0.0, 0.0, 0.0),
+            tone(0.0, 0.8, 0.0, 0.0),
+            tone(0.0, 0.0, -0.8, 0.0),
+            tone(0.0, 0.0, 0.0, 0.8),
+            tone(0.4, -0.5, 0.6, -0.3),
+            tone(1.0, 1.0, 1.0, 1.0),
+            tone(-1.0, -1.0, -1.0, -1.0),
+        ];
+
+        for config in &configs {
+            let table = ToneLut::new(config);
+            for luminance in LUMINANCES {
+                let direct = tone_curve(luminance.max(1e-5), config);
+                let tabled = table.at(luminance.max(1e-5), config);
+
+                let gap = (linear_to_srgb(direct.clamp(0.0, 1.0))
+                    - linear_to_srgb(tabled.clamp(0.0, 1.0)))
+                .abs();
+                assert!(gap < 4e-5, "luminance {luminance} : écart {gap}");
+                // Au-dessus de 1 l'écran sature : on compare aussi la valeur linéaire elle-même.
+                assert!(
+                    (direct - tabled).abs() <= 2e-3 * direct.abs().max(1e-3),
+                    "luminance {luminance} : {direct} contre {tabled}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn beyond_the_table_the_curve_is_computed_directly() {
+        let config = tone(0.5, 0.2, -0.2, 0.3);
+        let table = ToneLut::new(&config);
+        let beyond = LUT_REACH.powi(4) * 1.5;
+
+        assert_eq!(table.at(beyond, &config), tone_curve(beyond, &config));
+    }
+
+    #[test]
+    fn a_pixel_comes_out_the_same_with_or_without_the_table() {
+        let config = tone(0.4, 0.3, -0.3, 0.2);
+        let table = ToneLut::new(&config);
+
+        for pixel in [
+            [0.02, 0.01, 0.03],
+            [0.18, 0.2, 0.15],
+            [0.9, 0.5, 0.1],
+            [1.8, 1.6, 1.1],
+            [0.0, 0.0, 0.0],
+        ] {
+            let (mut direct, mut tabled) = (pixel, pixel);
+            tone_and_color_pixel(&mut direct, &config, None);
+            tone_and_color_pixel(&mut tabled, &config, Some(&table));
+
+            for channel in 0..3 {
+                let gap = (linear_to_srgb(direct[channel].clamp(0.0, 1.0))
+                    - linear_to_srgb(tabled[channel].clamp(0.0, 1.0)))
+                .abs();
+                assert!(gap < 1e-4, "{pixel:?} canal {channel} : écart {gap}");
+            }
+        }
+    }
+
+    #[test]
+    fn a_neutral_tone_stage_is_skipped_so_the_photo_is_left_exactly_as_it_was() {
+        let mut source = ImageBuf::new(3, 1);
+        source.data.copy_from_slice(&[
+            0.2, 0.3, 0.4, //
+            0.05, 0.05, 0.05, //
+            0.6, 0.1, 0.7,
+        ]);
+
+        let out = apply(&source, &RenderParams::default(), &[]);
+
+        assert_eq!(out.data, source.data);
+    }
+
+    #[test]
+    fn every_tone_and_colour_setting_wakes_the_stage_up() {
+        // Si `is_identity` en oubliait un, ce réglage ne ferait plus rien.
+        let source = {
+            let mut img = ImageBuf::new(4, 4);
+            for (i, value) in img.data.iter_mut().enumerate() {
+                *value = 0.05 + 0.05 * (i % 12) as f32;
+            }
+            img
+        };
+        let neutral = apply(&source, &RenderParams::default(), &[]);
+
+        for settings in [
+            RenderParams {
+                contrast: 0.3,
+                ..RenderParams::default()
+            },
+            RenderParams {
+                shadows: 0.3,
+                ..RenderParams::default()
+            },
+            RenderParams {
+                highlights: 0.3,
+                ..RenderParams::default()
+            },
+            RenderParams {
+                whites: 0.3,
+                ..RenderParams::default()
+            },
+            RenderParams {
+                blacks: 0.3,
+                ..RenderParams::default()
+            },
+            RenderParams {
+                lift: 0.3,
+                ..RenderParams::default()
+            },
+            RenderParams {
+                saturation: 0.3,
+                ..RenderParams::default()
+            },
+            RenderParams {
+                vibrance: 0.3,
+                ..RenderParams::default()
+            },
+        ] {
+            assert_ne!(
+                apply(&source, &settings, &[]).data,
+                neutral.data,
+                "{settings:?}"
+            );
         }
     }
 }

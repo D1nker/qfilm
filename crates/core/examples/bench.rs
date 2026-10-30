@@ -13,6 +13,7 @@ use qfilm_core::buffer::ImageBuf;
 use qfilm_core::mask::{Mask, MaskAdjust, MaskShape};
 use qfilm_core::render::{self, RenderParams};
 use qfilm_core::{encode, preset};
+use rayon::prelude::*;
 use serde_json::{Value, json};
 
 fn photo(width: u32, height: u32) -> ImageBuf {
@@ -51,12 +52,34 @@ fn time(mut run: impl FnMut()) -> f64 {
         .fold(f64::INFINITY, f64::min)
 }
 
+/// Ce que coûte un passage sur toute l'image : de quoi savoir si c'est la mémoire ou le calcul qui pèse.
+fn floor(img: &ImageBuf) {
+    println!("-- le plancher : ce que coûte un passage sur toute l'image --");
+    let clone = time(|| drop(img.clone()));
+    println!("{:<34}{clone:>8.1} ms", "copie de l'image");
+    let mut scratch = img.clone();
+    let pass = time(|| {
+        scratch.data.par_chunks_mut(3).for_each(|px| {
+            px[0] *= 1.0001;
+            px[1] *= 1.0001;
+            px[2] *= 1.0001;
+        });
+    });
+    println!("{:<34}{pass:>8.1} ms", "un passage trivial (lire + écrire)");
+    let mut reused = img.clone();
+    let reuse = time(|| reused.data.clone_from(&img.data));
+    println!("{:<34}{reuse:>8.1} ms", "copie dans un tampon réutilisé");
+}
+
 fn report(width: u32, height: u32) {
     let img = photo(width, height);
     println!(
         "\n== {width}×{height} ({:.1} MP) ==",
         f64::from(width * height) / 1e6
     );
+
+    floor(&img);
+    println!("-- le rendu --");
 
     let baseline = time(|| drop(render::apply(&img, &RenderParams::default(), &[])));
     println!("{:<34}{baseline:>8.1} ms", "neutre (copie + épaulement)");
