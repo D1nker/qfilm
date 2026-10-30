@@ -715,29 +715,45 @@ fn box_blur(data: &mut [f32], w: usize, h: usize, radius: usize) {
     let window = (2 * radius + 1) as f64;
     let mut temp = vec![0.0f32; w * h];
 
-    for (line, out) in data.chunks(w).zip(temp.chunks_mut(w)) {
-        let last = w.cast_signed() - 1;
-        let at = |i: isize| f64::from(line[i.clamp(0, last) as usize]);
-        let mut sum: f64 = (-r..=r).map(at).sum();
-        for (x, value) in out.iter_mut().enumerate() {
-            *value = (sum / window) as f32;
-            let x = x.cast_signed();
-            sum += at(x + r + 1) - at(x - r);
-        }
-    }
+    // Les lignes sont indépendantes : un fil par ligne, avec la même somme glissante qu'avant.
+    data.par_chunks(w)
+        .zip(temp.par_chunks_mut(w))
+        .for_each(|(line, out)| {
+            let last = w.cast_signed() - 1;
+            let at = |i: isize| f64::from(line[i.clamp(0, last) as usize]);
+            let mut sum: f64 = (-r..=r).map(at).sum();
+            for (x, value) in out.iter_mut().enumerate() {
+                *value = (sum / window) as f32;
+                let x = x.cast_signed();
+                sum += at(x + r + 1) - at(x - r);
+            }
+        });
 
-    // Une passe verticale qui avance ligne par ligne, plus sage pour le cache qu'une colonne à la fois.
+    // La passe verticale avance ligne par ligne (plus sage pour le cache qu'une colonne à la fois), par
+    // bandes de lignes : chaque bande recalcule sa première fenêtre, puis glisse. La fenêtre de départ coûte
+    // `2 * rayon + 1` lignes par bande, d'où des bandes aussi peu nombreuses que les fils.
     let last = h.cast_signed() - 1;
     let row = |y: isize| (y.clamp(0, last) as usize) * w;
-    let mut sums: Vec<f64> = (0..w)
-        .map(|x| (-r..=r).map(|dy| f64::from(temp[row(dy) + x])).sum())
-        .collect();
-    for y in 0..h.cast_signed() {
-        for (x, sum) in sums.iter_mut().enumerate() {
-            data[y as usize * w + x] = (*sum / window) as f32;
-            *sum += f64::from(temp[row(y + r + 1) + x]) - f64::from(temp[row(y - r) + x]);
-        }
-    }
+    let band = h.div_ceil(rayon::current_num_threads()).max(8);
+    data.par_chunks_mut(band * w)
+        .enumerate()
+        .for_each(|(index, out)| {
+            let first = (index * band).cast_signed();
+            let mut sums: Vec<f64> = (0..w)
+                .map(|x| {
+                    (-r..=r)
+                        .map(|dy| f64::from(temp[row(first + dy) + x]))
+                        .sum()
+                })
+                .collect();
+            for (offset, out_row) in out.chunks_mut(w).enumerate() {
+                let y = first + offset.cast_signed();
+                for (x, sum) in sums.iter_mut().enumerate() {
+                    out_row[x] = (*sum / window) as f32;
+                    *sum += f64::from(temp[row(y + r + 1) + x]) - f64::from(temp[row(y - r) + x]);
+                }
+            }
+        });
 }
 
 fn apply_vignette(img: &mut ImageBuf, amount: f32, midpoint: f32, feather: f32) {

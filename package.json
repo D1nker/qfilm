@@ -34,7 +34,8 @@
     "e2e": "npm run e2e -w @qfilm/ui",
     "test:all": "npm run test && npm run test:rust && npm run e2e",
     "website:images": "cargo run --release -p qfilm-core --example site_images -- \"${SITE_PHOTOS:-$HOME/qFilm-site-photos}\" website/images.json website/img",
-    "website:screenshots": "npm run screenshots -w @qfilm/ui"
+    "website:screenshots": "npm run screenshots -w @qfilm/ui",
+    "bench": "cargo run --release -p qfilm-core --example bench"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.11.4",
