@@ -113,6 +113,14 @@ test.describe("the release workflow", () => {
     expect(workflow).toContain("fail-fast: false");
   });
 
+  test("hands the target to Tauri itself: a trailing `--` in the script sends it to cargo instead", () => {
+    // `tauri-action` ajoute son propre `--` avant `args` ; un second casse l'assemblage des Mac.
+    const script = /tauriScript:\s*(.+)/.exec(workflow)?.[1]?.trim() ?? "";
+
+    expect(script).toBe("npm run tauri");
+    expect(script.endsWith("--")).toBe(false);
+  });
+
   test("signs the Mac bundle ad hoc: without it Apple silicon reports the app as damaged", () => {
     expect(workflow).toMatch(/APPLE_SIGNING_IDENTITY:\s*"-"/);
   });

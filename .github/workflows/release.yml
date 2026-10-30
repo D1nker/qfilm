@@ -92,7 +92,10 @@ jobs:
           # Pour signer et notariser (compte Apple Developer), voir docs/RELEASING.md.
           APPLE_SIGNING_IDENTITY: "-"
         with:
-          tauriScript: npm run tauri --
+          # Sans `--` final : l'action en ajoute un elle-même avant `args`. Un second ferait passer `--target` à
+          # cargo au lieu de Tauri, qui chercherait alors le binaire dans target/release/ au lieu de
+          # target/<cible>/release/ (le premier essai l'a vérifié : « can't open main binary »).
+          tauriScript: npm run tauri
           args: ${{ matrix.target && format('--target {0}', matrix.target) || '' }}
           # Sans étiquette (lancement à la main) : on construit, on ne publie rien.
           tagName: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
