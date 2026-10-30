@@ -309,3 +309,7 @@ website:images`, driven by `website/images.json`) applies a look and a frame to 
   is a full-bleed square (iOS rounds it itself). Regenerate the desktop set with
   `npm run tauri icon branding/icon.png`, then delete `desktop/icons/android`, `ios` and the extra `64x64.png`
   (desktop only), and re-render the share cards (`npm run website:screenshots`, they embed the icon).
+  The window's Dock / Cmd+Tab icon is compiled into the binary and Cargo does not track the icon files: after
+  changing them, `touch desktop/src/lib.rs` (or `cargo clean -p app`) and restart `npm run app`, a page reload
+  cannot do it (macOS may also cache the old one: `killall Dock`). The header shows the mark (`/favicon.svg`)
+  beside the wordmark.
