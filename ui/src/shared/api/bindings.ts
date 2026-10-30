@@ -10,9 +10,9 @@ export const commands = {
 	closeImage: (id: string) => __TAURI_INVOKE<null>("close_image", { id }),
 	/**  Calculé sur un thread dédié : ne doit jamais retarder le rendu de l'aperçu. */
 	presetThumbnails: (id: string) => __TAURI_INVOKE<PresetThumbnail[]>("preset_thumbnails", { id }),
-	renderPreview: (id: string, params: RenderParams_Deserialize, geometry: Geometry_Deserialize, frame: FrameSelection_Deserialize, draft: boolean) => __TAURI_INVOKE<PreviewResult>("render_preview", { id, params, geometry, frame, draft }),
+	renderPreview: (id: string, params: RenderParams_Deserialize, geometry: Geometry_Deserialize, masks: Mask_Deserialize[], frame: FrameSelection_Deserialize, draft: boolean) => __TAURI_INVOKE<PreviewResult>("render_preview", { id, params, geometry, masks, frame, draft }),
 	frameThumbnails: (id: string, params: RenderParams_Deserialize, frames: FrameSelection_Deserialize[]) => __TAURI_INVOKE<string[]>("frame_thumbnails", { id, params, frames }),
-	exportImage: (id: string, params: RenderParams_Deserialize, geometry: Geometry_Deserialize, frame: FrameSelection_Deserialize, caption: Caption_Deserialize, destination: string, options: ExportOptions_Deserialize) => __TAURI_INVOKE<null>("export_image", { id, params, geometry, frame, caption, destination, options }),
+	exportImage: (id: string, params: RenderParams_Deserialize, geometry: Geometry_Deserialize, masks: Mask_Deserialize[], frame: FrameSelection_Deserialize, caption: Caption_Deserialize, destination: string, options: ExportOptions_Deserialize) => __TAURI_INVOKE<null>("export_image", { id, params, geometry, masks, frame, caption, destination, options }),
 	listFrames: () => __TAURI_INVOKE<FrameCatalog_Serialize>("list_frames"),
 	reloadFrames: () => __TAURI_INVOKE<FrameCatalog_Serialize>("reload_frames"),
 	importFrame: (path: string) => __TAURI_INVOKE<FrameCatalog_Serialize>("import_frame", { path }),
@@ -242,6 +242,77 @@ export type LoadIssue = {
 };
 
 export type LocalizedText = string | { [key in string]: string };
+
+export type Mask = Mask_Serialize | Mask_Deserialize;
+
+/**
+ *  Les décalages qu'un masque applique, tous nuls par défaut. Les mêmes noms et les mêmes échelles
+ *  que les réglages globaux : un décalage de 0,5 d'exposition vaut un demi-diaphragme de plus.
+ */
+export type MaskAdjust = MaskAdjust_Serialize | MaskAdjust_Deserialize;
+
+/**
+ *  Les décalages qu'un masque applique, tous nuls par défaut. Les mêmes noms et les mêmes échelles
+ *  que les réglages globaux : un décalage de 0,5 d'exposition vaut un demi-diaphragme de plus.
+ */
+export type MaskAdjust_Deserialize = {
+	exposure?: number,
+	contrast?: number,
+	highlights?: number,
+	shadows?: number,
+	whites?: number,
+	blacks?: number,
+	temperature?: number,
+	tint?: number,
+	saturation?: number,
+	vibrance?: number,
+};
+
+/**
+ *  Les décalages qu'un masque applique, tous nuls par défaut. Les mêmes noms et les mêmes échelles
+ *  que les réglages globaux : un décalage de 0,5 d'exposition vaut un demi-diaphragme de plus.
+ */
+export type MaskAdjust_Serialize = {
+	exposure: number,
+	contrast: number,
+	highlights: number,
+	shadows: number,
+	whites: number,
+	blacks: number,
+	temperature: number,
+	tint: number,
+	saturation: number,
+	vibrance: number,
+};
+
+/**  La forme d'un masque, en fractions de la photo recadrée (0 à 1 en largeur et en hauteur). */
+export type MaskShape = 
+/**  Plein effet en `from`, plus aucun en `to` : la distance entre les deux est le flou du dégradé. */
+{ kind: "linear"; from: [number, number]; to: [number, number] } | 
+/**
+ *  Une ellipse pleine en son centre. `radius` est en fractions de la **largeur** pour les deux axes
+ *  (l'ellipse est donc dessinée en pixels, sa rotation `angle` en degrés ne la déforme pas) ;
+ *  `feather` (0 à 1) est la part du rayon, vers l'intérieur, où l'effet s'estompe.
+ */
+{ kind: "radial"; center: [number, number]; radius: [number, number]; angle: number; feather: number };
+
+export type Mask_Deserialize = {
+	/**  Pour l'interface (clés de liste, sélection) : le rendu l'ignore. */
+	id: string,
+	shape: MaskShape,
+	/**  L'effet s'applique hors de la zone au lieu d'y rester. */
+	invert?: boolean,
+	adjust?: MaskAdjust_Deserialize,
+};
+
+export type Mask_Serialize = {
+	/**  Pour l'interface (clés de liste, sélection) : le rendu l'ignore. */
+	id: string,
+	shape: MaskShape,
+	/**  L'effet s'applique hors de la zone au lieu d'y rester. */
+	invert: boolean,
+	adjust: MaskAdjust_Serialize,
+};
 
 export type ParamDef = ParamDef_Serialize | ParamDef_Deserialize;
 

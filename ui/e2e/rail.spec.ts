@@ -9,12 +9,19 @@ test.describe("the group rail", () => {
   test("is one rail for the whole panel: the looks, then Retouche, then Cadre", async ({
     openApp,
   }) => {
-    await expect(rail(openApp).getByRole("button")).toHaveCount(9);
-    for (const name of ["Négatif couleur", "Noir & blanc", "Tons", "Couleurs", "Finition"]) {
+    await expect(rail(openApp).getByRole("button")).toHaveCount(10);
+    for (const name of [
+      "Négatif couleur",
+      "Noir & blanc",
+      "Tons",
+      "Couleurs",
+      "Finition",
+      "Masques",
+    ]) {
       await expect(item(openApp, name)).toBeVisible();
     }
     await expect(rail(openApp).locator('[data-section="looks"]')).toHaveCount(2);
-    await expect(rail(openApp).locator('[data-section="adjust"]')).toHaveCount(3);
+    await expect(rail(openApp).locator('[data-section="adjust"]')).toHaveCount(4);
     await expect(rail(openApp).locator('[data-section="frame"]')).toHaveCount(4);
   });
 
@@ -104,7 +111,7 @@ test.describe("the group rail", () => {
     });
 
     test("they cross from one group to the next", async ({ openApp }) => {
-      await item(openApp, "Finition").click();
+      await item(openApp, "Masques").click();
 
       await openApp.page.keyboard.press("ArrowDown");
 

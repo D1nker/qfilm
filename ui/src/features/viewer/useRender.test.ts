@@ -43,6 +43,8 @@ async function setup() {
   const { useLook } = await import("@/features/looks");
   const { useFrame } = await import("@/features/frames");
   const { useGeometry } = await import("@/features/geometry");
+  const { useMasks } = await import("@/features/masks");
+  const { useInspector } = await import("@/features/inspector");
   const api = vi.mocked(await import("@/shared/api/api"));
   api.listFrames.mockResolvedValue(catalog);
   api.renderPreview.mockResolvedValue(result("default"));
@@ -54,6 +56,8 @@ async function setup() {
     editor: useEditor(),
     look: useLook(),
     geometry: useGeometry(),
+    masks: useMasks(),
+    inspector: useInspector(),
     frame,
     api,
   };
@@ -83,10 +87,83 @@ describe("useRender", () => {
 
     await vi.waitFor(() => expect(api.renderPreview).toHaveBeenCalled());
     await vi.waitFor(() => {
-      const [id, params, , selection] = api.renderPreview.mock.calls.at(-1) ?? [];
+      const [id, params, , , selection] = api.renderPreview.mock.calls.at(-1) ?? [];
       expect(id).toBe("a");
       expect((params as { exposure: number }).exposure).toBeCloseTo(1.5);
       expect(selection).toMatchObject({ id: "film35", params: { stock: "amber" } });
+    });
+  });
+
+  describe("masks", () => {
+    const lastMasks = (api: Awaited<ReturnType<typeof setup>>["api"]) =>
+      api.renderPreview.mock.calls.at(-1)?.[3] as { id: string }[] | undefined;
+    const calls = (api: Awaited<ReturnType<typeof setup>>["api"]) =>
+      api.renderPreview.mock.calls.length;
+    const lastFrame = (api: Awaited<ReturnType<typeof setup>>["api"]) =>
+      api.renderPreview.mock.calls.at(-1)?.[4];
+
+    async function withPhoto() {
+      const context = await setup();
+      context.editor.image.value = image("a");
+      await nextTick();
+      return context;
+    }
+
+    it("sends the masks that change something, after the geometry", async () => {
+      const { api, masks } = await withPhoto();
+
+      masks.add("linear");
+      masks.setAdjust(masks.selectedId.value ?? "", "exposure", -0.5);
+
+      await vi.waitFor(() => expect(lastMasks(api)).toHaveLength(1));
+    });
+
+    it("sends nothing for a mask that changes nothing, and does not render again for it", async () => {
+      const { api, masks } = await withPhoto();
+      await vi.waitFor(() => expect(calls(api)).toBeGreaterThan(0));
+      // Les rendus du chargement de la photo doivent être passés : on compte ce qui suit.
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      const before = calls(api);
+
+      masks.add("radial");
+      masks.setShape(masks.selectedId.value ?? "", {
+        kind: "radial",
+        center: [0.2, 0.2],
+        radius: [0.1, 0.1],
+        angle: 0,
+        feather: 0.1,
+      });
+      await nextTick();
+      await new Promise((resolve) => setTimeout(resolve, 20));
+
+      expect(calls(api)).toBe(before);
+      expect(lastMasks(api)).toEqual([]);
+    });
+
+    it("renders again when a mask's setting or shape changes", async () => {
+      const { api, masks } = await withPhoto();
+      masks.add("linear");
+      const id = masks.selectedId.value ?? "";
+      masks.setAdjust(id, "exposure", -0.5);
+      await vi.waitFor(() => expect(lastMasks(api)).toHaveLength(1));
+      const before = calls(api);
+
+      masks.setShape(id, { kind: "linear", from: [0, 0], to: [1, 1] });
+
+      await vi.waitFor(() => expect(calls(api)).toBeGreaterThan(before));
+    });
+
+    it("hides the frame while the masks page is shown, and gives it back after", async () => {
+      const { api, frame, inspector } = await withPhoto();
+      frame.applyFrame("film35");
+      await vi.waitFor(() => expect(lastFrame(api)?.id).toBe("film35"));
+
+      inspector.tab.value = "adjust";
+      inspector.group.adjust = "masks";
+      await vi.waitFor(() => expect(lastFrame(api)?.id).toBe("none"));
+
+      inspector.group.adjust = "tone";
+      await vi.waitFor(() => expect(lastFrame(api)?.id).toBe("film35"));
     });
   });
 
@@ -95,7 +172,7 @@ describe("useRender", () => {
       api.renderPreview.mock.calls.at(-1)?.[2] as
         { quarterTurns: number; crop: { width: number } } | undefined;
     const lastFrame = (api: Awaited<ReturnType<typeof setup>>["api"]) =>
-      api.renderPreview.mock.calls.at(-1)?.[3];
+      api.renderPreview.mock.calls.at(-1)?.[4];
 
     it("sends the crop, and renders again when it changes", async () => {
       const { api, editor, geometry } = await setup();
@@ -241,12 +318,12 @@ describe("useRender", () => {
     const release = beginDrag();
     look.setParam("exposure", 0.4);
     await vi.waitFor(() => expect(api.renderPreview).toHaveBeenCalled());
-    expect(api.renderPreview.mock.calls.at(-1)?.[4]).toBe(true);
+    expect(api.renderPreview.mock.calls.at(-1)?.[5]).toBe(true);
     await vi.waitFor(() => expect(render.view.draft).toBe(true));
 
     release();
 
-    await vi.waitFor(() => expect(api.renderPreview.mock.calls.at(-1)?.[4]).toBe(false));
+    await vi.waitFor(() => expect(api.renderPreview.mock.calls.at(-1)?.[5]).toBe(false));
     await vi.waitFor(() => expect(render.view.draft).toBe(false));
   });
 
@@ -266,7 +343,7 @@ describe("useRender", () => {
     }
     release();
 
-    for (const call of api.renderPreview.mock.calls) expect(call[4]).toBe(false);
+    for (const call of api.renderPreview.mock.calls) expect(call[5]).toBe(false);
     expect(render.view.draft).toBe(false);
   });
 
@@ -290,7 +367,7 @@ describe("useRender", () => {
     await vi.waitFor(() => expect(api.renderPreview).toHaveBeenCalled());
     release();
 
-    expect(api.renderPreview.mock.calls.at(-1)?.[4]).toBe(false);
+    expect(api.renderPreview.mock.calls.at(-1)?.[5]).toBe(false);
   });
 
   it("renders in full quality when nothing is being dragged", async () => {
@@ -300,7 +377,7 @@ describe("useRender", () => {
 
     await vi.waitFor(() => expect(api.renderPreview).toHaveBeenCalled());
 
-    for (const call of api.renderPreview.mock.calls) expect(call[4]).toBe(false);
+    for (const call of api.renderPreview.mock.calls) expect(call[5]).toBe(false);
   });
 
   it("forgets the draft flag the moment another photo is opened", async () => {

@@ -8,10 +8,12 @@ import { useNotice } from "@/shared/lib/useNotice";
 import { useFrame } from "@/features/frames";
 import { useGeometry } from "@/features/geometry";
 import { useLook } from "@/features/looks";
+import { useMasks } from "@/features/masks";
 
 const { image, error } = useEditor();
 const { show } = useNotice();
 const { params, activePreset } = useLook();
+const { forRender: masks } = useMasks();
 const { frame, caption } = useFrame();
 const { geometry } = useGeometry();
 
@@ -42,6 +44,7 @@ async function saveExport() {
       current.id,
       { ...params.value },
       { ...geometry.value, crop: { ...geometry.value.crop } },
+      masks.value,
       { id: frame.id, params: { ...frame.params } },
       { ...caption },
       destination,

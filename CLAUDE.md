@@ -35,7 +35,7 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
   each: `photo/useEditor` (open photo, presets, thumbnails), `looks/useLook` (preset × amount + manual
   adjustments), `frames/useFrame` (chosen frame, its params, caption, imported frames), `useFrameThumbnails`,
   `viewer/useRender` (the single watcher that calls Rust), `viewer/useViewportNavigation` (zoom/pan),
-  `history/useHistory` (undo/redo of look + frame, steps collapse after a 300 ms pause), `export/useExport`,
+  `masks/useMasks` (the masks), `history/useHistory` (undo/redo of look + frame + crop + masks, steps collapse after a 300 ms pause), `export/useExport`,
   `inspector/useInspector`, `app/useTheme` (dark default, light), `shared/i18n` (`useLocale`), `app/useShortcuts`, `app/useHelp`
   (shortcuts dialog), `shared/lib/useNotice` (passing messages).
 - Rendering is driven by one watcher in `useRender`: change state, never call the renderer by hand.
@@ -151,6 +151,30 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
   the drag, the valid set being convex). A screen mirror after an odd quarter turn is the _other_ flip of
   the source (`useGeometry.flip`, pinned by a Rust test). Export order: geometry, resize, look.
   Preset and frame thumbnails still show the uncropped photo.
+- Masks (`crates/core/src/mask.rs`, UI in `features/masks/`) are local Light + Color adjustments inside a linear
+  or radial gradient, and not a look: a preset never touches them, the intensity does not scale them and
+  `resetLook` leaves them. A mask is a shape plus ten deltas (`MaskAdjust`: exposure, contrast, highlights,
+  shadows, whites, blacks, temperature, tint, saturation, vibrance), with the same names and scales as the
+  global sliders. **No second render**: per pixel the effective settings are `global + Σ weight × delta`,
+  computed inside the two per-pixel stages (`apply_exposure_and_white_balance`, `apply_tone_and_color`, via
+  `Tone`), so a mask costs a weight evaluation per pixel; a test pins that each of the ten deltas equals moving
+  that slider everywhere. Without an active mask (`Local::new` is `None`: none, or all deltas zero) the code
+  path is the one from before masks, bit for bit, so golden images did not move. Coordinates are fractions of
+  the **cropped** photo (masks follow the crop frame, not the photo content: crop first), sampled at pixel
+  centres, so preview and export draw the same area. A linear mask is full at `from` and gone at `to` (their
+  distance is the feather); a radial one is an ellipse whose radii are fractions of the **width** (both axes,
+  so the rotation `angle` never deforms it) with a `feather` share fading inward. Overlapping masks add.
+  `masks` is its own argument of `render_preview` and `export_image` (after `geometry`), part of the render
+  cache key (`RenderKey`); thumbnails ignore it. UI: `useMasks` (module state, the selection is not in the undo
+  snapshot, so choosing a mask is not a step), `forRender`/`renderKey` send only the masks that change
+  something (adding a neutral one or moving its handles renders nothing), `maskShapes.ts` holds the pure maths
+  (radius handles measure the vertical in heights: `aspect` = height / width). The "Masques" page is the 4th of
+  the Retouche group (`MASKS_PAGE`, rendered by the host next to `AdjustPanel`); while it is shown the preview
+  has **no frame** (like while cropping) and `MaskOverlay` draws the chosen mask's handles over the photo. The
+  overlay root must exist before a mask does (it measures itself on mount: an SVG stuck at its initial 1 × 1
+  viewBox turns its strokes into a flat colour), only the handles take the pointer (panning and zoom keep
+  working), and they also move with the arrow keys. Not done: brush, per-mask clarity or sharpening, masks that
+  follow the photo through a crop change.
 - Colour grading is one wheel with a puck per zone (`ColorWheel`, geometry in `wheel.ts`: hue is the angle from
   the top, saturation the distance from the centre, with a dead zone at the centre where the hue is kept), a
   zone picker and precise sliders for the active zone. Dragging goes through `beginDrag()` so it previews as a
@@ -160,7 +184,7 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
   heading that matches its intent; the headings are not collapsible.
 - The inspector has no tabs: one rail (`shared/ui/UiRailPanel`, hosted by `app/InspectorPanel`) lists every page,
   in three groups separated by a thin line: the looks (one icon per category, `categoryIcons.ts`, a fallback for
-  an unknown one), Retouche (Tons, Couleurs, Finition), Cadre (Recadrage, Cadre, Légende, Mes cadres). Each
+  an unknown one), Retouche (Tons, Couleurs, Finition, Masques), Cadre (Recadrage, Cadre, Légende, Mes cadres). Each
   feature exposes its items from a plain module (`useLookPages`, `adjustRailItems`, `frameRailItems`: names, icons,
   "modified" dots, unfolding), and its panel (`LooksPanel`, `AdjustPanel`, `FramePanel`) only draws its pages,
   `v-show`n by the `page` prop. The host mounts one panel at a time (`v-if` on `tab`, so a hidden panel keeps

@@ -31,8 +31,9 @@
         />
 
         <CropOverlay v-if="cropping && !comparing" :style="captionCanvasStyle" />
+        <MaskOverlay v-if="maskEditing && !comparing" :style="captionCanvasStyle" />
 
-        <template v-if="!comparing && !cropping">
+        <template v-if="!comparing && !cropping && !maskEditing">
           <canvas ref="captionCanvas" class="caption-layer" :style="captionCanvasStyle" />
 
           <template v-if="editable">
@@ -99,6 +100,7 @@ import { useCaptionLayer } from "@/features/viewer/useCaptionLayer";
 import { useEditor } from "@/features/photo";
 import { useFrame } from "@/features/frames";
 import { CropOverlay, useGeometry } from "@/features/geometry";
+import { MaskOverlay, useMasks } from "@/features/masks";
 import { useInspector, PanelHandle } from "@/features/inspector";
 import { useRender } from "@/features/viewer/useRender";
 import { useViewportNavigation } from "@/features/viewer/useViewportNavigation";
@@ -108,6 +110,7 @@ const { image, loading, comparing, browse } = useEditor();
 const { frame, caption, current, setParam } = useFrame();
 const { tab } = useInspector();
 const { cropping } = useGeometry();
+const { editing: maskEditing } = useMasks();
 const { view } = useRender();
 
 const stage = ref<HTMLElement | null>(null);

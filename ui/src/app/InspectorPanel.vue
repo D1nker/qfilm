@@ -12,6 +12,7 @@
         >
           <LooksPanel v-if="tab === 'looks'" :page="looksPage" @select="labelFrameFromLook" />
           <AdjustPanel v-if="tab === 'adjust'" :page="group.adjust" />
+          <MasksPanel v-if="tab === 'adjust' && group.adjust === MASKS_PAGE" />
           <FramePanel v-if="tab === 'frame'" :page="group.frame" />
         </UiRailPanel>
       </div>
@@ -25,6 +26,7 @@ import { computed } from "vue";
 import { localized, t } from "@/shared/i18n";
 import type { Preset } from "@/shared/api/api";
 import { FramePanel, frameRailItems, unfoldFramePage, useFrame } from "@/features/frames";
+import { MASKS_PAGE, MasksPanel, maskRailItems, unfoldMasksPage } from "@/features/masks";
 import { PanelResizer, useInspector, type InspectorTab } from "@/features/inspector";
 import UiRailPanel from "@/shared/ui/UiRailPanel.vue";
 import {
@@ -42,7 +44,7 @@ const { page: looksPage, items: looksItems } = useLookPages(() => group.looks);
 /// Une seule rampe pour tout le panneau : les looks, la retouche, le cadre, séparés d'un trait fin.
 const items = computed(() => [
   ...looksItems().map((item) => ({ ...item, section: "looks" })),
-  ...adjustRailItems().map((item) => ({ ...item, section: "adjust" })),
+  ...[...adjustRailItems(), ...maskRailItems()].map((item) => ({ ...item, section: "adjust" })),
   ...frameRailItems().map((item) => ({ ...item, section: "frame" })),
 ]);
 
@@ -60,7 +62,8 @@ function go(id: string) {
 }
 
 function unfold(id: string) {
-  if (tab.value === "adjust") unfoldAdjustPage(id);
+  if (id === MASKS_PAGE) unfoldMasksPage();
+  else if (tab.value === "adjust") unfoldAdjustPage(id);
   else if (tab.value === "frame") unfoldFramePage(id);
 }
 

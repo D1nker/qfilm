@@ -8,11 +8,12 @@ use qfilm_core::buffer::ImageBuf;
 use qfilm_core::decode::Metadata;
 use qfilm_core::frame::{FrameInfo, FrameRegistry, LoadIssue, UserFrames};
 use qfilm_core::geometry::Geometry;
+use qfilm_core::mask::Mask;
 use qfilm_core::render::RenderParams;
 use serde::Serialize;
 
-/// Ce que le rendu mémorise : le résultat n'est valable que pour ces réglages et ce cadrage.
-pub type RenderKey = (RenderParams, Geometry);
+/// Ce que le rendu mémorise : le résultat n'est valable que pour ces réglages, ce cadrage et ces masques.
+pub type RenderKey = (RenderParams, Geometry, Vec<Mask>);
 
 /// L'aperçu de la photo une fois cadrée (et sa version brouillon), refait quand le cadrage change.
 pub struct Prepared {

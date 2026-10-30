@@ -7,11 +7,13 @@ import { useEditor } from "@/features/photo";
 import { useFrame } from "@/features/frames";
 import { useGeometry } from "@/features/geometry";
 import { useLook } from "@/features/looks";
+import { useMasks } from "@/features/masks";
 
 const { image, error } = useEditor();
 const { shown } = useLook();
 const { frame } = useFrame();
 const { previewGeometry, cropping } = useGeometry();
+const { forRender: masks, renderKey: masksKey, editing: maskEditing } = useMasks();
 const { dragging } = useInteraction();
 
 const view = reactive({
@@ -45,8 +47,12 @@ const refresh = coalescedRunner(
         current.id,
         { ...shown.value },
         { ...previewGeometry.value, crop: { ...previewGeometry.value.crop } },
-        // Le cadre se règle sur la photo nue : pas de bordure autour pendant le recadrage.
-        cropping.value ? { id: "none", params: {} } : { id: frame.id, params: { ...frame.params } },
+        masks.value,
+        // Le cadre se règle sur la photo nue : pas de bordure autour pendant le recadrage, ni pendant
+        // qu'on pose des masques (leurs poignées se placent sur la photo, pas sur le cadre).
+        cropping.value || maskEditing.value
+          ? { id: "none", params: {} }
+          : { id: frame.id, params: { ...frame.params } },
         draft,
       );
       if (!draft) {
@@ -84,6 +90,8 @@ watch(
     shown.value,
     JSON.stringify(previewGeometry.value),
     cropping.value,
+    maskEditing.value,
+    masksKey.value,
     frame.id,
     JSON.stringify(frame.params),
     dragging.value,

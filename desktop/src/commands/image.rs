@@ -114,7 +114,7 @@ pub async fn preset_thumbnails(
         preset::builtin()
             .par_iter()
             .map(|preset| {
-                let rendered = render::apply(&thumb, &preset.params);
+                let rendered = render::apply(&thumb, &preset.params, &[]);
                 Ok(PresetThumbnail {
                     id: preset.id.clone(),
                     image: encode::to_data_url(&rendered, THUMB_JPEG_QUALITY)?,

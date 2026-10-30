@@ -65,6 +65,21 @@ export interface Call {
   args: Record<string, unknown>;
 }
 
+export interface MaskCall {
+  id: string;
+  shape:
+    | { kind: "linear"; from: [number, number]; to: [number, number] }
+    | {
+        kind: "radial";
+        center: [number, number];
+        radius: [number, number];
+        angle: number;
+        feather: number;
+      };
+  invert: boolean;
+  adjust: Record<string, number>;
+}
+
 export interface RenderCall {
   id: string;
   geometry: {
@@ -75,6 +90,7 @@ export interface RenderCall {
     crop: { x: number; y: number; width: number; height: number };
   };
   params: Record<string, number> & { curves: Record<"rgb" | "red" | "green" | "blue", number[][]> };
+  masks: MaskCall[];
   frame: { id: string; params: Record<string, string | number | boolean> };
 }
 

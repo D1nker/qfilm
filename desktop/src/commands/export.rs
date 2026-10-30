@@ -4,6 +4,7 @@ use qfilm_core::caption::Caption;
 use qfilm_core::encode::ExportOptions;
 use qfilm_core::frame::FrameSelection;
 use qfilm_core::geometry::{self, Geometry};
+use qfilm_core::mask::Mask;
 use qfilm_core::render::RenderParams;
 use qfilm_core::{PhotoError, encode, render};
 use tauri::State;
@@ -18,6 +19,7 @@ pub async fn export_image(
     id: String,
     params: RenderParams,
     geometry: Geometry,
+    masks: Vec<Mask>,
     frame: FrameSelection,
     caption: Caption,
     destination: String,
@@ -37,9 +39,9 @@ pub async fn export_image(
         let source = cropped.as_ref().unwrap_or(&image.full);
         let rendered = match options.max_edge {
             Some(edge) if edge < source.width.max(source.height) => {
-                render::apply(&source.downscale_to_fit(edge), &params)
+                render::apply(&source.downscale_to_fit(edge), &params, &masks)
             }
-            _ => render::apply(source, &params),
+            _ => render::apply(source, &params, &masks),
         };
         (rendered, image.metadata.clone())
     };

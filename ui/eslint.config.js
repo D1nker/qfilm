@@ -14,10 +14,11 @@ const FEATURE_DEPENDENCIES = {
   looks: ["photo"],
   inspector: ["photo"],
   geometry: ["photo", "inspector"],
+  masks: ["photo", "looks", "inspector"],
   frames: ["photo", "looks", "inspector", "geometry"],
-  history: ["photo", "looks", "frames", "geometry"],
-  export: ["photo", "looks", "frames", "geometry"],
-  viewer: ["photo", "looks", "frames", "geometry", "history", "inspector"],
+  history: ["photo", "looks", "frames", "geometry", "masks"],
+  export: ["photo", "looks", "frames", "geometry", "masks"],
+  viewer: ["photo", "looks", "frames", "geometry", "masks", "history", "inspector"],
 };
 
 const restrictImports = (...patterns) => ["error", { patterns: [NO_PARENT_IMPORTS, ...patterns] }];

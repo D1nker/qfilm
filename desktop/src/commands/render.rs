@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use qfilm_core::frame::{FrameSelection, TextZone};
 use qfilm_core::geometry::{self, Geometry};
+use qfilm_core::mask::Mask;
 use qfilm_core::render::RenderParams;
 use qfilm_core::{PhotoError, encode, render};
 use rayon::prelude::*;
@@ -36,7 +37,9 @@ pub async fn frame_thumbnails(
 
     tauri::async_runtime::spawn_blocking(move || {
         let registry = registry.read().map_err(|_| poisoned())?;
-        let rendered = render::apply(&thumb, &params);
+        // Les vignettes montrent la photo entière, sans cadrage : les masques, placés sur la photo
+        // recadrée, n'y auraient pas de sens.
+        let rendered = render::apply(&thumb, &params, &[]);
 
         // Un cadre qui échoue donne une vignette vide : il ne doit pas priver les autres des leurs.
         Ok(frames
@@ -60,6 +63,7 @@ pub async fn render_preview(
     id: String,
     params: RenderParams,
     geometry: Geometry,
+    masks: Vec<Mask>,
     frame: FrameSelection,
     draft: bool,
     state: State<'_, AppState>,
@@ -103,13 +107,13 @@ pub async fn render_preview(
             (full_size, cached, 1.0)
         };
 
-        let key = (params, geometry);
+        let key = (params, geometry, masks);
         let needs_render = cache
             .as_ref()
             .is_none_or(|(cached_key, _)| *cached_key != key);
 
         if needs_render {
-            let rendered = render::apply(source, &key.0);
+            let rendered = render::apply(source, &key.0, &key.2);
             *cache = Some((key, rendered));
         }
 
