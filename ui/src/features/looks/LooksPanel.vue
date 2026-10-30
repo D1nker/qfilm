@@ -19,6 +19,8 @@
             :src="thumbnails[preset.id]"
             :active="preset.id === activePreset"
             @click="select(preset)"
+            @pointerenter="enter(preset)"
+            @pointerleave="leave"
           />
         </UiTooltip>
       </div>
@@ -40,13 +42,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onBeforeUnmount, watch } from "vue";
 
 import { localized, t } from "@/shared/i18n";
 import type { Preset } from "@/shared/api/api";
 import { useEditor } from "@/features/photo";
 import { categoryIcon } from "@/features/looks/categoryIcons";
 import { useLook } from "@/features/looks/useLook";
+import { usePresetPreview } from "@/features/looks/usePresetPreview";
 import UiButton from "@/shared/ui/UiButton.vue";
 import UiPageHead from "@/shared/ui/UiPageHead.vue";
 import UiRailPanel from "@/shared/ui/UiRailPanel.vue";
@@ -90,7 +93,14 @@ const railItems = () =>
     mark: items.some((preset) => preset.id === activePreset.value) ? t("looks.applied") : undefined,
   }));
 
+const { enter, leave, stop } = usePresetPreview();
+
+// Une page cachée ne reçoit plus de `pointerleave` : sans cela l'aperçu resterait collé à la photo.
+watch(page, stop);
+onBeforeUnmount(stop);
+
 function select(preset: Preset) {
+  stop();
   applyPreset(preset);
   emit("select", preset);
 }

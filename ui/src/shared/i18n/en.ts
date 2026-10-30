@@ -60,6 +60,7 @@ export const en: Messages = {
     },
     rail: "Setting groups",
     resetPart: "Reset this group",
+    currentLook: "Look",
     resetGroup: "Reset this section",
     curves: {
       graph: "Tone curve",

@@ -1,4 +1,5 @@
 <template>
+  <CurrentLook />
   <UiRailPanel v-model="group" :label="t('adjust.rail')" :items="railItems()" @pick="unfold">
     <template v-for="part in PARTS" :key="part.id" #[part.id]>
       <UiPageHead :title="t(`adjust.parts.${part.id}`)">
@@ -128,6 +129,7 @@ import { t } from "@/shared/i18n";
 
 import { controls, formatControlValue, type ControlGroup } from "@/features/looks/controls";
 import { CURVE_IDS, isFlat } from "@/features/looks/curves";
+import CurrentLook from "@/features/looks/CurrentLook.vue";
 import CurvesPanel from "@/features/looks/CurvesPanel.vue";
 import { gradingRanges } from "@/features/looks/grading";
 import GradingPanel from "@/features/looks/GradingPanel.vue";

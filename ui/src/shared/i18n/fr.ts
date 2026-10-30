@@ -58,6 +58,7 @@ export const fr = {
     },
     rail: "Groupes de réglages",
     resetPart: "Réinitialiser ce groupe",
+    currentLook: "Look",
     resetGroup: "Réinitialiser cette section",
     curves: {
       graph: "Courbe des tons",

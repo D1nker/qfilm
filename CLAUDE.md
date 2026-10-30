@@ -175,6 +175,13 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
   `footer` slot, one slider under whichever page is shown. Labels and icons come from functions of `t`, and the buttons are named "Aller à X" so
   they never collide with the section headers of the same name. E2E: `App.group(name)` shows a page, and
   `App.openSection(name)` goes to the page of a section first.
+- Hovering a look in the Preset tab tries it on the photo (`usePresetPreview`: 120 ms before it starts, 80 ms
+  before it ends, so crossing the grid or going from one look to the next does not flash the original). It is
+  not edit state: `useLook().shown` is the hovered preset as a click would apply it (full intensity, no
+  adjustments), else `params`, and `useRender` renders `shown` while history, sliders and the Reset button
+  only see `params`. A click, a page change and the panel unmounting end it at once (a hidden page gets no
+  `pointerleave`). Retouche starts with `CurrentLook`, a display-only line (look name, intensity) shown while
+  a look is applied.
 - Resets: the Preset tab's (on its first category header) calls `resetLook`, back to Neutral with adjustments
   and curves, which is what choosing the Neutral preset does; it is disabled while `useLook().isPristine`.
   A Retouche page has its own Reset on its heading (that page's sliders and, for Tons, the curves); the Cadre

@@ -1,7 +1,60 @@
 import type { Page } from "@playwright/test";
-import { expect, test } from "./support/app";
+import { expect, test, type App } from "./support/app";
 
 test.describe("looks", () => {
+  test.describe("hover preview", () => {
+    const exposure = async (app: App) => (await app.lastRender()).params.exposure;
+
+    test("tries a look on the photo while the pointer is on it, and gives the photo back after", async ({
+      openApp,
+    }) => {
+      await openApp.page.getByRole("button", { name: "Portrait 400" }).hover();
+      await expect.poll(() => exposure(openApp)).not.toBe(0);
+
+      await openApp.page.mouse.move(5, 5);
+      await expect.poll(() => exposure(openApp)).toBe(0);
+    });
+
+    test("changes nothing in the edit: no look applied, nothing to reset or undo", async ({
+      openApp,
+    }) => {
+      await openApp.page.getByRole("button", { name: "Portrait 400" }).hover();
+      await expect.poll(() => exposure(openApp)).not.toBe(0);
+
+      await expect(openApp.page.getByRole("slider", { name: "Intensité" })).toHaveAttribute(
+        "data-disabled",
+        "",
+      );
+      await expect(openApp.page.getByRole("button", { name: "Réinitialiser" })).toBeDisabled();
+      await expect(
+        openApp.page.getByRole("button", { name: "Annuler", exact: true }),
+      ).toBeDisabled();
+    });
+
+    test("keeps the look when it is clicked", async ({ openApp }) => {
+      const look = openApp.page.getByRole("button", { name: "Portrait 400" });
+      await look.click();
+      await openApp.page.mouse.move(5, 5);
+
+      await expect.poll(() => exposure(openApp)).not.toBe(0);
+    });
+  });
+
+  test("Retouche says which look the adjustments sit on, and how strongly", async ({ openApp }) => {
+    const line = openApp.page.getByText("Portrait 400").and(openApp.page.locator(".name"));
+    await openApp.tab("Retouche").click();
+    await expect(openApp.page.locator(".look")).toHaveCount(0);
+
+    await openApp.tab("Preset").click();
+    await openApp.page.getByRole("button", { name: "Portrait 400" }).click();
+    await openApp.page.getByRole("slider", { name: "Intensité" }).focus();
+    await openApp.press("ArrowLeft", 20);
+    await openApp.tab("Retouche").click();
+
+    await expect(line).toBeVisible();
+    await expect(openApp.page.locator(".look .amount")).toHaveText("80 %");
+  });
+
   test("the intensity slider is disabled until a look is chosen", async ({ openApp }) => {
     const intensity = openApp.page.getByRole("slider", { name: "Intensité" });
     await expect(intensity).toHaveAttribute("data-disabled", "");

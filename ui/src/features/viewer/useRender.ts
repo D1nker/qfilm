@@ -9,7 +9,7 @@ import { useGeometry } from "@/features/geometry";
 import { useLook } from "@/features/looks";
 
 const { image, error } = useEditor();
-const { params } = useLook();
+const { shown } = useLook();
 const { frame } = useFrame();
 const { previewGeometry, cropping } = useGeometry();
 const { dragging } = useInteraction();
@@ -43,7 +43,7 @@ const refresh = coalescedRunner(
     try {
       const result = await renderPreview(
         current.id,
-        { ...params.value },
+        { ...shown.value },
         { ...previewGeometry.value, crop: { ...previewGeometry.value.crop } },
         // Le cadre se règle sur la photo nue : pas de bordure autour pendant le recadrage.
         cropping.value ? { id: "none", params: {} } : { id: frame.id, params: { ...frame.params } },
@@ -81,7 +81,7 @@ watch(image, (current) => {
 watch(
   () => [
     image.value?.id,
-    params.value,
+    shown.value,
     JSON.stringify(previewGeometry.value),
     cropping.value,
     frame.id,

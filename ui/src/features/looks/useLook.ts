@@ -68,6 +68,17 @@ const params = computed<RenderParams>(() => {
   return { ...out, curves: curves.value };
 });
 
+/// Le preset survolé, tel qu'un clic l'appliquerait (intensité pleine, sans retouche). Ce n'est pas
+/// de l'état d'édition : ni l'historique ni les curseurs ne le voient, seul le rendu s'en sert.
+const previewed = ref<RenderParams | null>(null);
+
+/// Ce que l'aperçu affiche : le look survolé, à défaut le look en cours.
+const shown = computed<RenderParams>(() => previewed.value ?? params.value);
+
+function previewPreset(preset: Preset | null) {
+  previewed.value = preset ? { ...preset.params } : null;
+}
+
 /// Rien n'est appliqué : ni preset, ni retouche, ni courbe. Le réglage « Réinitialiser » n'a alors rien à faire.
 const isPristine = computed(
   () =>
@@ -141,6 +152,8 @@ export function useLook() {
     activePreset,
     amount,
     params,
+    shown,
+    previewPreset,
     isPristine,
     applyPreset,
     setParam,

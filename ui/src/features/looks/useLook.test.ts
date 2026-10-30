@@ -280,4 +280,35 @@ describe("useLook", () => {
       expect(look.snapshot().curveEdits.green).toHaveLength(3);
     });
   });
+
+  describe("preview", () => {
+    it("shows the hovered look as a click would apply it, without touching the edit state", async () => {
+      const look = await setup();
+      look.applyPreset(portrait);
+      look.amount.value = 0.5;
+      look.setParam("contrast", 0.3);
+      const before = look.snapshot();
+
+      look.previewPreset({
+        ...portrait,
+        id: "other",
+        params: { ...portrait.params, exposure: -1 },
+      });
+
+      expect(look.shown.value).toMatchObject({ exposure: -1, contrast: -0.4 });
+      expect(look.params.value.exposure).toBeCloseTo(0.5);
+      expect(look.snapshot()).toEqual(before);
+      expect(look.activePreset.value).toBe("portrait");
+    });
+
+    it("goes back to the current look when the preview ends", async () => {
+      const look = await setup();
+      look.setParam("exposure", 0.4);
+
+      look.previewPreset(portrait);
+      look.previewPreset(null);
+
+      expect(look.shown.value).toEqual(look.params.value);
+    });
+  });
 });
