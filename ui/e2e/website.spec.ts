@@ -22,6 +22,7 @@ const RELEASE = {
     asset("qFilm_0.1.0_x64_en-US.msi", 8_100_000),
     asset("qFilm_0.1.0_amd64.AppImage", 85_000_000),
     asset("qFilm_0.1.0_amd64.deb", 8_000_000),
+    asset("qFilm_aarch64.app.tar.gz", 8_000_000),
     asset("qFilm.app.tar.gz.sig", 400),
     asset("latest.json", 900),
   ],
@@ -265,8 +266,15 @@ for (const { language, path, other } of PAGES) {
         const mac = section.locator('.os[data-os="mac"]');
         await expect(mac).toHaveClass(/recommended/);
         await expect(mac.locator("[data-get]")).toHaveAttribute("href", /aarch64\.dmg$/);
+        // Le navigateur ne distingue pas les puces : chaque installeur dit pour quel Mac il est.
+        await expect(mac.locator("[data-get]")).toContainText("Apple silicon");
         await expect(mac.locator("[data-get]")).toContainText("9");
-        await expect(mac.locator("[data-others] a")).toHaveText(["qFilm_0.1.0_x64.dmg"]);
+        await expect(mac.locator("[data-others] a")).toHaveText([
+          "Intel Mac · qFilm_0.1.0_x64.dmg",
+        ]);
+        await expect(mac.locator("[data-others] a")).toHaveAttribute("href", /_x64\.dmg$/);
+        // Les paquets de l'updater ne sont pas des téléchargements pour l'humain.
+        await expect(section.locator('a[href$=".app.tar.gz"]')).toHaveCount(0);
 
         const windows = section.locator('.os[data-os="windows"]');
         await expect(windows.locator("[data-get]")).toHaveAttribute("href", /x64-setup\.exe$/);
@@ -280,7 +288,7 @@ for (const { language, path, other } of PAGES) {
 
         const cta = page.locator("[data-cta]");
         await expect(cta).toHaveAttribute("href", /aarch64\.dmg$/);
-        await expect(cta).toContainText("macOS");
+        await expect(cta).toContainText("macOS (Apple silicon)");
         await context.close();
       });
 

@@ -4,10 +4,21 @@
 /// Du plus recommandé au moins recommandé : l'installeur avant le paquet nu. Les motifs finissent le nom
 /// du fichier : les signatures (`.dmg.sig`) et le manifeste de l'updater (`latest.json`) n'y répondent pas.
 const KINDS = {
-  mac: [/\.dmg$/i, /\.app\.tar\.gz$/i],
+  // Pas de `.app.tar.gz` : ce sont les paquets de l'updater de Tauri, pas un téléchargement à la main.
+  mac: [/\.dmg$/i],
   windows: [/-setup\.exe$/i, /\.msi$/i, /\.exe$/i],
   linux: [/\.appimage$/i, /\.deb$/i, /\.rpm$/i],
 };
+
+/// Un Mac a deux puces et le navigateur ne sait pas les distinguer (Safari se dit toujours Intel) : on nomme
+/// la puce de chaque installeur, sinon le gros bouton enverrait un Mac Intel vers un fichier qui ne s'ouvre pas.
+/// Rien pour Windows ni Linux : un seul installeur de chaque.
+function chipOf(os, name) {
+  if (os !== "mac") return "";
+  if (/aarch64|arm64/i.test(name)) return "Apple silicon";
+  if (/x64|x86_64/i.test(name)) return "Intel Mac";
+  return "";
+}
 
 export function assetsByOs(assets = []) {
   const found = { mac: [], windows: [], linux: [] };
@@ -20,6 +31,7 @@ export function assetsByOs(assets = []) {
           name: asset.name,
           url: asset.browser_download_url,
           size: asset.size,
+          chip: chipOf(os, asset.name),
           rank,
         });
         break;
@@ -27,7 +39,12 @@ export function assetsByOs(assets = []) {
     }
   }
 
-  for (const list of Object.values(found)) list.sort((a, b) => a.rank - b.rank);
+  // À rang égal, Apple silicon d'abord : c'est le Mac qu'on achète depuis 2020.
+  for (const list of Object.values(found)) {
+    list.sort(
+      (a, b) => a.rank - b.rank || (b.chip === "Apple silicon") - (a.chip === "Apple silicon"),
+    );
+  }
   return found;
 }
 

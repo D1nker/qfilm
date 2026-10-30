@@ -52,9 +52,8 @@ function showRelease(release) {
 
     button.href = first.url;
     const size = formatSize(first.size);
-    button.textContent = size
-      ? `${button.textContent.trim()} · ${size}`
-      : button.textContent.trim();
+    // Le nom de la puce est le même dans les deux langues : rien à traduire.
+    button.textContent = [button.textContent.trim(), first.chip, size].filter(Boolean).join(" · ");
 
     if (others.length > 0) {
       list.hidden = false;
@@ -62,7 +61,7 @@ function showRelease(release) {
         ...others.map((asset) => {
           const link = document.createElement("a");
           link.href = asset.url;
-          link.textContent = asset.name;
+          link.textContent = asset.chip ? `${asset.chip} · ${asset.name}` : asset.name;
           return link;
         }),
       );
@@ -76,7 +75,7 @@ function showRelease(release) {
     cta.href = primary.url;
     cta.querySelector("span").textContent = section.dataset.ctaReady.replace(
       "{os}",
-      SYSTEMS[current],
+      primary.chip ? `${SYSTEMS[current]} (${primary.chip})` : SYSTEMS[current],
     );
     document.querySelector("[data-note]")?.setAttribute("hidden", "");
   }
