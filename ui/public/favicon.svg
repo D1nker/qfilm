@@ -1,13 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="100 100 824 824">
-  <defs>
-    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#8f80ff"/>
-      <stop offset="1" stop-color="#5a46d8"/>
-    </linearGradient>
-  </defs>
-  <rect x="100" y="100" width="824" height="824" rx="188" fill="url(#background)"/>
-  <g fill="none" stroke="#fff" stroke-width="88">
-    <circle cx="496" cy="488" r="214"/>
-    <path d="M592 584L766 758"/>
-  </g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="100 100 824 824"><defs>
+<radialGradient id="bg" cx="0.3" cy="0.18" r="1.05"><stop offset="0" stop-color="#2b2842"/><stop offset="1" stop-color="#0b0a11"/></radialGradient>
+<linearGradient id="ink" gradientUnits="userSpaceOnUse" x1="300" y1="300" x2="700" y2="800"><stop offset="0" stop-color="#b9adff"/><stop offset="0.62" stop-color="#ff7fc8"/><stop offset="1" stop-color="#ffa94d"/></linearGradient>
+<linearGradient id="rim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.32"/><stop offset="0.5" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity="0.06"/></linearGradient>
+<filter id="soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="30"/></filter>
+</defs><rect x="100" y="100" width="824" height="824" rx="188" fill="url(#bg)"/><rect x="103" y="103" width="818" height="818" rx="185" fill="none" stroke="url(#rim)" stroke-width="6"/>
+<g fill="none" stroke="url(#ink)" stroke-width="100" stroke-linecap="round">
+<g filter="url(#soft)" opacity="0.65"><circle cx="468" cy="492" r="190"/><path d="M658 492V790"/></g>
+<circle cx="468" cy="492" r="190"/><path d="M658 492V790"/>
+</g></svg>

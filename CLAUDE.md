@@ -301,5 +301,11 @@ website:images`, driven by `website/images.json`) applies a look and a frame to 
   texts are generic (e.g. "Portrait 400", "Ambre"). Keep it that way when adding looks or frames.
   The bundle `identifier` (`io.github.d1nker.qfilm`) follows the GitHub-hosted convention: keep it,
   changing it later moves the app's data folder and breaks signing/updater continuity.
-- Icons: source in `branding/icon.svg` (+ `icon.png`). Regenerate with
-  `npm run tauri icon branding/icon.png`, then delete `desktop/icons/android` and `ios` (desktop only).
+- Logo: a glowing q (violet to rose, amber at the tail) on a near-black tile, chosen on 2026-10-30 among a q
+  monogram, a film strip and this one; it echoes the dark app and the website's darkroom look. Source:
+  `branding/icon.svg` (the macOS icon grid, 824 px tile in a 1024 canvas) and its `icon.png` (rendered by the
+  browser, transparent corners). The favicons (`ui/public/favicon.svg`, `website/icon.svg`) are the same drawing
+  with a `viewBox="100 100 824 824"` crop so it fills a tab (a test keeps them in sync), `website/apple-touch-icon.png`
+  is a full-bleed square (iOS rounds it itself). Regenerate the desktop set with
+  `npm run tauri icon branding/icon.png`, then delete `desktop/icons/android`, `ios` and the extra `64x64.png`
+  (desktop only), and re-render the share cards (`npm run website:screenshots`, they embed the icon).

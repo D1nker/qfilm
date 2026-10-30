@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+
 import { expect, test, type Page } from "@playwright/test";
 
 /// Le site (`website/`) : deux pages, anglais et français, sans étape de build. On vérifie ce qui casse
@@ -392,5 +395,32 @@ test.describe("website layout", () => {
       ),
     ).toBeLessThan(1.5);
     await expect(card.locator("h3")).toHaveCSS("text-align", "center");
+  });
+});
+
+test.describe("the logo", () => {
+  const read = (path: string) =>
+    readFileSync(fileURLToPath(new URL(`../../${path}`, import.meta.url)), "utf8");
+  /// Le dessin, sans la balise `<svg>` d'ouverture : les copies ne changent que de cadrage.
+  const drawing = (svg: string) => svg.slice(svg.indexOf(">") + 1);
+
+  test("is one drawing: the app's favicon and the site's are copies of the source", () => {
+    const source = read("branding/icon.svg");
+
+    expect(read("ui/public/favicon.svg")).toBe(read("website/icon.svg"));
+    expect(drawing(read("website/icon.svg"))).toBe(drawing(source));
+    expect(drawing(source)).toContain("<circle");
+  });
+
+  test("is the one the pages and the share cards point at", async ({ page }) => {
+    await withRelease(page, null);
+    await page.goto(SITE);
+
+    await expect(page.locator('link[rel="icon"]')).toHaveAttribute("href", "icon.svg");
+    await expect(page.locator(".top .brand img")).toHaveAttribute("src", "icon.svg");
+    await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute(
+      "href",
+      "apple-touch-icon.png",
+    );
   });
 });
