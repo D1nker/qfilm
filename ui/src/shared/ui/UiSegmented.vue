@@ -1,5 +1,10 @@
 <template>
-  <RadioGroupRoot v-model="model" class="segments" :aria-label="label">
+  <RadioGroupRoot
+    v-model="model"
+    class="segments"
+    :class="{ chips: options.some((option) => option.color) }"
+    :aria-label="label"
+  >
     <UiTooltip v-for="option in options" :key="option.value" :text="option.label">
       <RadioGroupItem
         :value="option.value"
@@ -77,6 +82,43 @@ const model = defineModel<T>({ required: true });
   border-radius: var(--radius-full);
 }
 
+/* Un sélecteur de couleurs : des pastilles rondes à plat, sans cadre autour. L'option choisie est
+   cerclée de gris neutre (l'accent violet disparaîtrait sur les pastilles violette et bleue). */
+.chips {
+  gap: var(--space-1);
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.chips .segment {
+  min-width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+}
+
+.chips .segment.swatch {
+  min-width: 28px;
+}
+
+.chips .dot {
+  width: 14px;
+  height: 14px;
+}
+
+.chips .segment:not(.swatch) {
+  padding: 0 var(--space-3);
+}
+
+.chips .segment[aria-checked="true"] {
+  background: var(--surface-hover);
+  box-shadow: inset 0 0 0 1.5px var(--text-muted);
+}
+
+.chips .segment.marked::after {
+  bottom: 1px;
+}
+
 .segment.marked::after {
   content: "";
   position: absolute;
@@ -99,7 +141,8 @@ const model = defineModel<T>({ required: true });
   color: var(--accent);
 }
 
-.segment:focus-visible {
+.segment:focus-visible,
+.chips .segment[aria-checked="true"]:focus-visible {
   outline: none;
   box-shadow: var(--focus-ring);
 }

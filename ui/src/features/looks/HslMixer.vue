@@ -68,9 +68,10 @@ const bandOptions = computed(() =>
   gap: var(--space-1);
 }
 
+/* Les huit pastilles se partagent la largeur des curseurs, comme les pastilles d'un sélecteur de teinte. */
 .mixer :deep(.segments) {
   justify-self: stretch;
   justify-content: space-between;
-  margin: var(--space-4) 0 var(--space-2);
+  margin: var(--space-3) 0 var(--space-3);
 }
 </style>

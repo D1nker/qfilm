@@ -152,7 +152,7 @@ const pointLabel = ([x, y]: CurvePoint, index: number) =>
   position: relative;
   width: min(100%, 260px);
   aspect-ratio: 1;
-  margin: var(--space-4) auto 0;
+  margin: var(--space-3) auto 0;
   border-radius: var(--radius-md);
   background: var(--surface);
   box-shadow: inset 0 0 0 1px var(--border-strong);

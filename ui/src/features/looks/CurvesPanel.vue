@@ -52,14 +52,12 @@ const channelOptions = computed(() =>
   display: grid;
 }
 
+/* Aussi large que le graphique juste dessous (voir `CurveEditor`), pour que les deux s'alignent. */
 .curves :deep(.segments) {
-  justify-self: stretch;
+  justify-self: center;
   justify-content: space-between;
-  margin-top: var(--space-4);
-}
-
-.curves :deep(.segment) {
-  flex: 1;
+  width: min(100%, 260px);
+  margin: var(--space-3) 0 0;
 }
 
 .hint {
