@@ -202,7 +202,7 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
   dot (`items[].mark`: "Modifié", or "Look appliqué" on a look category) so a change on a page you are not
   looking at stays visible; its text reaches screen readers through `aria-describedby` (ids built from the
   position, never the key: keys may contain spaces). A slider that goes both ways has a tick at zero and
-  fills from there. The tone-curve graph scales up to 340 px.
+  fills from there. The tone-curve graph scales up to 260 px.
 - Panel sections are `UiCollapsible`: with an `id` their open/closed state is remembered
   (`shared/lib/panelState`), a `modified` dot flags a section whose setting has moved, and the Retouche panel
   opens only Light and Color by default, with a reset button on each section that has changes. The e2e fixture
