@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use super::buffer::{ImageBuf, linear_to_srgb, srgb_to_linear};
 use super::curve::{Lut, ToneCurves};
+use super::mask::{Local, Mask, MaskAdjust};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, specta::Type)]
 #[serde(default, rename_all = "camelCase")]
@@ -177,10 +178,13 @@ impl Default for RenderParams {
 
 const LUMA: [f32; 3] = [0.2126, 0.7152, 0.0722];
 
-pub fn apply(source: &ImageBuf, params: &RenderParams) -> ImageBuf {
+/// Rend la photo avec ses réglages. Les `masks` ajoutent à ces réglages, zone par zone, des décalages de
+/// lumière et de couleur : voir `mask`. Sans masque actif le chemin est exactement celui d'avant eux.
+pub fn apply(source: &ImageBuf, params: &RenderParams, masks: &[Mask]) -> ImageBuf {
     let mut img = source.clone();
+    let local = Local::new(masks, img.width, img.height);
 
-    apply_exposure_and_white_balance(&mut img, params);
+    apply_exposure_and_white_balance(&mut img, params, local.as_ref());
 
     if params.noise_luminance > 0.001 || params.noise_color > 0.001 {
         apply_noise_reduction(&mut img, params.noise_luminance, params.noise_color);
@@ -199,7 +203,7 @@ pub fn apply(source: &ImageBuf, params: &RenderParams) -> ImageBuf {
         apply_clarity(&mut img, params.clarity);
     }
 
-    apply_tone_and_color(&mut img, params);
+    apply_tone_and_color(&mut img, params, local.as_ref());
 
     if let Some(luts) = params.curves.luts() {
         apply_curves(&mut img, &luts);
@@ -253,77 +257,145 @@ fn luma_of(pixel: &[f32]) -> f32 {
     LUMA[0] * pixel[0] + LUMA[1] * pixel[1] + LUMA[2] * pixel[2]
 }
 
-fn apply_exposure_and_white_balance(img: &mut ImageBuf, p: &RenderParams) {
+/// Les gains par canal de l'exposition et de la balance des blancs.
+fn white_balance_gains(exposure: f32, temperature: f32, tint: f32) -> [f32; 3] {
     let mut gains = [
-        1.0 + 0.18 * p.temperature,
-        1.0 - 0.10 * p.tint,
-        1.0 - 0.18 * p.temperature,
+        1.0 + 0.18 * temperature,
+        1.0 - 0.10 * tint,
+        1.0 - 0.18 * temperature,
     ];
 
     // Sans cette normalisation, réchauffer une image l'éclaircirait au passage.
     let weighted = (LUMA[0] * gains[0] + LUMA[1] * gains[1] + LUMA[2] * gains[2]).max(1e-5);
-    let exposure = 2f32.powf(p.exposure) / weighted;
+    let exposure = 2f32.powf(exposure) / weighted;
     for gain in &mut gains {
         *gain *= exposure;
     }
+    gains
+}
 
-    img.data.par_chunks_mut(3).for_each(|px| {
+fn apply_exposure_and_white_balance(img: &mut ImageBuf, p: &RenderParams, local: Option<&Local>) {
+    let gains = white_balance_gains(p.exposure, p.temperature, p.tint);
+
+    let Some(local) = local else {
+        img.data.par_chunks_mut(3).for_each(|px| {
+            for (channel, gain) in px.iter_mut().zip(gains) {
+                *channel *= gain;
+            }
+        });
+        return;
+    };
+
+    let width = img.width as usize;
+    img.data.par_chunks_mut(3).enumerate().for_each(|(i, px)| {
+        let delta = local.at((i % width) as u32, (i / width) as u32);
+        // Hors de toute zone : les gains globaux, sans les recalculer.
+        let gains = if delta.is_zero() {
+            gains
+        } else {
+            white_balance_gains(
+                p.exposure + delta.exposure,
+                p.temperature + delta.temperature,
+                p.tint + delta.tint,
+            )
+        };
         for (channel, gain) in px.iter_mut().zip(gains) {
             *channel *= gain;
         }
     });
 }
 
+/// Les réglages de tons et de couleur d'un pixel : les réglages globaux, plus le décalage des masques
+/// qui le recouvrent.
+struct Tone {
+    gamma: f32,
+    black_point: f32,
+    saturation: f32,
+    vibrance: f32,
+    shadows: f32,
+    highlights: f32,
+    whites: f32,
+}
+
+impl Tone {
+    fn new(p: &RenderParams, delta: &MaskAdjust) -> Self {
+        Self {
+            // Puissance de 2 plutôt que 1 + c : sans ça le curseur agit deux fois plus
+            // fort vers la gauche que vers la droite.
+            gamma: 2f32.powf(p.contrast + delta.contrast),
+            black_point: p.lift * 0.06 + (p.blacks + delta.blacks) * 0.02,
+            saturation: 1.0 + p.saturation + delta.saturation,
+            vibrance: p.vibrance + delta.vibrance,
+            shadows: p.shadows + delta.shadows,
+            highlights: p.highlights + delta.highlights,
+            whites: p.whites + delta.whites,
+        }
+    }
+}
+
 /// Courbe appliquée à la seule luminance ; les canaux sont ensuite mis à
 /// l'échelle, ce qui préserve la teinte au lieu de sursaturer.
-fn tone_curve(linear: f32, p: &RenderParams, gamma: f32) -> f32 {
+fn tone_curve(linear: f32, t: &Tone) -> f32 {
     // Pivot à 18 % de gris : le contraste s'ouvre autour du gris moyen.
     const PIVOT: f32 = 0.18;
-    let contrasted = PIVOT * (linear.max(0.0) / PIVOT).powf(gamma);
+    let contrasted = PIVOT * (linear.max(0.0) / PIVOT).powf(t.gamma);
 
     // Les masques suivent la perception, pas la lumière physique.
     let mut v = linear_to_srgb(contrasted);
     let mask = v.clamp(0.0, 1.0);
 
-    v += p.shadows * 2.0 * (1.0 - mask).powi(2) * mask;
-    v += p.highlights * 2.0 * mask * mask * (1.0 - mask);
-    v += p.whites * 0.2 * mask.powi(4);
+    v += t.shadows * 2.0 * (1.0 - mask).powi(2) * mask;
+    v += t.highlights * 2.0 * mask * mask * (1.0 - mask);
+    v += t.whites * 0.2 * mask.powi(4);
 
     srgb_to_linear(v.max(0.0))
 }
 
-fn apply_tone_and_color(img: &mut ImageBuf, p: &RenderParams) {
-    // Puissance de 2 plutôt que 1 + c : sans ça le curseur agit deux fois plus
-    // fort vers la gauche que vers la droite.
-    let gamma = 2f32.powf(p.contrast);
-    let black_point = p.lift * 0.06 + p.blacks * 0.02;
-    let saturation = 1.0 + p.saturation;
+fn tone_and_color_pixel(px: &mut [f32], t: &Tone) {
+    let luma_in = luma_of(px).max(1e-5);
+    let ratio = tone_curve(luma_in, t) / luma_in;
+    for channel in px.iter_mut() {
+        *channel *= ratio;
+    }
 
-    img.data.par_chunks_mut(3).for_each(|px| {
-        let luma_in = luma_of(px).max(1e-5);
-        let ratio = tone_curve(luma_in, p, gamma) / luma_in;
+    // Additif, sinon un pixel parfaitement noir ne pourrait jamais être relevé.
+    if t.black_point.abs() > 1e-6 {
         for channel in px.iter_mut() {
-            *channel *= ratio;
+            *channel = t.black_point + *channel * (1.0 - t.black_point);
         }
+    }
 
-        // Additif, sinon un pixel parfaitement noir ne pourrait jamais être relevé.
-        if black_point.abs() > 1e-6 {
-            for channel in px.iter_mut() {
-                *channel = black_point + *channel * (1.0 - black_point);
-            }
-        }
+    let luma = luma_of(px);
+    let peak = px[0].max(px[1]).max(px[2]);
+    let current = if peak > 1e-5 {
+        (peak - px[0].min(px[1]).min(px[2])) / peak
+    } else {
+        0.0
+    };
+    let amount = t.saturation + t.vibrance * (1.0 - current);
 
-        let luma = luma_of(px);
-        let peak = px[0].max(px[1]).max(px[2]);
-        let current = if peak > 1e-5 {
-            (peak - px[0].min(px[1]).min(px[2])) / peak
+    for channel in px.iter_mut() {
+        *channel = luma + (*channel - luma) * amount;
+    }
+}
+
+fn apply_tone_and_color(img: &mut ImageBuf, p: &RenderParams, local: Option<&Local>) {
+    let global = Tone::new(p, &MaskAdjust::default());
+
+    let Some(local) = local else {
+        img.data
+            .par_chunks_mut(3)
+            .for_each(|px| tone_and_color_pixel(px, &global));
+        return;
+    };
+
+    let width = img.width as usize;
+    img.data.par_chunks_mut(3).enumerate().for_each(|(i, px)| {
+        let delta = local.at((i % width) as u32, (i / width) as u32);
+        if delta.is_zero() {
+            tone_and_color_pixel(px, &global);
         } else {
-            0.0
-        };
-        let amount = saturation + p.vibrance * (1.0 - current);
-
-        for channel in px.iter_mut() {
-            *channel = luma + (*channel - luma) * amount;
+            tone_and_color_pixel(px, &Tone::new(p, &delta));
         }
     });
 }
@@ -779,7 +851,7 @@ mod tests {
     }
 
     fn vignetted(params: &RenderParams) -> ImageBuf {
-        apply(&flat(201, 0.4), params)
+        apply(&flat(201, 0.4), params, &[])
     }
 
     #[test]
@@ -794,8 +866,8 @@ mod tests {
         let source = flat(8, 0.37);
 
         assert_eq!(
-            apply(&source, &diagonal).data,
-            apply(&source, &RenderParams::default()).data
+            apply(&source, &diagonal, &[]).data,
+            apply(&source, &RenderParams::default(), &[]).data
         );
     }
 
@@ -810,7 +882,7 @@ mod tests {
         };
         let source = flat(8, srgb_to_linear(0.5));
 
-        let out = at(&apply(&source, &lifted), 3, 3);
+        let out = at(&apply(&source, &lifted, &[]), 3, 3);
 
         assert!((out - srgb_to_linear(0.7)).abs() < 0.01, "{out}");
     }
@@ -824,7 +896,7 @@ mod tests {
             },
             ..RenderParams::default()
         };
-        let out = apply(&flat(8, srgb_to_linear(0.5)), &red_up);
+        let out = apply(&flat(8, srgb_to_linear(0.5)), &red_up, &[]);
 
         assert!(out.data[0] > out.data[1] + 0.1);
         assert!((out.data[1] - out.data[2]).abs() < 1e-6);
@@ -926,6 +998,7 @@ mod tests {
                 grain_roughness: roughness,
                 ..RenderParams::default()
             },
+            &[],
         )
     }
 
@@ -983,8 +1056,8 @@ mod tests {
         let source = noisy_gray(64, 0.3, 0.05, true);
 
         assert_eq!(
-            apply(&source, &RenderParams::default()).data,
-            apply(&source, &RenderParams::default()).data
+            apply(&source, &RenderParams::default(), &[]).data,
+            apply(&source, &RenderParams::default(), &[]).data
         );
         let with_zero = RenderParams {
             noise_luminance: 0.0,
@@ -992,8 +1065,8 @@ mod tests {
             ..RenderParams::default()
         };
         assert_eq!(
-            apply(&source, &with_zero).data,
-            apply(&source, &RenderParams::default()).data
+            apply(&source, &with_zero, &[]).data,
+            apply(&source, &RenderParams::default(), &[]).data
         );
     }
 
@@ -1006,14 +1079,15 @@ mod tests {
                 noise_luminance: 1.0,
                 ..RenderParams::default()
             },
+            &[],
         );
 
         assert!(
             standard_deviation(&cleaned)
-                < standard_deviation(&apply(&source, &RenderParams::default())) * 0.5
+                < standard_deviation(&apply(&source, &RenderParams::default(), &[])) * 0.5
         );
         assert!(
-            (mean_luma(&cleaned) - mean_luma(&apply(&source, &RenderParams::default()))).abs()
+            (mean_luma(&cleaned) - mean_luma(&apply(&source, &RenderParams::default(), &[]))).abs()
                 < 0.01
         );
     }
@@ -1029,7 +1103,7 @@ mod tests {
                 }
             }
         }
-        let plain = apply(&source, &RenderParams::default());
+        let plain = apply(&source, &RenderParams::default(), &[]);
         let cleaned = apply(
             &source,
             &RenderParams {
@@ -1037,6 +1111,7 @@ mod tests {
                 noise_color: 1.0,
                 ..RenderParams::default()
             },
+            &[],
         );
 
         let step = |img: &ImageBuf| at(img, size / 2, 40) - at(img, size / 2 - 1, 40);
@@ -1051,13 +1126,14 @@ mod tests {
     #[test]
     fn colour_noise_reduction_calms_chroma_and_keeps_brightness() {
         let source = noisy_gray(96, 0.3, 0.04, true);
-        let plain = apply(&source, &RenderParams::default());
+        let plain = apply(&source, &RenderParams::default(), &[]);
         let cleaned = apply(
             &source,
             &RenderParams {
                 noise_color: 1.0,
                 ..RenderParams::default()
             },
+            &[],
         );
 
         assert!(red_minus_green_spread(&cleaned) < red_minus_green_spread(&plain) * 0.4);
@@ -1085,13 +1161,14 @@ mod tests {
                 sharpen_radius: radius,
                 ..RenderParams::default()
             },
+            &[],
         )
     }
 
     #[test]
     fn sharpening_overshoots_on_both_sides_of_an_edge() {
         let source = step_edge(200, 8);
-        let plain = apply(&source, &RenderParams::default());
+        let plain = apply(&source, &RenderParams::default(), &[]);
         let crisp = sharpened(&source, 1.0, 1.0);
 
         let (dark, bright) = (200 / 2 - 1, 200 / 2);
@@ -1114,7 +1191,7 @@ mod tests {
         for level in [0.05, 0.3, 1.0, 1.6] {
             let crisp = sharpened(&flat(64, level), 1.0, 2.0);
 
-            let plain = apply(&flat(64, level), &RenderParams::default());
+            let plain = apply(&flat(64, level), &RenderParams::default(), &[]);
             let unchanged = crisp
                 .data
                 .iter()
@@ -1127,7 +1204,7 @@ mod tests {
     #[test]
     fn a_larger_radius_spreads_the_sharpening_wider() {
         let source = step_edge(1800, 8);
-        let plain = apply(&source, &RenderParams::default());
+        let plain = apply(&source, &RenderParams::default(), &[]);
         let reach = |radius| {
             let crisp = sharpened(&source, 1.0, radius);
             (0..900)
@@ -1148,7 +1225,7 @@ mod tests {
     fn the_sharpening_radius_follows_the_resolution() {
         let overshoot = |width: u32| {
             let source = step_edge(width, 8);
-            let plain = apply(&source, &RenderParams::default());
+            let plain = apply(&source, &RenderParams::default(), &[]);
             let crisp = sharpened(&source, 1.0, 2.0);
             at(&crisp, width / 2, 4) - at(&plain, width / 2, 4)
         };
@@ -1182,8 +1259,8 @@ mod tests {
     fn graded(level: f32, params: &RenderParams) -> ([f32; 3], [f32; 3]) {
         let source = flat(4, level);
         (
-            first_pixel(&apply(&source, params)),
-            first_pixel(&apply(&source, &RenderParams::default())),
+            first_pixel(&apply(&source, params, &[])),
+            first_pixel(&apply(&source, &RenderParams::default(), &[])),
         )
     }
 
@@ -1220,8 +1297,8 @@ mod tests {
         let source = noisy_gray(32, 0.3, 0.1, true);
 
         assert_eq!(
-            apply(&source, &params).data,
-            apply(&source, &RenderParams::default()).data
+            apply(&source, &params, &[]).data,
+            apply(&source, &RenderParams::default(), &[]).data
         );
     }
 
@@ -1305,7 +1382,7 @@ mod tests {
     }
 
     fn mixed(px: [f32; 3], params: &RenderParams) -> [f32; 3] {
-        first_pixel(&apply(&solid(px), params))
+        first_pixel(&apply(&solid(px), params, &[]))
     }
 
     fn hsl_of(px: [f32; 3]) -> (f32, f32, f32) {
@@ -1359,14 +1436,15 @@ mod tests {
         let source = noisy_gray(32, 0.3, 0.1, true);
 
         assert_eq!(
-            apply(&source, &RenderParams::default()).data,
+            apply(&source, &RenderParams::default(), &[]).data,
             apply(
                 &source,
                 &RenderParams {
                     red_hue: 0.0,
                     blue_saturation: 0.0,
                     ..RenderParams::default()
-                }
+                },
+                &[]
             )
             .data
         );
@@ -1500,8 +1578,8 @@ mod tests {
         for level in [0.02, 0.18, 0.5, 0.9] {
             let source = solid([level; 3]);
             assert_eq!(
-                apply(&source, &loud).data,
-                apply(&source, &RenderParams::default()).data,
+                apply(&source, &loud, &[]).data,
+                apply(&source, &RenderParams::default(), &[]).data,
                 "{level}"
             );
         }
@@ -1606,5 +1684,342 @@ mod tests {
         );
         let (_, saturation, _) = hsl_of(mixed(RED, &red_filter));
         assert!(saturation < 0.05, "toujours en noir et blanc");
+    }
+}
+
+#[cfg(test)]
+mod masked_tests {
+    use super::*;
+    use crate::mask::MaskShape;
+
+    const SIZE: u32 = 201;
+
+    fn flat(size: u32, rgb: [f32; 3]) -> ImageBuf {
+        let mut img = ImageBuf::new(size, size);
+        for px in img.data.chunks_mut(3) {
+            px.copy_from_slice(&rgb);
+        }
+        img
+    }
+
+    fn pixel(img: &ImageBuf, fx: f32, fy: f32) -> [f32; 3] {
+        let x = ((fx * img.width as f32) as u32).min(img.width - 1);
+        let y = ((fy * img.height as f32) as u32).min(img.height - 1);
+        let i = ((y * img.width + x) * 3) as usize;
+        [img.data[i], img.data[i + 1], img.data[i + 2]]
+    }
+
+    fn mask(shape: MaskShape, adjust: MaskAdjust) -> Mask {
+        Mask {
+            id: "m".into(),
+            shape,
+            invert: false,
+            adjust,
+        }
+    }
+
+    fn exposure(value: f32) -> MaskAdjust {
+        MaskAdjust {
+            exposure: value,
+            ..MaskAdjust::default()
+        }
+    }
+
+    /// Un disque ferme sur la moitié gauche de la photo : son centre est à plein effet, la moitié droite hors zone.
+    fn left_disc(adjust: MaskAdjust) -> Mask {
+        mask(
+            MaskShape::Radial {
+                center: [0.25, 0.5],
+                radius: [0.2, 0.2],
+                angle: 0.0,
+                feather: 0.0,
+            },
+            adjust,
+        )
+    }
+
+    /// Une zone qui couvre toute la photo à plein effet.
+    fn everywhere(adjust: MaskAdjust) -> Mask {
+        mask(
+            MaskShape::Linear {
+                from: [0.5, 2.0],
+                to: [0.5, 3.0],
+            },
+            adjust,
+        )
+    }
+
+    fn close(a: [f32; 3], b: [f32; 3]) -> bool {
+        (0..3).all(|c| (a[c] - b[c]).abs() < 1e-5)
+    }
+
+    const GREY: [f32; 3] = [0.2, 0.2, 0.2];
+    const COLOUR: [f32; 3] = [0.6, 0.3, 0.1];
+
+    #[test]
+    fn masks_that_change_nothing_leave_the_image_exactly_as_it_was() {
+        let source = flat(SIZE, COLOUR);
+        let params = RenderParams {
+            exposure: 0.3,
+            ..RenderParams::default()
+        };
+
+        let idle = apply(&source, &params, &[left_disc(MaskAdjust::default())]);
+
+        assert_eq!(idle.data, apply(&source, &params, &[]).data);
+    }
+
+    #[test]
+    fn a_masked_exposure_lifts_its_zone_and_leaves_the_rest_exactly_as_it_was() {
+        let source = flat(SIZE, GREY);
+        let plain = apply(&source, &RenderParams::default(), &[]);
+
+        let masked = apply(
+            &source,
+            &RenderParams::default(),
+            &[left_disc(exposure(1.0))],
+        );
+
+        let lifted = apply(
+            &source,
+            &RenderParams {
+                exposure: 1.0,
+                ..RenderParams::default()
+            },
+            &[],
+        );
+        assert!(close(pixel(&masked, 0.25, 0.5), pixel(&lifted, 0.25, 0.5)));
+        assert!(pixel(&masked, 0.25, 0.5)[0] > pixel(&plain, 0.25, 0.5)[0] + 0.05);
+        assert_eq!(pixel(&masked, 0.8, 0.5), pixel(&plain, 0.8, 0.5));
+        assert_eq!(pixel(&masked, 0.05, 0.05), pixel(&plain, 0.05, 0.05));
+    }
+
+    /// Les dix réglages d'un masque, par leur nom : les mêmes que ceux de `RenderParams`.
+    const MASKED_SETTINGS: [&str; 10] = [
+        "exposure",
+        "contrast",
+        "highlights",
+        "shadows",
+        "whites",
+        "blacks",
+        "temperature",
+        "tint",
+        "saturation",
+        "vibrance",
+    ];
+
+    fn global_setting(name: &str, value: f32) -> RenderParams {
+        let mut p = RenderParams::default();
+        match name {
+            "exposure" => p.exposure = value,
+            "contrast" => p.contrast = value,
+            "highlights" => p.highlights = value,
+            "shadows" => p.shadows = value,
+            "whites" => p.whites = value,
+            "blacks" => p.blacks = value,
+            "temperature" => p.temperature = value,
+            "tint" => p.tint = value,
+            "saturation" => p.saturation = value,
+            "vibrance" => p.vibrance = value,
+            _ => panic!("réglage inconnu : {name}"),
+        }
+        p
+    }
+
+    fn mask_setting(name: &str, value: f32) -> MaskAdjust {
+        let mut a = MaskAdjust::default();
+        match name {
+            "exposure" => a.exposure = value,
+            "contrast" => a.contrast = value,
+            "highlights" => a.highlights = value,
+            "shadows" => a.shadows = value,
+            "whites" => a.whites = value,
+            "blacks" => a.blacks = value,
+            "temperature" => a.temperature = value,
+            "tint" => a.tint = value,
+            "saturation" => a.saturation = value,
+            "vibrance" => a.vibrance = value,
+            _ => panic!("réglage inconnu : {name}"),
+        }
+        a
+    }
+
+    #[test]
+    fn a_mask_delta_is_the_same_as_moving_that_slider_everywhere() {
+        // Pour chacun des dix réglages : le décalage d'un masque qui couvre tout vaut le curseur global.
+        let ramp = {
+            let mut img = ImageBuf::new(64, 16);
+            for (i, px) in img.data.chunks_mut(3).enumerate() {
+                let t = (i % 64) as f32 / 63.0;
+                px.copy_from_slice(&[t * 1.5, t * t, 0.3 + 0.2 * t]);
+            }
+            img
+        };
+        let plain = apply(&ramp, &RenderParams::default(), &[]);
+
+        for name in MASKED_SETTINGS {
+            for value in [0.5, -0.5] {
+                let by_slider = apply(&ramp, &global_setting(name, value), &[]);
+                let by_mask = apply(
+                    &ramp,
+                    &RenderParams::default(),
+                    &[everywhere(mask_setting(name, value))],
+                );
+
+                let worst = by_slider
+                    .data
+                    .iter()
+                    .zip(&by_mask.data)
+                    .map(|(a, b)| (a - b).abs())
+                    .fold(0.0, f32::max);
+                assert!(worst < 1e-5, "{name} {value} : écart {worst}");
+                assert_ne!(
+                    by_slider.data, plain.data,
+                    "{name} {value} : le curseur ne fait rien, le test ne prouve rien"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn a_mask_adds_to_the_global_settings() {
+        let source = flat(SIZE, GREY);
+        let global = RenderParams {
+            exposure: 1.0,
+            ..RenderParams::default()
+        };
+
+        let masked = apply(&source, &global, &[left_disc(exposure(1.0))]);
+
+        let twice = apply(
+            &source,
+            &RenderParams {
+                exposure: 2.0,
+                ..RenderParams::default()
+            },
+            &[],
+        );
+        let once = apply(&source, &global, &[]);
+        assert!(close(pixel(&masked, 0.25, 0.5), pixel(&twice, 0.25, 0.5)));
+        assert_eq!(pixel(&masked, 0.8, 0.5), pixel(&once, 0.8, 0.5));
+    }
+
+    #[test]
+    fn two_masks_on_the_same_zone_act_like_one_with_the_sum() {
+        let source = flat(SIZE, GREY);
+
+        let two = apply(
+            &source,
+            &RenderParams::default(),
+            &[left_disc(exposure(0.4)), left_disc(exposure(0.6))],
+        );
+        let one = apply(
+            &source,
+            &RenderParams::default(),
+            &[left_disc(exposure(1.0))],
+        );
+
+        assert!(close(pixel(&two, 0.25, 0.5), pixel(&one, 0.25, 0.5)));
+    }
+
+    #[test]
+    fn an_inverted_mask_acts_outside_its_zone() {
+        let source = flat(SIZE, GREY);
+        let plain = apply(&source, &RenderParams::default(), &[]);
+        let mut inverted = left_disc(exposure(1.0));
+        inverted.invert = true;
+
+        let out = apply(&source, &RenderParams::default(), &[inverted]);
+
+        assert_eq!(pixel(&out, 0.25, 0.5), pixel(&plain, 0.25, 0.5));
+        assert!(pixel(&out, 0.8, 0.5)[0] > pixel(&plain, 0.8, 0.5)[0] + 0.05);
+    }
+
+    #[test]
+    fn a_gradient_fades_its_effect_along_the_line() {
+        let source = flat(SIZE, GREY);
+        let gradient = mask(
+            MaskShape::Linear {
+                from: [0.5, 0.0],
+                to: [0.5, 1.0],
+            },
+            exposure(-1.0),
+        );
+        let plain = apply(&source, &RenderParams::default(), &[]);
+
+        let out = apply(&source, &RenderParams::default(), &[gradient]);
+
+        let column: Vec<f32> = (0..10)
+            .map(|i| pixel(&out, 0.5, 0.02 + 0.1 * i as f32)[0])
+            .collect();
+        assert!(column.windows(2).all(|pair| pair[0] <= pair[1] + 1e-6));
+        assert!(
+            column[0] < pixel(&plain, 0.5, 0.0)[0] * 0.6,
+            "le haut est assombri"
+        );
+        assert!(
+            (column[9] - pixel(&plain, 0.5, 0.99)[0]).abs() < 0.01,
+            "le bas est presque intact"
+        );
+    }
+
+    #[test]
+    fn masked_saturation_drains_the_colour_of_its_zone_only() {
+        let source = flat(SIZE, COLOUR);
+        let drain = MaskAdjust {
+            saturation: -1.0,
+            ..MaskAdjust::default()
+        };
+
+        let out = apply(&source, &RenderParams::default(), &[left_disc(drain)]);
+
+        let [r, g, b] = pixel(&out, 0.25, 0.5);
+        assert!(
+            (r - g).abs() < 1e-4 && (g - b).abs() < 1e-4,
+            "gris dans la zone"
+        );
+        let [r, _, b] = pixel(&out, 0.8, 0.5);
+        assert!(r > b * 2.0, "couleur ailleurs");
+    }
+
+    #[test]
+    fn masked_temperature_warms_its_zone_only() {
+        let source = flat(SIZE, GREY);
+        let warm = MaskAdjust {
+            temperature: 0.8,
+            ..MaskAdjust::default()
+        };
+
+        let out = apply(&source, &RenderParams::default(), &[left_disc(warm)]);
+
+        let [r, _, b] = pixel(&out, 0.25, 0.5);
+        assert!(r > b * 1.2, "chaud dans la zone");
+        let [r, _, b] = pixel(&out, 0.8, 0.5);
+        assert!((r - b).abs() < 1e-5, "neutre ailleurs");
+    }
+
+    #[test]
+    fn the_same_zone_is_drawn_at_any_resolution() {
+        // L'aperçu (réduit) et l'export (pleine taille) doivent montrer le même masque.
+        let soft = mask(
+            MaskShape::Radial {
+                center: [0.5, 0.5],
+                radius: [0.4, 0.3],
+                angle: 20.0,
+                feather: 1.0,
+            },
+            exposure(1.0),
+        );
+        let small = apply(
+            &flat(100, GREY),
+            &RenderParams::default(),
+            std::slice::from_ref(&soft),
+        );
+        let large = apply(&flat(800, GREY), &RenderParams::default(), &[soft]);
+
+        for (fx, fy) in [(0.5, 0.5), (0.6, 0.5), (0.35, 0.55), (0.5, 0.35)] {
+            let (a, b) = (pixel(&small, fx, fy)[0], pixel(&large, fx, fy)[0]);
+            assert!((a - b).abs() < 0.01, "{fx},{fy} : {a} contre {b}");
+        }
     }
 }

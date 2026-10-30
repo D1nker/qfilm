@@ -394,7 +394,10 @@ macro_rules! golden_look {
     ($name:ident, $params:expr) => {
         #[test]
         fn $name() {
-            assert_golden(stringify!($name), &render::apply(&landscape(), &$params));
+            assert_golden(
+                stringify!($name),
+                &render::apply(&landscape(), &$params, &[]),
+            );
         }
     };
 }
@@ -472,6 +475,50 @@ golden_look!(
     }
 );
 
+/// Un dégradé qui assombrit le ciel et une ellipse qui réchauffe et éclaire le bloc rouge : la forme,
+/// le flou et le sens des deux masques se voient d'un coup d'œil.
+#[test]
+fn look_masks_gradient_and_radial() {
+    use super::mask::{Mask, MaskAdjust, MaskShape};
+
+    let masks = [
+        Mask {
+            id: "sky".into(),
+            shape: MaskShape::Linear {
+                from: [0.5, 0.05],
+                to: [0.5, 0.6],
+            },
+            invert: false,
+            adjust: MaskAdjust {
+                exposure: -0.9,
+                contrast: 0.3,
+                saturation: 0.3,
+                ..MaskAdjust::default()
+            },
+        },
+        Mask {
+            id: "spot".into(),
+            shape: MaskShape::Radial {
+                center: [0.2, 0.64],
+                radius: [0.22, 0.12],
+                angle: -15.0,
+                feather: 0.6,
+            },
+            invert: false,
+            adjust: MaskAdjust {
+                exposure: 0.6,
+                temperature: 0.5,
+                ..MaskAdjust::default()
+            },
+        },
+    ];
+
+    assert_golden(
+        "look_masks_gradient_and_radial",
+        &render::apply(&landscape(), &RenderParams::default(), &masks),
+    );
+}
+
 golden_look!(
     look_color_grading,
     RenderParams {
@@ -535,7 +582,7 @@ fn look_noise_reduced() {
     };
     assert_golden(
         "look_noise_reduced",
-        &render::apply(&noisy_landscape(), &params),
+        &render::apply(&noisy_landscape(), &params, &[]),
     );
 }
 
@@ -543,7 +590,7 @@ fn look_noise_reduced() {
 fn look_noisy_source_without_reduction() {
     assert_golden(
         "look_noisy_source_without_reduction",
-        &render::apply(&noisy_landscape(), &RenderParams::default()),
+        &render::apply(&noisy_landscape(), &RenderParams::default(), &[]),
     );
 }
 
@@ -555,8 +602,8 @@ fn rendering_is_deterministic() {
         clarity: 0.3,
         ..RenderParams::default()
     };
-    let first = render::apply(&landscape(), &params);
-    let second = render::apply(&landscape(), &params);
+    let first = render::apply(&landscape(), &params, &[]);
+    let second = render::apply(&landscape(), &params, &[]);
     assert_eq!(first.data, second.data);
 }
 

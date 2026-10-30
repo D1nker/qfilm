@@ -22,6 +22,7 @@ pub mod encode;
 pub mod fonts;
 pub mod frame;
 pub mod geometry;
+pub mod mask;
 pub mod preset;
 pub mod render;
 pub mod text;
