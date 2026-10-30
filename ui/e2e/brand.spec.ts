@@ -1,30 +1,33 @@
-import { expect, test } from "./support/app";
+import { expect, test, type App } from "./support/app";
 
 test.describe("the brand in the header", () => {
-  test("shows the logo next to the wordmark, loaded, and keeps the menu's name", async ({
+  const brand = (app: App) => app.page.getByRole("button", { name: "Menu" });
+
+  test("is the logo alone, loaded: it is a q, so a written qFilm beside it would stutter", async ({
     app,
   }) => {
-    const brand = app.page.getByRole("button", { name: "Menu" });
-    const mark = brand.locator("img.mark");
+    const mark = brand(app).locator("img.mark");
 
     await expect(mark).toBeVisible();
     expect(await mark.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
-    await expect(brand).toContainText("qFilm");
     await expect(mark).toHaveAttribute("alt", "");
+    await expect(brand(app)).toHaveText("");
   });
 
-  test("the logo sits on the same line as the wordmark and keeps its size", async ({ app }) => {
-    const brand = app.page.getByRole("button", { name: "Menu" });
-    const [mark, word] = await Promise.all([
-      brand.locator("img.mark").boundingBox(),
-      brand.locator(".wordmark").boundingBox(),
-    ]);
+  test("keeps its size, and still names itself for assistive technology and on hover", async ({
+    app,
+  }) => {
+    const box = await brand(app).locator("img.mark").boundingBox();
+    expect(box?.width).toBe(28);
+    expect(box?.height).toBe(28);
 
-    expect(mark?.width).toBe(22);
-    expect(mark?.height).toBe(22);
-    expect(Math.abs((mark?.y ?? 0) + 11 - ((word?.y ?? 0) + (word?.height ?? 0) / 2))).toBeLessThan(
-      3,
-    );
-    expect(mark?.x ?? 99).toBeLessThan(word?.x ?? 0);
+    await brand(app).hover();
+    await expect(app.page.getByRole("tooltip")).toHaveText("Menu");
+  });
+
+  test("still opens the menu", async ({ app }) => {
+    await brand(app).click();
+
+    await expect(app.page.getByRole("menu")).toBeVisible();
   });
 });

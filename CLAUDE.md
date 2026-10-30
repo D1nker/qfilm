@@ -311,5 +311,5 @@ website:images`, driven by `website/images.json`) applies a look and a frame to 
   (desktop only), and re-render the share cards (`npm run website:screenshots`, they embed the icon).
   The window's Dock / Cmd+Tab icon is compiled into the binary and Cargo does not track the icon files: after
   changing them, `touch desktop/src/lib.rs` (or `cargo clean -p app`) and restart `npm run app`, a page reload
-  cannot do it (macOS may also cache the old one: `killall Dock`). The header shows the mark (`/favicon.svg`)
-  beside the wordmark.
+  cannot do it (macOS may also cache the old one: `killall Dock`). The app header shows the mark alone
+  (`/favicon.svg`, no wordmark: it is a q, and "q qFilm" stuttered); the button keeps its "Menu" name and tooltip.

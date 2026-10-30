@@ -50,7 +50,7 @@ test.describe("floating toolbar", () => {
 
     await expect(header.getByRole("button", { name: "Ouvrir…" })).toBeVisible();
     await expect(header.getByRole("button", { name: "Exporter…" })).toBeVisible();
-    await expect(header.getByRole("button", { name: "Menu" })).toContainText("qFilm");
+    await expect(header.getByRole("button", { name: "Menu" }).locator("img.mark")).toBeVisible();
     await expect(header.getByRole("button", { name: "Annuler" })).toHaveCount(0);
     await expect(header.getByRole("button", { name: /Comparer/ })).toHaveCount(0);
     await expect(header.getByRole("button", { name: /panneau/ })).toHaveCount(0);
@@ -194,7 +194,7 @@ test.describe("menu", () => {
     await expect(app.page.getByRole("menuitem", { name: "Raccourcis clavier" })).toBeVisible();
   });
 
-  test("opens aligned with the wordmark, not off to the right", async ({ app }) => {
+  test("opens aligned with the logo, not off to the right", async ({ app }) => {
     await app.page.getByRole("button", { name: "Menu" }).click();
 
     const menu = await bounds(app, '[role="menu"]');

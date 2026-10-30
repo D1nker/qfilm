@@ -2,8 +2,7 @@
   <header data-tauri-drag-region :class="{ overlay: isMac }">
     <UiMenu :entries="menu" :tooltip="t('menu.label')" align="start">
       <UiButton variant="ghost" class="brand" :aria-label="t('menu.label')">
-        <img class="mark" src="/favicon.svg" alt="" width="22" height="22" />
-        <span class="wordmark"><span>q</span>Film</span>
+        <img class="mark" src="/favicon.svg" alt="" width="28" height="28" />
         <ChevronDown :size="14" class="chevron" />
       </UiButton>
     </UiMenu>
@@ -82,21 +81,12 @@ header.overlay {
   color: var(--text);
 }
 
+/* Le logo seul : c'est un q, et « qFilm » à côté ferait « q qFilm ». Le nom reste dans le nom accessible
+   du bouton, son infobulle et la barre de menus du système. */
 .mark {
   flex: none;
-  width: 22px;
-  height: 22px;
-  margin-right: var(--space-1);
-}
-
-.wordmark {
-  font-size: var(--text-lg);
-  font-weight: var(--weight-semibold);
-  letter-spacing: -0.01em;
-}
-
-.wordmark span {
-  color: var(--accent);
+  width: 28px;
+  height: 28px;
 }
 
 .chevron {
