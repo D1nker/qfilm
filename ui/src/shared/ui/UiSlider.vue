@@ -227,7 +227,7 @@ button.value:hover:not(:disabled) {
   flex: 1;
   height: 3px;
   border-radius: var(--radius-full);
-  background: var(--surface-active);
+  background: var(--track);
 }
 
 .track.colored {

@@ -51,7 +51,9 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
 - Styles for content Reka teleports to `<body>` (select popup, tooltip) must be unscoped with a
   namespaced class (`.ui-select-content`): scoped CSS does not reach it.
 - Styling goes through design tokens in `ui/src/styles/tokens.css` (light + dark, neutral grays,
-  violet accent). No hard-coded colors, no Tailwind. Inter is the font.
+  violet accent). No hard-coded colors, no Tailwind. Inter is the font. `--text-faint` is for small text
+  too (section titles, hints), so it must stay at 4.5:1 on `--surface` and `--bg` in both themes
+  (`tokens.test.ts` checks it); the slider groove has its own `--track` (`--surface-active` is a hover colour).
 - Headless widgets come from Reka UI, wrapped in `src/shared/ui/` as `Ui*` components
   (UiButton, UiSlider, UiSelect, UiMenu, UiDialog, UiTooltip…). Reuse them; add a new one there rather than
   styling raw elements in feature components. Icons come from `lucide-vue-next`.

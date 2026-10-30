@@ -39,10 +39,11 @@
 
   --border: oklch(1 0 0 / 0.08);
   --border-strong: oklch(1 0 0 / 0.16);
+  --track: oklch(0.36 0 0);
 
   --text: oklch(0.96 0 0);
   --text-muted: oklch(0.7 0 0);
-  --text-faint: oklch(0.52 0 0);
+  --text-faint: oklch(0.6 0 0);
 
   --accent: oklch(0.68 0.18 285);
   --accent-hover: oklch(0.73 0.17 285);
@@ -72,10 +73,11 @@
 
   --border: oklch(0 0 0 / 0.08);
   --border-strong: oklch(0 0 0 / 0.16);
+  --track: oklch(0.86 0 0);
 
   --text: oklch(0.22 0 0);
   --text-muted: oklch(0.5 0 0);
-  --text-faint: oklch(0.65 0 0);
+  --text-faint: oklch(0.55 0 0);
 
   --accent: oklch(0.55 0.21 285);
   --accent-hover: oklch(0.5 0.21 285);

@@ -12,5 +12,7 @@ export default defineConfig({
     setupFiles: ["src/test/setup.ts"],
     include: ["src/**/*.test.ts"],
     restoreMocks: true,
+    // Vitest stubs CSS imports; the contrast test needs the real tokens (`?raw`).
+    css: { include: [/tokens\.css/] },
   },
 });
