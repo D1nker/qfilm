@@ -86,7 +86,7 @@
       @toggle-zoom="toggleActual()"
     />
 
-    <div v-if="loading" class="overlay">{{ t("viewer.decoding") }}</div>
+    <div v-if="loading" class="decoding">{{ t("viewer.decoding") }}</div>
   </main>
 </template>
 
@@ -308,7 +308,9 @@ img {
   font-size: var(--text-sm);
 }
 
-.overlay {
+/* Pas `.overlay` : un style scopé du parent s'applique aussi à la racine d'un composant enfant, et
+   cette teinte assombrissait la photo sous les poignées de recadrage et de masque. */
+.decoding {
   position: absolute;
   inset: 0;
   display: flex;

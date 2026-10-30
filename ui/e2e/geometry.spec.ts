@@ -198,6 +198,16 @@ test.describe("crop and rotate", () => {
     await expect(overlay(openApp)).toHaveCount(0);
   });
 
+  test("the crop overlay adds no tint inside the crop: the photo is shown as it is", async ({
+    openApp,
+  }) => {
+    await cropButton(openApp).click();
+
+    expect(
+      await overlay(openApp).evaluate((element) => getComputedStyle(element).backgroundColor),
+    ).toBe("rgba(0, 0, 0, 0)");
+  });
+
   test("a double-click on the cadre closes it", async ({ openApp }) => {
     await cropButton(openApp).click();
 

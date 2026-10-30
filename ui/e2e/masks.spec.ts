@@ -309,6 +309,17 @@ test.describe("the handles on the photo", () => {
     await expect.poll(async () => (await openApp.lastRender()).frame.id).toBe("film35");
   });
 
+  test("the overlay adds no tint: the photo under the handles is shown as it is", async ({
+    openApp,
+  }) => {
+    await openApp.group("Masques");
+
+    // Un style du parent qui déborderait sur la racine de l'overlay assombrirait la photo qu'on retouche.
+    expect(
+      await overlay(openApp).evaluate((element) => getComputedStyle(element).backgroundColor),
+    ).toBe("rgba(0, 0, 0, 0)");
+  });
+
   test("the overlay lets clicks through, except on the handles", async ({ openApp }) => {
     await addMask(openApp, "Dégradé linéaire");
 
