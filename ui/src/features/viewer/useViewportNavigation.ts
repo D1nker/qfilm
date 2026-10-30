@@ -191,6 +191,10 @@ export function useViewportNavigation({ stage, scroller, previewImage, logicalSi
     if (event.key === " " && !keyboardFocusedButton) {
       event.preventDefault();
       spaceDown.value = true;
+    } else if (!event.metaKey && !event.ctrlKey && !event.altKey && !event.shiftKey) {
+      // Z bascule entre « ajusté » et 100 %, comme dans Lightroom ; ⌘Z, lui, reste l'annulation.
+      if (event.key.toLowerCase() !== "z" || event.repeat) return;
+      void toggleActual();
     } else if (event.metaKey || event.ctrlKey) {
       if (event.key === "=" || event.key === "+") void zoomIn();
       else if (event.key === "-") void zoomOut();

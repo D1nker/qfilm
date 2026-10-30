@@ -68,9 +68,14 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
   On macOS the window uses an overlay title bar: `trafficLightPosition.y` in `tauri.conf.json` centers the
   lights in the 52px header and `header.overlay` in `AppHeader` reserves their width; change them together.
 - Components stay small and presentational; logic goes in composables, static data in the feature's own helper files (`controls.ts`, `fonts.ts`…).
-- Shortcuts: `C` hold = original, `F` = hide/show panel, ⌘Z / ⇧⌘Z, ⌘ +/−/0 zoom, Space+drag pan.
+- Shortcuts: `C` hold = original, `F` = hide/show panel, ⌘Z / ⇧⌘Z, ⌘ +/−/0 zoom, `Z` fit / 100 %, `R` crop
+  (`X`, Enter), ⌘O open, ⇧⌘E export, ⌘, preferences, Space+drag pan; the dialog (`app/shortcuts.ts`) lists them
+  and `app/useShortcuts` + `useViewportNavigation` handle them. ⌘ means "Cmd or Ctrl" on every system (the
+  handlers accept either, the labels show ⌘ on a Mac and Ctrl elsewhere, tested per user agent); AltGr is
+  Ctrl+Alt on Windows, so a shortcut that has `altKey` set is never one of ours. Open and export keep quiet
+  while the export or the shortcuts dialog is up; plain `Z` is ignored in a text field (⌘Z stays undo).
   Never take `Tab` (keyboard navigation) and pick keys that work on AZERTY (no `\`, no dead
-  keys). Space must not re-trigger a button that was merely clicked: see `lastInput` in
+  keys). Lightroom's own keys that we skip on purpose: `Tab` (panels), `\` (before/after), brackets. Space must not re-trigger a button that was merely clicked: see `lastInput` in
   `useViewportNavigation` (`:focus-visible` cannot tell the two apart in Chromium).
 - The photo area must never grow with the image: keep `minmax(0, 1fr)` / `min-height: 0` on grid
   items and let the viewport scroll instead.

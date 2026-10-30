@@ -246,8 +246,13 @@ export const fr = {
   shortcuts: {
     title: "Raccourcis clavier",
     description: "La liste des raccourcis clavier de qFilm.",
+    file: "Fichier",
     editing: "Édition",
     display: "Affichage",
+    open: "Ouvrir une photo",
+    export: "Exporter",
+    preferences: "Préférences (thème, langue)",
+    zoomToggle: "Basculer entre ajusté et 100 %",
     undo: "Annuler",
     redo: "Rétablir",
     crop: "Recadrer (ouvrir ou fermer)",

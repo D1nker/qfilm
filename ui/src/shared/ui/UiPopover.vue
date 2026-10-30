@@ -51,7 +51,8 @@ withDefaults(
 
 // Comme pour UiMenu : le survol ouvre l'infobulle après un délai, et le popover doit rester seul
 // à l'écran. Le popover reste hors de TooltipRoot, sinon son déclencheur s'ancre sur l'infobulle.
-const open = ref(false);
+/// Ouvert ou fermé : le parent peut le tenir (un raccourci clavier l'ouvre), sinon il se gère seul.
+const open = defineModel<boolean>("open", { default: false });
 const tooltipOpen = ref(false);
 const content = ref<ComponentPublicInstance | null>(null);
 

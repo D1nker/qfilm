@@ -1,6 +1,6 @@
 <template>
   <div class="preferences">
-    <UiPopover :tooltip="t('preferences.label')">
+    <UiPopover v-model:open="preferencesOpen" :tooltip="t('preferences.label')">
       <template #trigger>
         <UiButton variant="ghost" size="sm" icon :aria-label="t('preferences.label')">
           <SlidersHorizontal :size="15" />
@@ -27,12 +27,14 @@
 import { computed } from "vue";
 import { Moon, SlidersHorizontal, Sun } from "lucide-vue-next";
 
+import { usePreferences } from "@/app/usePreferences";
 import { useTheme, type ThemeMode } from "@/app/useTheme";
 import { LOCALES, t, useLocale, type Locale } from "@/shared/i18n";
 import UiButton from "@/shared/ui/UiButton.vue";
 import UiPopover from "@/shared/ui/UiPopover.vue";
 import UiSegmented from "@/shared/ui/UiSegmented.vue";
 
+const { preferencesOpen } = usePreferences();
 const { mode, set: setTheme } = useTheme();
 const { locale, set: setLocale } = useLocale();
 

@@ -1,9 +1,12 @@
 import { onMounted, onUnmounted } from "vue";
 
+import { useExport } from "@/features/export";
 import { useGeometry } from "@/features/geometry";
 import { useEditor } from "@/features/photo";
 import { useHistory } from "@/features/history";
 import { useInspector } from "@/features/inspector";
+import { useHelp } from "@/app/useHelp";
+import { usePreferences } from "@/app/usePreferences";
 
 function isTyping(target: EventTarget | null) {
   return (
@@ -13,13 +16,41 @@ function isTyping(target: EventTarget | null) {
 }
 
 export function useShortcuts() {
-  const { comparing, image } = useEditor();
+  const { comparing, image, browse } = useEditor();
+  const { exportOpen, openExport } = useExport();
+  const { shortcutsOpen } = useHelp();
+  const { preferencesOpen } = usePreferences();
   const { toggle, tab, group } = useInspector();
   const { cropping, toggleCropping, stopCropping, swapOrientation } = useGeometry();
   const { undo, redo } = useHistory();
 
+  /// Les raccourcis de l'application, qui marchent même dans un champ de texte (aucun n'y a de sens propre) :
+  /// ouvrir, exporter, préférences. Renvoie vrai quand la touche était l'un d'eux. Pendant une boîte de
+  /// dialogue, ouvrir et exporter se taisent : la fenêtre du dessous n'est pas celle qu'on regarde.
+  function onAppShortcut(event: KeyboardEvent) {
+    const key = event.key.toLowerCase();
+    const modal = exportOpen.value || shortcutsOpen.value;
+
+    if (key === "o" && !event.shiftKey) {
+      event.preventDefault();
+      if (!modal) void browse();
+    } else if (key === "e" && event.shiftKey) {
+      event.preventDefault();
+      if (!modal) openExport();
+    } else if (key === ",") {
+      event.preventDefault();
+      preferencesOpen.value = !preferencesOpen.value;
+    } else {
+      return false;
+    }
+    return true;
+  }
+
   function onKeydown(event: KeyboardEvent) {
+    // ⌘ sur Mac, Ctrl ailleurs : on accepte l'un ou l'autre, quel que soit le système.
     const command = event.metaKey || event.ctrlKey;
+
+    if (command && !event.altKey && onAppShortcut(event)) return;
 
     // Dans un champ de texte, ⌘Z reste l'annulation de la frappe.
     if (command && !event.altKey && !isTyping(event.target)) {

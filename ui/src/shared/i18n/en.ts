@@ -248,8 +248,13 @@ export const en: Messages = {
   shortcuts: {
     title: "Keyboard shortcuts",
     description: "The list of qFilm keyboard shortcuts.",
+    file: "File",
     editing: "Editing",
     display: "View",
+    open: "Open a photo",
+    export: "Export",
+    preferences: "Preferences (theme, language)",
+    zoomToggle: "Switch between fit and 100%",
     undo: "Undo",
     redo: "Redo",
     crop: "Crop (open or close)",
