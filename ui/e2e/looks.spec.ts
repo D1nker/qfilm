@@ -40,21 +40,6 @@ test.describe("looks", () => {
     });
   });
 
-  test("Retouche says which look the adjustments sit on, and how strongly", async ({ openApp }) => {
-    const line = openApp.page.getByText("Portrait 400").and(openApp.page.locator(".name"));
-    await openApp.tab("Retouche").click();
-    await expect(openApp.page.locator(".look")).toHaveCount(0);
-
-    await openApp.tab("Preset").click();
-    await openApp.page.getByRole("button", { name: "Portrait 400" }).click();
-    await openApp.page.getByRole("slider", { name: "Intensité" }).focus();
-    await openApp.press("ArrowLeft", 20);
-    await openApp.tab("Retouche").click();
-
-    await expect(line).toBeVisible();
-    await expect(openApp.page.locator(".look .amount")).toHaveText("80 %");
-  });
-
   test("the intensity slider is disabled until a look is chosen", async ({ openApp }) => {
     const intensity = openApp.page.getByRole("slider", { name: "Intensité" });
     await expect(intensity).toHaveAttribute("data-disabled", "");

@@ -186,8 +186,7 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
   not edit state: `useLook().shown` is the hovered preset as a click would apply it (full intensity, no
   adjustments), else `params`, and `useRender` renders `shown` while history, sliders and the Reset button
   only see `params`. A click, a page change and the panel unmounting end it at once (a hidden page gets no
-  `pointerleave`). Retouche starts with `CurrentLook`, a display-only line (look name, intensity) shown while
-  a look is applied.
+  `pointerleave`).
 - Resets: the looks' (on each category's header) calls `resetLook`, back to Neutral with adjustments
   and curves, which is what choosing the Neutral preset does; it is disabled while `useLook().isPristine`.
   A Retouche page has its own Reset on its heading (that page's sliders and, for Tons, the curves); the Cadre

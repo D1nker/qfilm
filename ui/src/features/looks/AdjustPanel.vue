@@ -1,6 +1,5 @@
 <template>
   <div>
-    <CurrentLook />
     <div v-for="part in PARTS" v-show="page === part.id" :key="part.id">
       <UiPageHead :title="t(`adjust.parts.${part.id}`)">
         <UiButton
@@ -140,7 +139,6 @@ import {
   resetPart,
 } from "@/features/looks/adjustParts";
 import { formatControlValue } from "@/features/looks/controls";
-import CurrentLook from "@/features/looks/CurrentLook.vue";
 import CurvesPanel from "@/features/looks/CurvesPanel.vue";
 import GradingPanel from "@/features/looks/GradingPanel.vue";
 import HslMixer from "@/features/looks/HslMixer.vue";
