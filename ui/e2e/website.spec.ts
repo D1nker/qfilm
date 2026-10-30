@@ -371,3 +371,26 @@ test.describe("website (both languages)", () => {
     expect((await request.get(`${SITE}/404.html`)).ok()).toBe(true);
   });
 });
+
+test.describe("website layout", () => {
+  test("the privacy cards are centred, icon included", async ({ page }) => {
+    await withRelease(page, null);
+    await page.goto(SITE);
+    const card = page.locator(".trust article").first();
+    await card.scrollIntoViewIfNeeded();
+
+    const [cardBox, iconBox] = await Promise.all([
+      card.boundingBox(),
+      card.locator(".icon").boundingBox(),
+    ]);
+
+    expect(
+      Math.abs(
+        (iconBox?.x ?? 0) +
+          (iconBox?.width ?? 0) / 2 -
+          ((cardBox?.x ?? 0) + (cardBox?.width ?? 0) / 2),
+      ),
+    ).toBeLessThan(1.5);
+    await expect(card.locator("h3")).toHaveCSS("text-align", "center");
+  });
+});

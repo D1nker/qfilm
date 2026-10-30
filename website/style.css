@@ -669,6 +669,7 @@ figcaption span {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface);
+  text-align: center;
 }
 
 .trust .icon {
@@ -676,7 +677,7 @@ figcaption span {
   place-items: center;
   width: 44px;
   height: 44px;
-  margin-bottom: 20px;
+  margin: 0 auto 20px;
   border-radius: 12px;
   background: var(--accent-soft);
   color: var(--accent);
