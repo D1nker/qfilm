@@ -145,7 +145,7 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
   and choosing an aspect ratio (`setAngle`, `setAspect`) open the tool (they need the whole photo under
   the box); a quarter turn or a flip (`rotate`, `flip`) applies at once to the cropped photo and carries the
   crop with it, without opening it, `R` toggles it (and goes to the
-  Frame tab), Enter/Escape/double-click close it, leaving the Frame tab closes it. `crop.ts` holds the pure
+  Cadre section), Enter/Escape/double-click close it, leaving the Cadre section closes it. `crop.ts` holds the pure
   maths (`fits`, `resize`, `move`, `fitInside`, `largestRect`): the crop must always stay inside the rotated
   photo, so no empty corner ever reaches the export; a drag goes as far as `fits` allows (bisection along
   the drag, the valid set being convex). A screen mirror after an odd quarter turn is the _other_ flip of
@@ -158,34 +158,40 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
 - The Retouche panel lists its sections under three plain headings (`PARTS` in `AdjustPanel`): Tons (Light, Tone
   curve), Couleurs (Color, Color mixer, Color grading), Finition (Detail, Effects). A new section goes under the
   heading that matches its intent; the headings are not collapsible.
-- Long panels (Retouche, Cadre) are split into pages by a group rail (`shared/ui/UiRailPanel`): a thin column of
-  icons on the panel's left edge, one per page; a click shows that page alone (its content is the slot named
-  after its id, the others are `v-show`n away), restarts at the top and **unfolds the page's sections**
-  (`openPanels`, even if they had been folded: pages are small, we want to see the content). Every section
-  is open by default. The selected page of each tab lives in `useInspector().group` (the host, `InspectorPanel`,
-  passes it down with `v-model:group` because `looks` may not import `inspector`), so the crop shortcut can
-  say `group.frame = "crop"`. The panel is 30 % of the window, between 356 and 520 px, until the user drags its left
-  edge (`PanelResizer`, a `role="separator"` strip; `inspector/panelWidth.ts` holds the pure bounds: 320 px
-  minimum, 720 px maximum, and the canvas always keeps 440 px). The width is remembered
-  (`qfilm-panel-width`), double-click or Home gives the automatic one back, the arrows resize
-  (Shift for bigger steps). `App.vue` reads it through `--inspector-width`, and turns the grid transition
-  off while dragging. The rail alone costs 36 px. The Preset tab has one too, one icon per look category (`categoryIcons.ts`, a
-  fallback icon for a category the table does not know): it opens on the applied look's category, or the first
-  one offering more than "Neutral", then keeps the last one viewed; the intensity slider is the rail panel's
-  `footer` slot, one slider under whichever page is shown. Labels and icons come from functions of `t`, and the buttons are named "Aller à X" so
-  they never collide with the section headers of the same name. E2E: `App.group(name)` shows a page, and
-  `App.openSection(name)` goes to the page of a section first.
-- Hovering a look in the Preset tab tries it on the photo (`usePresetPreview`: 120 ms before it starts, 80 ms
+- The inspector has no tabs: one rail (`shared/ui/UiRailPanel`, hosted by `app/InspectorPanel`) lists every page,
+  in three groups separated by a thin line: the looks (one icon per category, `categoryIcons.ts`, a fallback for
+  an unknown one), Retouche (Tons, Couleurs, Finition), Cadre (Recadrage, Cadre, Légende, Mes cadres). Each
+  feature exposes its items from a plain module (`useLookPages`, `adjustRailItems`, `frameRailItems`: names, icons,
+  "modified" dots, unfolding), and its panel (`LooksPanel`, `AdjustPanel`, `FramePanel`) only draws its pages,
+  `v-show`n by the `page` prop. The host mounts one panel at a time (`v-if` on `tab`, so a hidden panel keeps
+  no hover or timer behind). The state is still `useInspector()`: `tab` is the **section** (`looks`, `adjust`,
+  `frame`; the viewport, the frame thumbnails and the crop read it) and `group[tab]` its page (the crop shortcut
+  says `group.frame = "crop"`); choosing a page sets both (`go` in the host). The looks' page is empty until
+  chosen: it opens on the applied look's category, or the first one.
+  A click shows that page alone, restarts at the top and **unfolds the page's sections** (`openPanels`, even if
+  they had been folded: pages are small, we want to see the content; so a fold only lasts while you stay on the
+  page). Every section is open by default. Only the shown page's icon is in the tab order, the up/down arrows
+  change page (across groups, wrapping; Home/End for the ends) and unfold like a click. Buttons are named
+  "Aller à X" so they never collide with the section headers of the same name, and carry `data-page` and
+  `data-section`. The intensity slider sits under the looks pages. The panel is 30 % of the window, between 356
+  and 520 px, until the user drags its left edge (`PanelResizer`, a `role="separator"` strip;
+  `inspector/panelWidth.ts` holds the pure bounds: 320 px minimum, 720 px maximum, and the canvas always keeps
+  440 px). The width is remembered (`qfilm-panel-width`), double-click or Home gives the automatic one back, the
+  arrows resize (Shift for bigger steps). `App.vue` reads it through `--inspector-width`, and turns the grid
+  transition off while dragging. The rail alone costs 36 px. E2E: `App.group(name)` shows a page,
+  `App.openSection(name)` goes to the page of a section first, and `App.tab("Preset" | "Retouche" | "Cadre")`
+  clicks the first icon of that group (the looks' first category).
+- Hovering a look tries it on the photo (`usePresetPreview`: 120 ms before it starts, 80 ms
   before it ends, so crossing the grid or going from one look to the next does not flash the original). It is
   not edit state: `useLook().shown` is the hovered preset as a click would apply it (full intensity, no
   adjustments), else `params`, and `useRender` renders `shown` while history, sliders and the Reset button
   only see `params`. A click, a page change and the panel unmounting end it at once (a hidden page gets no
   `pointerleave`). Retouche starts with `CurrentLook`, a display-only line (look name, intensity) shown while
   a look is applied.
-- Resets: the Preset tab's (on its first category header) calls `resetLook`, back to Neutral with adjustments
+- Resets: the looks' (on each category's header) calls `resetLook`, back to Neutral with adjustments
   and curves, which is what choosing the Neutral preset does; it is disabled while `useLook().isPristine`.
   A Retouche page has its own Reset on its heading (that page's sliders and, for Tons, the curves); the Cadre
-  page's (`resetFrame`) clears the frame and the caption together. The Preset tab's intensity slider comes after its categories.
+  page's (`resetFrame`) clears the frame and the caption together. The looks' intensity slider comes after their grid.
 - Density: a Retouche page title is uppercase, with room below it (`AdjustPanel`), and sections are `--space-5`
   apart. A `UiSlider` inside a `UiRailPanel` measures its container (`container-type` on the rail panel's
   body): from 340 px of body width it is one line (name | track | value, a grid in a `@container` rule that
@@ -194,7 +200,7 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
   (`groupedPresets` filters it, it stays the starting state): Reset is the way back.
 - A page with a single section (a Preset category, Recadrage, Légende, Mes cadres) has no collapsible: it has
   a `UiPageHead` (uppercase title, its Reset on the right) like the Retouche pages. A rail icon can carry a
-  dot (`items[].mark`: "Modifié", or "Look appliqué" in the Preset tab) so a change on a page you are not
+  dot (`items[].mark`: "Modifié", or "Look appliqué" on a look category) so a change on a page you are not
   looking at stays visible; its text reaches screen readers through `aria-describedby` (ids built from the
   position, never the key: keys may contain spaces). A slider that goes both ways has a tick at zero and
   fills from there. The tone-curve graph scales up to 340 px.

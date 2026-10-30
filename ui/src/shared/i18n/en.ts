@@ -20,13 +20,10 @@ export const en: Messages = {
     light: "Light",
     language: "Language",
   },
-  tabs: {
-    looks: "Preset",
-    adjust: "Edit",
-    frame: "Frame",
-  },
   rail: {
     goTo: "Go to {group}",
+    label: "Panel pages",
+    region: "Settings",
   },
   panel: {
     resize: "Panel width",
@@ -40,7 +37,6 @@ export const en: Messages = {
   },
   looks: {
     intensity: "Intensity",
-    rail: "Look categories",
     applied: "Look applied",
   },
   adjust: {
@@ -58,7 +54,6 @@ export const en: Messages = {
       color: "Colors",
       finish: "Finish",
     },
-    rail: "Setting groups",
     resetPart: "Reset this group",
     currentLook: "Look",
     resetGroup: "Reset this section",
@@ -160,7 +155,7 @@ export const en: Messages = {
     },
   },
   frames: {
-    rail: "Frame parts",
+    title: "Frame",
     shape: "Shape",
     settings: "Settings",
     caption: "Caption",

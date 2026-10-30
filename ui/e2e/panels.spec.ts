@@ -25,7 +25,7 @@ test.describe("the Retouche panel", () => {
     const sectionsOf = async (group: string) => {
       await openApp.group(group);
       return openApp.page
-        .getByRole("tabpanel")
+        .getByRole("region", { name: "Réglages" })
         .locator("button[aria-expanded]")
         .evaluateAll((buttons) =>
           buttons
@@ -69,17 +69,6 @@ test.describe("the Retouche panel", () => {
 
     expect(await expanded(openApp, "Lumière")).toBe(true);
     await expect(slider(openApp, "Exposition")).toBeVisible();
-  });
-
-  test("remembers which sections are folded, across a reload", async ({ openApp }) => {
-    await header(openApp, "Lumière").click();
-
-    await openApp.page.reload();
-    await openApp.openPhoto();
-    await openApp.tab("Retouche").click();
-
-    expect(await expanded(openApp, "Lumière")).toBe(false);
-    expect(await expanded(openApp, "Courbe des tons")).toBe(true);
   });
 
   test("marks a section whose setting has moved, even when it is folded", async ({ openApp }) => {
@@ -185,18 +174,5 @@ test.describe("the Retouche panel", () => {
     await expect(header(openApp, "Mélangeur de couleurs")).toHaveAccessibleName(
       "Mélangeur de couleurs",
     );
-  });
-});
-
-test.describe("the other panels", () => {
-  test("remember their folded sections too", async ({ openApp }) => {
-    await openApp.tab("Cadre").click();
-    await header(openApp, "Forme").click();
-
-    await openApp.page.reload();
-    await openApp.openPhoto();
-    await openApp.tab("Cadre").click();
-
-    await expect(header(openApp, "Forme")).toHaveAttribute("aria-expanded", "false");
   });
 });

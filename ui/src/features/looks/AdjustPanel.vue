@@ -1,7 +1,7 @@
 <template>
-  <CurrentLook />
-  <UiRailPanel v-model="group" :label="t('adjust.rail')" :items="railItems()" @pick="unfold">
-    <template v-for="part in PARTS" :key="part.id" #[part.id]>
+  <div>
+    <CurrentLook />
+    <div v-for="part in PARTS" v-show="page === part.id" :key="part.id">
       <UiPageHead :title="t(`adjust.parts.${part.id}`)">
         <UiButton
           variant="ghost"
@@ -117,109 +117,46 @@
           <GradingPanel />
         </UiCollapsible>
       </template>
-    </template>
-  </UiRailPanel>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
-import { Palette, RotateCcw, Sparkles, SunMedium } from "lucide-vue-next";
+import { RotateCcw } from "lucide-vue-next";
 
 import { t } from "@/shared/i18n";
-
-import { controls, formatControlValue, type ControlGroup } from "@/features/looks/controls";
-import { CURVE_IDS, isFlat } from "@/features/looks/curves";
+import {
+  GRADING_KEYS,
+  HSL_KEYS,
+  PARTS,
+  changed,
+  curvesChanged,
+  isControlGroup,
+  itemsOf,
+  keysOf,
+  partChanged,
+  reset,
+  resetCurves,
+  resetPart,
+} from "@/features/looks/adjustParts";
+import { formatControlValue } from "@/features/looks/controls";
 import CurrentLook from "@/features/looks/CurrentLook.vue";
 import CurvesPanel from "@/features/looks/CurvesPanel.vue";
-import { gradingRanges } from "@/features/looks/grading";
 import GradingPanel from "@/features/looks/GradingPanel.vue";
 import HslMixer from "@/features/looks/HslMixer.vue";
-import { hslRanges } from "@/features/looks/hsl";
-import { NEUTRAL, type NumericParamKey } from "@/features/looks/neutral";
+import { NEUTRAL } from "@/features/looks/neutral";
 import { trackFor } from "@/features/looks/tracks";
-import { openPanels } from "@/shared/lib/panelState";
 import { useEditor } from "@/features/photo";
 import { useLook } from "@/features/looks/useLook";
 import UiButton from "@/shared/ui/UiButton.vue";
 import UiCollapsible from "@/shared/ui/UiCollapsible.vue";
 import UiPageHead from "@/shared/ui/UiPageHead.vue";
-import UiRailPanel from "@/shared/ui/UiRailPanel.vue";
 import UiSlider from "@/shared/ui/UiSlider.vue";
 import UiTooltip from "@/shared/ui/UiTooltip.vue";
 
+/// Les réglages à la main. La page affichée est choisie sur la rampe d'icônes de l'hôte (`InspectorPanel`).
+defineProps<{ page: string }>();
+
 const { image } = useEditor();
-const { params, setParam, setCurve } = useLook();
-
-/// La page affichée : le panneau d'à côté (`InspectorPanel`) la tient, pour que le raccourci de recadrage, ailleurs, sache y aller.
-const group = defineModel<string>("group", { required: true });
-
-type Section = ControlGroup | "curves" | "hsl" | "grading";
-
-/// L'ordre du panneau : des sections de réglages regroupées par intention, pour qu'on s'y repère.
-const PARTS: { id: "tone" | "color" | "finish"; sections: Section[] }[] = [
-  { id: "tone", sections: ["light", "curves"] },
-  { id: "color", sections: ["color", "hsl", "grading"] },
-  { id: "finish", sections: ["detail", "effects"] },
-];
-
-const RAIL_ICONS = { tone: SunMedium, color: Palette, finish: Sparkles };
-
-const railItems = () =>
-  PARTS.map((part) => ({
-    id: part.id,
-    label: t(`adjust.parts.${part.id}`),
-    icon: RAIL_ICONS[part.id],
-    mark: partChanged(part) ? t("common.modified") : undefined,
-  }));
-
-const isControlGroup = (section: Section): section is ControlGroup =>
-  !["curves", "hsl", "grading"].includes(section);
-
-const itemsOf = (group: ControlGroup) => controls.filter((control) => control.group === group);
-
-const HSL_KEYS = hslRanges.map((range) => range.key);
-const GRADING_KEYS = gradingRanges.map((range) => range.key);
-
-const keysOf = (items: { key: NumericParamKey }[]) => items.map((item) => item.key);
-
-const changed = (keys: NumericParamKey[]) =>
-  keys.some((key) => Math.abs(params.value[key] - NEUTRAL[key]) > 1e-6);
-
-function reset(keys: NumericParamKey[]) {
-  for (const key of keys) setParam(key, NEUTRAL[key]);
-}
-
-/// L'identifiant sous lequel chaque section retient qu'elle est ouverte.
-const panelId = (section: Section) => `adjust-${section}`;
-
-/// Choisir une page déplie ses sections : elles sont peu nombreuses, on veut voir leur contenu.
-function unfold(id: string) {
-  const part = PARTS.find((entry) => entry.id === id);
-  if (part) openPanels(part.sections.map(panelId));
-}
-
-const sectionKeys = (section: Section): NumericParamKey[] => {
-  if (section === "hsl") return HSL_KEYS;
-  if (section === "grading") return GRADING_KEYS;
-  if (isControlGroup(section)) return keysOf(itemsOf(section));
-  return [];
-};
-
-type Part = (typeof PARTS)[number];
-
-/// Une page se réinitialise d'un bloc : ses curseurs, et ses courbes si elle en a.
-const partChanged = (part: Part) =>
-  part.sections.some((section) => changed(sectionKeys(section))) ||
-  (part.sections.includes("curves") && curvesChanged.value);
-
-function resetPart(part: Part) {
-  for (const section of part.sections) reset(sectionKeys(section));
-  if (part.sections.includes("curves")) resetCurves();
-}
-
-const curvesChanged = computed(() => CURVE_IDS.some((id) => !isFlat(params.value.curves[id])));
-
-function resetCurves() {
-  for (const id of CURVE_IDS) setCurve(id, []);
-}
+const { params, setParam } = useLook();
 </script>

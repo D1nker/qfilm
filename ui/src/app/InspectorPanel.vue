@@ -2,13 +2,19 @@
   <aside>
     <PanelResizer />
     <div class="card">
-      <UiTabs v-model="tab" :tabs="tabs">
-        <template #looks>
-          <LooksPanel v-model:group="group.looks" @select="labelFrameFromLook" />
-        </template>
-        <template #adjust><AdjustPanel v-model:group="group.adjust" /></template>
-        <template #frame><FramePanel v-model:group="group.frame" /></template>
-      </UiTabs>
+      <div class="scroll" role="region" :aria-label="t('rail.region')">
+        <UiRailPanel
+          :model-value="current"
+          :label="t('rail.label')"
+          :items="items"
+          @update:model-value="go"
+          @pick="unfold"
+        >
+          <LooksPanel v-if="tab === 'looks'" :page="looksPage" @select="labelFrameFromLook" />
+          <AdjustPanel v-if="tab === 'adjust'" :page="group.adjust" />
+          <FramePanel v-if="tab === 'frame'" :page="group.frame" />
+        </UiRailPanel>
+      </div>
     </div>
   </aside>
 </template>
@@ -18,19 +24,45 @@ import { computed } from "vue";
 
 import { localized, t } from "@/shared/i18n";
 import type { Preset } from "@/shared/api/api";
-import { useFrame, FramePanel } from "@/features/frames";
+import { FramePanel, frameRailItems, unfoldFramePage, useFrame } from "@/features/frames";
 import { PanelResizer, useInspector, type InspectorTab } from "@/features/inspector";
-import UiTabs from "@/shared/ui/UiTabs.vue";
-import { AdjustPanel, LooksPanel } from "@/features/looks";
-
-const tabs = computed<{ value: InspectorTab; label: string }[]>(() => [
-  { value: "looks", label: t("tabs.looks") },
-  { value: "adjust", label: t("tabs.adjust") },
-  { value: "frame", label: t("tabs.frame") },
-]);
+import UiRailPanel from "@/shared/ui/UiRailPanel.vue";
+import {
+  AdjustPanel,
+  LooksPanel,
+  adjustRailItems,
+  unfoldAdjustPage,
+  useLookPages,
+} from "@/features/looks";
 
 const { tab, group } = useInspector();
 const { labelFromLook } = useFrame();
+const { page: looksPage, items: looksItems } = useLookPages(() => group.looks);
+
+/// Une seule rampe pour tout le panneau : les looks, la retouche, le cadre, séparés d'un trait fin.
+const items = computed(() => [
+  ...looksItems().map((item) => ({ ...item, section: "looks" })),
+  ...adjustRailItems().map((item) => ({ ...item, section: "adjust" })),
+  ...frameRailItems().map((item) => ({ ...item, section: "frame" })),
+]);
+
+/// La page affichée : celle que retient la section en cours.
+const current = computed(() => (tab.value === "looks" ? looksPage.value : group[tab.value]));
+
+/// Choisir une page, c'est aussi choisir sa section : le reste de l'app (le recadrage, la légende
+/// sur la photo, les vignettes du cadre) ne regarde que `tab`.
+function go(id: string) {
+  const section = items.value.find((item) => item.id === id)?.section as InspectorTab | undefined;
+  if (!section) return;
+
+  tab.value = section;
+  group[section] = id;
+}
+
+function unfold(id: string) {
+  if (tab.value === "adjust") unfoldAdjustPage(id);
+  else if (tab.value === "frame") unfoldFramePage(id);
+}
 
 function labelFrameFromLook(preset: Preset) {
   labelFromLook(preset.id, localized(preset.name));
@@ -53,5 +85,12 @@ aside {
   background: var(--surface);
   box-shadow: var(--shadow-md);
   overflow: hidden;
+}
+
+.scroll {
+  height: 100%;
+  min-height: 0;
+  padding: var(--space-4);
+  overflow-y: auto;
 }
 </style>

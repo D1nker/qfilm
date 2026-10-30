@@ -170,10 +170,9 @@ test.describe("crop and rotate", () => {
     await openApp.page.keyboard.press("r");
 
     await expect(overlay(openApp)).toBeVisible();
-    await expect(openApp.page.getByRole("tab", { name: "Cadre" })).toHaveAttribute(
-      "aria-selected",
-      "true",
-    );
+    await expect(
+      openApp.page.getByRole("navigation").getByRole("button", { name: "Aller à Recadrage" }),
+    ).toHaveAttribute("aria-current", "true");
 
     await openApp.page.keyboard.press("Escape");
     await expect(overlay(openApp)).toHaveCount(0);

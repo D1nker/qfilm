@@ -33,7 +33,7 @@ describe("language", () => {
     const { useLocale, t } = await setup();
 
     expect(useLocale().locale.value).toBe("fr");
-    expect(t("tabs.adjust")).toBe("Retouche");
+    expect(t("adjust.parts.tone")).toBe("Tons");
     expect(document.documentElement.lang).toBe("fr");
   });
 
@@ -42,7 +42,7 @@ describe("language", () => {
     const { useLocale, t } = await setup();
 
     expect(useLocale().locale.value).toBe("en");
-    expect(t("tabs.adjust")).toBe("Edit");
+    expect(t("adjust.parts.tone")).toBe("Tone");
   });
 
   it("lets the user override the system language and remembers it", async () => {
@@ -50,7 +50,7 @@ describe("language", () => {
     const first = await setup();
     first.useLocale().set("en");
 
-    expect(first.t("tabs.frame")).toBe("Frame");
+    expect(first.t("frames.title")).toBe("Frame");
     expect(document.documentElement.lang).toBe("en");
     expect(localStorage.getItem("qfilm-locale")).toBe("en");
 

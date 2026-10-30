@@ -1,6 +1,6 @@
 <template>
-  <UiRailPanel v-model="page" :label="t('looks.rail')" :items="railItems()">
-    <template v-for="group in groupedPresets" :key="group.key" #[group.key]>
+  <div>
+    <div v-for="group in groupedPresets" v-show="page === group.key" :key="group.key">
       <UiPageHead :title="localized(group.title)">
         <UiButton variant="ghost" size="sm" :disabled="isPristine" @click="resetLook">
           {{ t("common.reset") }}
@@ -24,79 +24,48 @@
           />
         </UiTooltip>
       </div>
-    </template>
+    </div>
 
-    <template #footer>
-      <UiSlider
-        v-model="amount"
-        :label="t('looks.intensity')"
-        :display="`${Math.round(amount * 100)} %`"
-        :min="0"
-        :max="1"
-        :step="0.01"
-        :edit-scale="100"
-        :disabled="activePreset === 'neutral'"
-      />
-    </template>
-  </UiRailPanel>
+    <UiSlider
+      v-model="amount"
+      :label="t('looks.intensity')"
+      :display="`${Math.round(amount * 100)} %`"
+      :min="0"
+      :max="1"
+      :step="0.01"
+      :edit-scale="100"
+      :disabled="activePreset === 'neutral'"
+    />
+  </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, watch } from "vue";
+import { onBeforeUnmount, watch } from "vue";
 
 import { localized, t } from "@/shared/i18n";
 import type { Preset } from "@/shared/api/api";
 import { useEditor } from "@/features/photo";
-import { categoryIcon } from "@/features/looks/categoryIcons";
 import { useLook } from "@/features/looks/useLook";
 import { usePresetPreview } from "@/features/looks/usePresetPreview";
 import UiButton from "@/shared/ui/UiButton.vue";
 import UiPageHead from "@/shared/ui/UiPageHead.vue";
-import UiRailPanel from "@/shared/ui/UiRailPanel.vue";
 import UiSlider from "@/shared/ui/UiSlider.vue";
 import UiTooltip from "@/shared/ui/UiTooltip.vue";
 import UiThumbnailButton from "@/shared/ui/UiThumbnailButton.vue";
+
+/// Les looks, rangés par catégorie. La page affichée est choisie sur la rampe d'icônes de l'hôte
+/// (`InspectorPanel`), qui l'obtient de `useLookPages`.
+const props = defineProps<{ page: string }>();
 
 const emit = defineEmits<{ select: [preset: Preset] }>();
 
 const { groupedPresets, thumbnails } = useEditor();
 const { activePreset, amount, isPristine, applyPreset, resetLook } = useLook();
 
-/// La catégorie affichée, tenue par le panneau d'à côté (voir `AdjustPanel`). Vide : celle du look
-/// appliqué, à défaut la première.
-const chosen = defineModel<string>("group", { required: true });
-
-const automatic = computed(() => {
-  const groups = groupedPresets.value;
-  const active = groups.find((entry) =>
-    entry.items.some((preset) => preset.id === activePreset.value),
-  );
-  return (active ?? groups[0])?.key ?? "";
-});
-
-const page = computed({
-  get: () =>
-    groupedPresets.value.some((entry) => entry.key === chosen.value)
-      ? chosen.value
-      : automatic.value,
-  set: (key: string) => {
-    chosen.value = key;
-  },
-});
-
-const railItems = () =>
-  groupedPresets.value.map(({ key, title, items }) => ({
-    id: key,
-    label: localized(title),
-    icon: categoryIcon(key),
-    // Le look appliqué vit dans cette catégorie : un point le dit, même depuis une autre page.
-    mark: items.some((preset) => preset.id === activePreset.value) ? t("looks.applied") : undefined,
-  }));
-
 const { enter, leave, stop } = usePresetPreview();
 
 // Une page cachée ne reçoit plus de `pointerleave` : sans cela l'aperçu resterait collé à la photo.
-watch(page, stop);
+watch(() => props.page, stop);
 onBeforeUnmount(stop);
 
 function select(preset: Preset) {

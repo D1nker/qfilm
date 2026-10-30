@@ -191,8 +191,17 @@ export class App {
     return (await this.calls(cmd)).length;
   }
 
+  /// Le panneau n'a plus d'onglets, seulement une rampe d'icônes : « l'onglet » est le premier bouton de
+  /// sa section (les looks : leur première catégorie, avant les raccourcis Favoris et Récents).
   tab(name: "Preset" | "Retouche" | "Cadre" | "Edit" | "Frame") {
-    return this.page.getByRole("tab", { name });
+    const rail = this.page.getByRole("navigation");
+    if (name === "Preset") {
+      return rail
+        .locator('[data-section="looks"]:not([data-page="favorites"]):not([data-page="recent"])')
+        .first();
+    }
+    const page = name === "Retouche" || name === "Edit" ? "tone" : "frame";
+    return rail.locator(`[data-page="${page}"]`);
   }
 
   /// Les panneaux Retouche et Cadre sont en pages : affiche celle de la rampe d'icônes qui porte ce nom.

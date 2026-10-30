@@ -18,13 +18,10 @@ export const fr = {
     light: "Clair",
     language: "Langue",
   },
-  tabs: {
-    looks: "Preset",
-    adjust: "Retouche",
-    frame: "Cadre",
-  },
   rail: {
     goTo: "Aller à {group}",
+    label: "Pages du panneau",
+    region: "Réglages",
   },
   panel: {
     resize: "Largeur du panneau",
@@ -38,7 +35,6 @@ export const fr = {
   },
   looks: {
     intensity: "Intensité",
-    rail: "Catégories de looks",
     applied: "Look appliqué",
   },
   adjust: {
@@ -56,7 +52,6 @@ export const fr = {
       color: "Couleurs",
       finish: "Finition",
     },
-    rail: "Groupes de réglages",
     resetPart: "Réinitialiser ce groupe",
     currentLook: "Look",
     resetGroup: "Réinitialiser cette section",
@@ -158,7 +153,7 @@ export const fr = {
     },
   },
   frames: {
-    rail: "Parties du cadre",
+    title: "Cadre",
     shape: "Forme",
     settings: "Réglages",
     caption: "Légende",
