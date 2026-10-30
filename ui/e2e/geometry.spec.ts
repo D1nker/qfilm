@@ -21,6 +21,26 @@ async function drag(app: App, from: { x: number; y: number }, to: { x: number; y
   await app.page.mouse.up();
 }
 
+test.describe("the crop page layout", () => {
+  test("names what pivots and what flips, in two rows of two compact buttons", async ({
+    openApp,
+  }) => {
+    await openApp.group("Recadrage");
+
+    for (const [group, buttons] of [
+      ["Rotation", ["Pivoter à gauche", "Pivoter à droite"]],
+      ["Miroir", ["Retourner horizontalement", "Retourner verticalement"]],
+    ] as const) {
+      const row = openApp.page.getByRole("group", { name: group });
+      await expect(row.getByRole("button")).toHaveCount(2);
+      for (const name of buttons) {
+        const box = await row.getByRole("button", { name }).boundingBox();
+        expect(box?.width ?? 99).toBeLessThanOrEqual(40);
+      }
+    }
+  });
+});
+
 test.describe("crop and rotate", () => {
   test.beforeEach(async ({ openApp }) => {
     await openApp.tab("Cadre").click();

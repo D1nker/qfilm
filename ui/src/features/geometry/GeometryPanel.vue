@@ -42,13 +42,15 @@
         </div>
       </UiField>
 
-      <div class="tools" role="group" :aria-label="t('geometry.tools')">
-        <UiTooltip v-for="tool in tools()" :key="tool.id" :text="tool.label">
-          <UiButton icon :disabled="!image" :aria-label="tool.label" @click="tool.run">
-            <component :is="tool.icon" :size="14" />
-          </UiButton>
-        </UiTooltip>
-      </div>
+      <UiField v-for="row in toolRows()" :key="row.id" :label="row.label" as="div">
+        <div class="pair" role="group" :aria-label="row.label">
+          <UiTooltip v-for="tool in row.tools" :key="tool.id" :text="tool.label">
+            <UiButton icon :disabled="!image" :aria-label="tool.label" @click="tool.run">
+              <component :is="tool.icon" :size="14" />
+            </UiButton>
+          </UiTooltip>
+        </div>
+      </UiField>
 
       <UiSlider
         :model-value="angle"
@@ -109,29 +111,47 @@ const aspectLabel = (id: AspectId) =>
 
 const aspectOptions = () => ASPECTS.map((id) => ({ value: id, label: aspectLabel(id) }));
 
-const tools = () => [
-  { id: "left", icon: RotateCcw, label: t("geometry.rotateLeft"), run: () => rotate(false) },
-  { id: "right", icon: RotateCw, label: t("geometry.rotateRight"), run: () => rotate(true) },
+/// Deux rangées de deux boutons : ce qui pivote, ce qui retourne. Une icône seule ne dit pas laquelle est laquelle.
+const toolRows = () => [
   {
-    id: "horizontal",
-    icon: FlipHorizontal2,
-    label: t("geometry.flipHorizontal"),
-    run: () => flip("horizontal"),
+    id: "rotation",
+    label: t("geometry.rotation"),
+    tools: [
+      { id: "left", icon: RotateCcw, label: t("geometry.rotateLeft"), run: () => rotate(false) },
+      { id: "right", icon: RotateCw, label: t("geometry.rotateRight"), run: () => rotate(true) },
+    ],
   },
   {
-    id: "vertical",
-    icon: FlipVertical2,
-    label: t("geometry.flipVertical"),
-    run: () => flip("vertical"),
+    id: "mirror",
+    label: t("geometry.mirror"),
+    tools: [
+      {
+        id: "horizontal",
+        icon: FlipHorizontal2,
+        label: t("geometry.flipHorizontal"),
+        run: () => flip("horizontal"),
+      },
+      {
+        id: "vertical",
+        icon: FlipVertical2,
+        label: t("geometry.flipVertical"),
+        run: () => flip("vertical"),
+      },
+    ],
   },
 ];
 </script>
 
 <style scoped>
+/* Les rangées ont toutes le même rythme : `UiField` y ajoute sa propre marge, qu'on retire. */
 .geometry {
   display: grid;
-  gap: var(--space-3);
+  gap: var(--space-4);
   margin-top: var(--space-2);
+}
+
+.geometry :deep(.field) {
+  margin-top: 0;
 }
 
 .aspect {
@@ -139,17 +159,8 @@ const tools = () => [
   gap: var(--space-2);
 }
 
-.aspect > :first-child {
-  flex: 1;
-}
-
-.tools {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-2);
-}
-
-.tools :deep(.btn) {
-  width: 100%;
+.pair {
+  display: flex;
+  gap: var(--space-1);
 }
 </style>
