@@ -159,8 +159,8 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
   curve), Couleurs (Color, Color mixer, Color grading), Finition (Detail, Effects). A new section goes under the
   heading that matches its intent; the headings are not collapsible.
 - The inspector has no tabs: one rail (`shared/ui/UiRailPanel`, hosted by `app/InspectorPanel`) lists every page,
-  in three groups separated by a thin line: the looks (one icon per category, `categoryIcons.ts`, a fallback for
-  an unknown one), Retouche (Tons, Couleurs, Finition), Cadre (Recadrage, Cadre, Légende, Mes cadres). Each
+  in three groups separated by a thin line: the looks (Favoris, Récents, then one icon per category,
+  `categoryIcons.ts`, a fallback for an unknown one), Retouche (Tons, Couleurs, Finition), Cadre (Recadrage, Cadre, Légende, Mes cadres). Each
   feature exposes its items from a plain module (`useLookPages`, `adjustRailItems`, `frameRailItems`: names, icons,
   "modified" dots, unfolding), and its panel (`LooksPanel`, `AdjustPanel`, `FramePanel`) only draws its pages,
   `v-show`n by the `page` prop. The host mounts one panel at a time (`v-if` on `tab`, so a hidden panel keeps
@@ -181,6 +181,15 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
   transition off while dragging. The rail alone costs 36 px. E2E: `App.group(name)` shows a page,
   `App.openSection(name)` goes to the page of a section first, and `App.tab("Preset" | "Retouche" | "Cadre")`
   clicks the first icon of that group (the looks' first category).
+- Favourites and recent looks (`useFavorites`, ids in `qfilm-favorite-looks` and `qfilm-recent-looks`): a star on
+  each thumbnail (`LookGrid`, shown on hover, kept visible once lit) toggles a look in Favoris, in the order it
+  was added; applying a look puts it first in Récents (8 at most). An id that matches no look any more is
+  hidden, not erased. Applying from Récents does not move the look: the grid would shuffle under the pointer
+  and start previewing its neighbour. The star's name is generic ("Ajouter aux favoris") and the look's name is
+  its description: a name containing the look's would match every `getByRole("button", { name: "Portrait 400" })`.
+  Only the shown looks page is mounted (`v-if`), so its grid, and the hover preview, go away with it; a click
+  ends the preview at once (the pointer is still on the thumbnail, and its full-intensity preview would hide
+  the intensity and adjustments that follow).
 - Hovering a look tries it on the photo (`usePresetPreview`: 120 ms before it starts, 80 ms
   before it ends, so crossing the grid or going from one look to the next does not flash the original). It is
   not edit state: `useLook().shown` is the hovered preset as a click would apply it (full intensity, no

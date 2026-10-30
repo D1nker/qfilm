@@ -1,30 +1,17 @@
 <template>
   <div>
-    <div v-for="group in groupedPresets" v-show="page === group.key" :key="group.key">
-      <UiPageHead :title="localized(group.title)">
-        <UiButton variant="ghost" size="sm" :disabled="isPristine" @click="resetLook">
-          {{ t("common.reset") }}
-        </UiButton>
-      </UiPageHead>
+    <template v-for="entry in pages" :key="entry.id">
+      <div v-if="page === entry.id">
+        <UiPageHead :title="entry.title">
+          <UiButton variant="ghost" size="sm" :disabled="isPristine" @click="resetLook">
+            {{ t("common.reset") }}
+          </UiButton>
+        </UiPageHead>
 
-      <div class="grid">
-        <UiTooltip
-          v-for="preset in group.items"
-          :key="preset.id"
-          :text="localized(preset.description)"
-          side="left"
-        >
-          <UiThumbnailButton
-            :name="localized(preset.name)"
-            :src="thumbnails[preset.id]"
-            :active="preset.id === activePreset"
-            @click="select(preset)"
-            @pointerenter="enter(preset)"
-            @pointerleave="leave"
-          />
-        </UiTooltip>
+        <LookGrid v-if="entry.presets.length > 0" :presets="entry.presets" @select="select" />
+        <p v-else class="empty">{{ entry.empty }}</p>
       </div>
-    </div>
+    </template>
 
     <UiSlider
       v-model="amount"
@@ -40,46 +27,65 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, watch } from "vue";
+import { computed } from "vue";
 
 import { localized, t } from "@/shared/i18n";
 import type { Preset } from "@/shared/api/api";
 import { useEditor } from "@/features/photo";
+import LookGrid from "@/features/looks/LookGrid.vue";
+import { FAVORITES_PAGE, RECENT_PAGE } from "@/features/looks/lookPages";
+import { useFavorites } from "@/features/looks/useFavorites";
 import { useLook } from "@/features/looks/useLook";
-import { usePresetPreview } from "@/features/looks/usePresetPreview";
 import UiButton from "@/shared/ui/UiButton.vue";
 import UiPageHead from "@/shared/ui/UiPageHead.vue";
 import UiSlider from "@/shared/ui/UiSlider.vue";
-import UiTooltip from "@/shared/ui/UiTooltip.vue";
-import UiThumbnailButton from "@/shared/ui/UiThumbnailButton.vue";
 
-/// Les looks, rangés par catégorie. La page affichée est choisie sur la rampe d'icônes de l'hôte
-/// (`InspectorPanel`), qui l'obtient de `useLookPages`.
+/// Les looks : les favoris, les récents, puis une page par catégorie. La page affichée est choisie sur
+/// la rampe d'icônes de l'hôte (`InspectorPanel`), qui l'obtient de `useLookPages`. Seule cette page
+/// est montée : ses vignettes et l'aperçu au survol partent avec elle.
 const props = defineProps<{ page: string }>();
 
 const emit = defineEmits<{ select: [preset: Preset] }>();
 
-const { groupedPresets, thumbnails } = useEditor();
+const { groupedPresets } = useEditor();
 const { activePreset, amount, isPristine, applyPreset, resetLook } = useLook();
+const { favoritePresets, recentPresets, noteUsed } = useFavorites();
 
-const { enter, leave, stop } = usePresetPreview();
-
-// Une page cachée ne reçoit plus de `pointerleave` : sans cela l'aperçu resterait collé à la photo.
-watch(() => props.page, stop);
-onBeforeUnmount(stop);
+const pages = computed(() => [
+  {
+    id: FAVORITES_PAGE,
+    title: t("looks.favorites"),
+    presets: favoritePresets.value,
+    empty: t("looks.noFavorites"),
+  },
+  {
+    id: RECENT_PAGE,
+    title: t("looks.recent"),
+    presets: recentPresets.value,
+    empty: t("looks.noRecent"),
+  },
+  ...groupedPresets.value.map((group) => ({
+    id: group.key,
+    title: localized(group.title),
+    presets: group.items,
+    empty: "",
+  })),
+]);
 
 function select(preset: Preset) {
-  stop();
   applyPreset(preset);
+  // Dans les récents le look y est déjà : le remonter changerait la grille sous le pointeur, qui
+  // se mettrait à essayer le look d'à côté.
+  if (props.page !== RECENT_PAGE) noteUsed(preset);
   emit("select", preset);
 }
 </script>
 
 <style scoped>
-.grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-3);
-  padding: var(--space-1);
+.empty {
+  margin: var(--space-4) var(--space-1);
+  color: var(--text-faint);
+  font-size: var(--text-xs);
+  line-height: 1.5;
 }
 </style>

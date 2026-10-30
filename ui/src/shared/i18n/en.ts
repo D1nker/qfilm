@@ -38,6 +38,12 @@ export const en: Messages = {
   looks: {
     intensity: "Intensity",
     applied: "Look applied",
+    favorites: "Favorites",
+    recent: "Recent",
+    noFavorites: "No favorites yet. Click a look's star to keep it here.",
+    noRecent: "The looks you apply show up here.",
+    addFavorite: "Add to favorites",
+    removeFavorite: "Remove from favorites",
   },
   adjust: {
     groups: {
