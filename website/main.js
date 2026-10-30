@@ -1,4 +1,4 @@
-import { assetsByOs, formatSize } from "./releases.js";
+import { assetsByOs } from "./releases.js";
 
 const SYSTEMS = { mac: "macOS", windows: "Windows", linux: "Linux" };
 
@@ -51,9 +51,15 @@ function showRelease(release) {
     }
 
     button.href = first.url;
-    const size = formatSize(first.size);
-    // Le nom de la puce est le même dans les deux langues : rien à traduire.
-    button.textContent = [button.textContent.trim(), first.chip, size].filter(Boolean).join(" · ");
+
+    // Le bouton reste un simple « Télécharger » ; la puce du Mac se lit juste dessous. Le nom de la puce est
+    // le même dans les deux langues : rien à traduire.
+    if (first.chip && others.some((asset) => asset.chip)) {
+      const chip = document.createElement("p");
+      chip.className = "chip when-ready";
+      chip.textContent = first.chip;
+      button.after(chip);
+    }
 
     if (others.length > 0) {
       list.hidden = false;
@@ -68,14 +74,16 @@ function showRelease(release) {
     }
   }
 
-  // Le bouton du haut de page va droit au fichier du système du visiteur.
+  // Le bouton du haut de page va droit au fichier du système du visiteur, sauf sur un Mac : le navigateur ne
+  // distingue pas les puces (Safari se dit toujours Intel), donc on le laisse choisir dans la section.
   const [primary] = found[current] ?? [];
   const cta = document.querySelector("[data-cta]");
   if (cta && primary) {
-    cta.href = primary.url;
+    const chooses = found[current].some((asset) => asset.chip !== primary.chip);
+    if (!chooses) cta.href = primary.url;
     cta.querySelector("span").textContent = section.dataset.ctaReady.replace(
       "{os}",
-      primary.chip ? `${SYSTEMS[current]} (${primary.chip})` : SYSTEMS[current],
+      SYSTEMS[current],
     );
     document.querySelector("[data-note]")?.setAttribute("hidden", "");
   }

@@ -267,8 +267,9 @@ for (const { language, path, other } of PAGES) {
         await expect(mac).toHaveClass(/recommended/);
         await expect(mac.locator("[data-get]")).toHaveAttribute("href", /aarch64\.dmg$/);
         // Le navigateur ne distingue pas les puces : chaque installeur dit pour quel Mac il est.
-        await expect(mac.locator("[data-get]")).toContainText("Apple silicon");
-        await expect(mac.locator("[data-get]")).toContainText("9");
+        await expect(mac.locator(".chip")).toHaveText("Apple silicon");
+        // Le bouton reste un simple « Télécharger » : ni puce ni poids dedans.
+        await expect(mac.locator("[data-get]")).not.toContainText(/silicon|MB/);
         await expect(mac.locator("[data-others] a")).toHaveText([
           "Intel Mac · qFilm_0.1.0_x64.dmg",
         ]);
@@ -287,8 +288,25 @@ for (const { language, path, other } of PAGES) {
         await expect(section.locator('a[href$=".sig"], a[href$="latest.json"]')).toHaveCount(0);
 
         const cta = page.locator("[data-cta]");
-        await expect(cta).toHaveAttribute("href", /aarch64\.dmg$/);
-        await expect(cta).toContainText("macOS (Apple silicon)");
+        // Sur un Mac, deux puces : le bouton du haut mène à la section, il ne choisit pas pour le visiteur.
+        await expect(cta).toHaveAttribute("href", "#download");
+        await expect(cta).toContainText("macOS");
+        await context.close();
+      });
+
+      test("sends a Windows visitor's top button straight to the installer", async ({
+        browser,
+      }) => {
+        const context = await browser.newContext({
+          userAgent:
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0 Safari/537.36",
+        });
+        const page = await context.newPage();
+        await withRelease(page, RELEASE);
+
+        await page.goto(SITE + path);
+
+        await expect(page.locator("[data-cta]")).toHaveAttribute("href", /x64-setup\.exe$/);
         await context.close();
       });
 

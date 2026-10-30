@@ -47,9 +47,3 @@ export function assetsByOs(assets = []) {
   }
   return found;
 }
-
-export function formatSize(bytes) {
-  if (!Number.isFinite(bytes) || bytes <= 0) return "";
-  const megabytes = bytes / 1024 / 1024;
-  return `${megabytes >= 10 ? Math.round(megabytes) : megabytes.toFixed(1)} MB`;
-}

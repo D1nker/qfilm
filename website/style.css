@@ -770,6 +770,19 @@ figcaption span {
   font-size: 15px;
 }
 
+/* Les boutons des fiches sont plus discrets que ceux du haut de page. */
+.os .button {
+  align-self: flex-start;
+  min-height: 42px;
+  padding: 0 28px;
+  font-size: 15px;
+}
+
+.os .chip {
+  margin-top: -8px;
+  font-size: 13px;
+}
+
 .os .others {
   font-size: 14px;
 }
