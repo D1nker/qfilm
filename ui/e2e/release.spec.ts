@@ -157,3 +157,58 @@ test.describe("the release guide", () => {
     expect(read("README.md")).toContain("docs/RELEASING.md");
   });
 });
+
+test.describe("the website workflow", () => {
+  const workflow = read(".github/workflows/pages.yml");
+
+  test("publishes on pushes to main that touch the site, or by hand", () => {
+    expect(workflow).toMatch(/push:\s*\n\s+branches: \[main\]\s*\n\s+paths:/);
+    expect(workflow).toContain('- "website/**"');
+    expect(workflow).toContain("workflow_dispatch:");
+    expect(workflow).not.toContain("pull_request");
+  });
+
+  test("only the deploy job may publish, and it reads the repository and nothing more", () => {
+    expect(workflow).toMatch(/^permissions:\s*\n\s+contents: read/m);
+    expect(workflow).toMatch(
+      /deploy:[\s\S]*permissions:\s*\n\s+pages: write\s*#[^\n]*\n\s+id-token: write/,
+    );
+    expect(workflow.match(/pages: write/g)).toHaveLength(1);
+    expect(workflow).not.toContain("contents: write");
+  });
+
+  test("keeps the repository-only files out of the published site", () => {
+    expect(workflow).toContain("--exclude README.md");
+    expect(workflow).toContain("--exclude images.json");
+    expect(workflow).toMatch(/path: _site/);
+  });
+
+  test("pins its actions and needs no secret", () => {
+    const uses = [...workflow.matchAll(/uses:\s*([^\s#]+)/g)].map((match) => match[1] ?? "");
+    expect(uses.length).toBeGreaterThanOrEqual(4);
+    for (const action of uses) expect(action, action).toMatch(/@v\d+$/);
+    expect(workflow).not.toContain("secrets.");
+  });
+
+  test("serves only files that exist: every page and asset the site links is in the folder", () => {
+    for (const file of [
+      "index.html",
+      "fr/index.html",
+      "404.html",
+      "robots.txt",
+      "sitemap.xml",
+      "icon.svg",
+    ]) {
+      expect(() => read(`website/${file}`), file).not.toThrow();
+    }
+  });
+});
+
+test.describe("the repository's public face", () => {
+  test("has a security policy that tells where to report", () => {
+    const policy = read("SECURITY.md");
+
+    expect(policy).toContain("Report a vulnerability");
+    expect(policy).toContain("privately");
+  });
+});

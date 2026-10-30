@@ -1,0 +1,47 @@
+name: Website
+
+# Publie `website/` sur GitHub Pages (https://d1nker.github.io/qfilm) à chaque changement du site sur `main`.
+# Pages ne sait servir que la racine du dépôt ou `docs/` : un flux de travail dépose donc le dossier lui-même.
+# À activer une fois : Settings, Pages, Source « GitHub Actions » (voir docs/RELEASING.md).
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "website/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Publish the website
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write # publier
+      id-token: write # prouver à Pages que la publication vient bien de ce dépôt
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Keep out what is only for the repository
+        run: |
+          mkdir _site
+          rsync -a --exclude README.md --exclude images.json website/ _site/
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

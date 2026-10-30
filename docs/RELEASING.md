@@ -63,6 +63,12 @@ The builds are not code-signed, and the website says so.
 Once the builds are signed, rewrite the "First launch" notes of both website pages
 (`website/index.html`, `website/fr/index.html`).
 
+## Publishing the website
+
+`.github/workflows/pages.yml` deploys `website/` to GitHub Pages on every push to `main` that touches it. Turn Pages
+on once, after the repository is public: Settings, Pages, Source **GitHub Actions** (or `gh api -X POST
+repos/D1nker/qfilm/pages -f build_type=workflow`). Public repositories get Pages for free.
+
 ## Things to know
 
 - The asset names come from Tauri (`qFilm_0.1.0_aarch64.dmg`, `qFilm_0.1.0_x64-setup.exe`, ...). The website

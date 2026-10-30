@@ -42,9 +42,11 @@ per system, the visitor's system first. Files are sorted by name (`releases.js`)
 ## Publishing
 
 The repository points at `https://d1nker.github.io/qfilm`. GitHub Pages serves a private repository only on a
-paid plan, so the site goes live when the repository is made public (Settings, Pages, deploy from a branch, the
-`website/` folder via a workflow, or move it to `docs/`). All links are relative, so the `/qfilm/` base path works.
-`404.html` is the only file that uses absolute `/qfilm/` paths.
+paid plan, so the site goes live when the repository is public. Pages can only serve the repository root or
+`docs/`, so `.github/workflows/pages.yml` deploys the `website/` folder itself (minus this README and
+`images.json`) on every push to `main` that touches it. Turn it on once: Settings, Pages, Source **GitHub Actions**
+(or `gh api -X POST repos/D1nker/qfilm/pages -f build_type=workflow`). All links are relative, so the `/qfilm/`
+base path works; `404.html` is the only file that uses absolute `/qfilm/` paths.
 
 ## Editing the copy
 
