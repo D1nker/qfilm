@@ -265,6 +265,23 @@ step, preview with `npm run website`, see `website/README.md`), `docs/` and `bra
   Playwright suite in `ui/e2e/` runs the real UI against `ui/e2e/support/tauri-mock.js` (real frame
   manifests, fake Rust); use the `openApp` fixture and `expect.poll`, not fixed sleeps. Check that a
   new test fails when the behavior it guards is broken.
+- Performance (measure before touching: `npm run bench`, a release build, best of 15 because the machine is
+  never quiet): in a render the cost is **maths, not memory**: a 26 MB copy or pass is 0.6 ms, three `powf` per
+  pixel were 12 of the 14 ms of a neutral render. So: the tone curve is sampled once per render into a table
+  (`ToneLut`, steps even in the fourth root of the luminance, exact fallback past 16 and for masked pixels), a
+  neutral tone stage is skipped outright, and `linear_to_srgb` / `srgb_to_linear` in `buffer.rs` are tables
+  too (within 1.2e-6 of the formula, and only at the curve's knee: tests pin it against the 16-bit level, since
+  export keeps 16-bit TIFF). The box blur (noise reduction, halation, clarity, sharpening) runs rows and bands of
+  columns in parallel with the same running sums. Preview JPEGs are encoded in strips on every core and stitched
+  with restart markers (`encode::jpeg_in_strips`): the decoded pixels are identical to a single pass (tested
+  on awkward sizes), and it falls back to one pass on anything it does not recognise. Rules: never add a
+  `powf`/`exp`/`sin` per pixel without asking whether it is a function of one value (then tabulate it); any
+  table needs a test against the exact formula over the whole range, edges included; a speed-up that moves a
+  golden image is a look change, not an optimisation.
+  Where it stands (1800 px preview, release): neutral 12 -> 1.6 ms, `portrait_400` 32 -> 17 ms, the colour
+  mixer 37 -> 19, noise reduction 44-68 -> 15-21, JPEG data URL 24 -> 6. Left: the mixer (HSL conversions), noise
+  reduction (many buffers), a staged cache (recompute only from the changed stage), serving the preview over a
+  custom protocol instead of a base64 string.
 - Golden-image tests (`crates/core/src/golden.rs`, references in `crates/core/golden/`) guard every frame
   shape/edge and the look pipeline. After an _intended_ rendering change run
   `UPDATE_GOLDEN=1 cargo test golden` and **look at the PNGs** before committing them. Failures
