@@ -196,4 +196,22 @@ test.describe("the group rail", () => {
       await unmarked(openApp, "Négatif couleur");
     });
   });
+
+  test("every page of every tab starts with a title", async ({ openApp }) => {
+    for (const tab of ["Preset", "Retouche", "Cadre"] as const) {
+      await openApp.tab(tab).click();
+      const names = await rail(openApp)
+        .getByRole("button")
+        .evaluateAll((buttons) => buttons.map((button) => button.getAttribute("aria-label")));
+
+      for (const name of names) {
+        await openApp.page.getByRole("button", { name: name ?? "", exact: true }).click();
+
+        await expect(
+          openApp.page.getByRole("tabpanel").getByRole("heading").first(),
+          `${tab} › ${name}`,
+        ).toBeVisible();
+      }
+    }
+  });
 });

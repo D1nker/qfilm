@@ -175,8 +175,8 @@ step, preview with `npm run website`), `docs/` and `branding/` are what they say
   `App.openSection(name)` goes to the page of a section first.
 - Resets: the Preset tab's (on its first category header) calls `resetLook`, back to Neutral with adjustments
   and curves, which is what choosing the Neutral preset does; it is disabled while `useLook().isPristine`.
-  A Retouche page has its own Reset on its heading (that page's sliders and, for Tons, the curves), the Cadre
-  tab's is on "Forme". The Preset tab's intensity slider comes after its categories.
+  A Retouche page has its own Reset on its heading (that page's sliders and, for Tons, the curves); the Cadre
+  page's (`resetFrame`) clears the frame and the caption together. The Preset tab's intensity slider comes after its categories.
 - Density: a Retouche page title is uppercase, with room below it (`AdjustPanel`), and sections are `--space-5`
   apart. A `UiSlider` inside a `UiRailPanel` measures its container (`container-type` on the rail panel's
   body): from 340 px of body width it is one line (name | track | value, a grid in a `@container` rule that

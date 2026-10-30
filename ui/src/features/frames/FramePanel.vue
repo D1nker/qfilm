@@ -5,12 +5,13 @@
     </template>
 
     <template #frame>
+      <UiPageHead :title="t('tabs.frame')">
+        <UiButton variant="ghost" size="sm" :disabled="isPristine" @click="resetFrame">
+          {{ t("common.reset") }}
+        </UiButton>
+      </UiPageHead>
+
       <UiCollapsible id="frame-shape" :title="t('frames.shape')">
-        <template #actions>
-          <UiButton variant="ghost" size="sm" :disabled="isPristine" @click="resetFrame">
-            {{ t("common.reset") }}
-          </UiButton>
-        </template>
         <div class="grid">
           <UiThumbnailButton
             v-for="info in frames"
