@@ -309,6 +309,18 @@ website:images`, driven by `website/images.json`) applies a look and a frame to 
   class (`.overlay`) that an ancestor also styles: it once dimmed the photo under the crop and mask handles
   (`ImageViewport` now calls its message `.decoding`, and both overlays have a test that their backdrop is clear).
 
+## Releases
+
+- A release is a Git tag (`v0.2.0`): `.github/workflows/release.yml` checks the version (`scripts/check-version.mjs`,
+  `npm run version:check`: `package.json`, `ui/package.json`, `desktop/tauri.conf.json`, `[workspace.package]`
+  must agree and match the tag), builds macOS (both architectures), Windows and Linux with `tauri-action`, and
+  attaches the installers to a **draft** release; the website flips to real downloads when it is published.
+  Procedure, signing and caveats: `docs/RELEASING.md`. `ui/e2e/release.spec.ts` pins what is costly to find out
+  on release day (draft only, ad hoc signing of the Mac bundle, no untrusted input in a command, no secret,
+  actions pinned, the version check gating the build).
+- Builds are unsigned; the Mac bundle is signed ad hoc (`APPLE_SIGNING_IDENTITY: "-"`), which is what makes Gatekeeper
+  offer "Open Anyway" instead of "damaged". The website's "First launch" notes say what each system asks.
+
 ## Product direction
 
 - Pitch: a **film look + frame studio** (looks, grain/halation, film frames, captions), not a

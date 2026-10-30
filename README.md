@@ -66,7 +66,7 @@ crates/core/         qfilm-core: the imaging engine (no Tauri dependency)
 └─ golden/           reference images for the rendering tests
 assets/fonts/        fonts shared by the engine (embedded) and the UI
 website/             static download page (no build step)
-docs/                frame authoring guide
+docs/                frame authoring guide, release guide (docs/RELEASING.md)
 branding/            app icon sources
 ```
 

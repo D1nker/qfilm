@@ -33,7 +33,8 @@ in the same frame, for a before/after).
 
 ## Downloads
 
-Today there is no release, so the download section says so. The page asks GitHub for
+Releases come from `.github/workflows/release.yml` (see `docs/RELEASING.md`). Until the first one is published,
+the download section says so. The page asks GitHub for
 `/repos/D1nker/qfilm/releases/latest`; as soon as it returns files, the section switches by itself to one button
 per system, the visitor's system first. Files are sorted by name (`releases.js`): `.dmg`, `-setup.exe`/`.msi`,
 `.AppImage`/`.deb`/`.rpm`. A system without a file in the release keeps its "coming soon".
